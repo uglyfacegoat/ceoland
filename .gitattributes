@@ -1,0 +1,11 @@
+* text=auto
+*.blend filter=lfs diff=lfs merge=lfs -text
+*.blend[0-9] filter=lfs diff=lfs merge=lfs -text
+*.glb filter=lfs diff=lfs merge=lfs -text
+*.fbx filter=lfs diff=lfs merge=lfs -text
+*.zip filter=lfs diff=lfs merge=lfs -text
+blender/textures/**/*.png filter=lfs diff=lfs merge=lfs -text
+blender/textures/**/*.jpg filter=lfs diff=lfs merge=lfs -text
+blender/textures/**/*.exr filter=lfs diff=lfs merge=lfs -text
+previews/**/*.png filter=lfs diff=lfs merge=lfs -text
+revisions/**/*.png filter=lfs diff=lfs merge=lfs -text

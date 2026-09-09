@@ -1,0 +1,87 @@
+{
+  "scene": "CEOMENTALITY | Web studio",
+  "blender": "5.1.2",
+  "engine": "CYCLES",
+  "resolution": [
+    1200,
+    675
+  ],
+  "color": {
+    "view": "AgX",
+    "look": "AgX - Medium High Contrast",
+    "exposure": 0.0
+  },
+  "images": [
+    {
+      "path": "C:\\Users\\ярославка\\Documents\\ChatGPT\\ceo\\blender\\textures\\ambientcg\\Leather038\\Leather038_2K-PNG_NormalGL.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "color_space": "Non-Color"
+    },
+    {
+      "path": "C:\\Users\\ярославка\\Documents\\ChatGPT\\ceo\\blender\\textures\\ambientcg\\Leather037\\Leather037_2K-PNG_Displacement.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "color_space": "Non-Color"
+    },
+    {
+      "path": "C:\\Users\\ярославка\\Documents\\ChatGPT\\ceo\\blender\\textures\\ambientcg\\Leather037\\Leather037_2K-PNG_Roughness.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "color_space": "Non-Color"
+    },
+    {
+      "path": "C:\\Users\\ярославка\\Documents\\ChatGPT\\ceo\\blender\\textures\\web-print-mask.png",
+      "size": [
+        4096,
+        4096
+      ],
+      "color_space": "Non-Color"
+    }
+  ],
+  "lights": [
+    {
+      "name": "WEB_LGT_key",
+      "position": [
+        0.3799999952316284,
+        -0.2199999988079071,
+        0.5
+      ],
+      "watts": 11.0,
+      "hidden": false
+    },
+    {
+      "name": "WEB_LGT_fill",
+      "position": [
+        -0.2199999988079071,
+        -0.25999999046325684,
+        0.23000000417232513
+      ],
+      "watts": 0.800000011920929,
+      "hidden": false
+    },
+    {
+      "name": "WEB_LGT_nickel_strip",
+      "position": [
+        0.11999999731779099,
+        0.10000000149011612,
+        0.3199999928474426
+      ],
+      "watts": 3.200000047683716,
+      "hidden": true
+    }
+  ],
+  "layers": [
+    "WEB_Leather backing",
+    "WEB_Front leather pocket",
+    "WEB_Middle leather pocket | unstitched upper edge"
+  ],
+  "lettering": "Native lettering alpha mask; pigment and relief share the front surface.",
+  "visual_status": "Material foundation study. Environment matching and final hero acceptance remain open."
+}

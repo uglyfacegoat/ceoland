@@ -1,0 +1,33 @@
+00:00.641  blend            | Read blend: "C:\Users\ярославка\Documents\ChatGPT\ceo land\blender\cardholder.blend"
+15:41:22 | INFO: Data are loaded, start creating Blender stuff
+15:41:22 | INFO: Blender create Mesh node Back side and bottom stitching
+15:41:22 | INFO: Blender create Mesh node Backing painted edge
+15:41:22 | INFO: Blender create Mesh node Front leather pocket
+15:41:22 | INFO: Blender create Mesh node Front saddle stitching.001
+15:41:22 | INFO: Blender create Mesh node Inserted card
+15:41:22 | INFO: Blender create Mesh node Joined leather side and bottom welt
+15:41:22 | INFO: Blender create Mesh node Leather backing
+15:41:22 | INFO: Blender create Mesh node Middle leather pocket | unstitched upper edge
+15:41:22 | INFO: Blender create Mesh node Middle pocket rolled lip | no stitching
+15:41:22 | INFO: Blender create Mesh node Pocket interior
+15:41:22 | INFO: Blender create Mesh node Pocket painted edge
+15:41:22 | INFO: Blender create Mesh node Printed logo | Bitch
+15:41:22 | INFO: Blender create Mesh node Printed logo | I'm CEO,
+15:41:22 | INFO: glTF import finished in 0.09s
+00:00.891  cycles           | WARNING HIPEW initialization failed: Error opening HIP dynamic library
+RENDER_DEVICE OPTIX
+00:04.891  render           | Saved: 'C:\Users\ярославка\Documents\ChatGPT\ceo land\previews\cardholder-glb-check.png'
+00:04.891  blend            | Read blend: "C:\Users\ярославка\Documents\ChatGPT\ceo land\blender\key.blend"
+15:41:26 | INFO: Data are loaded, start creating Blender stuff
+15:41:26 | INFO: Blender create Mesh node Recut blade mesh.001
+15:41:26 | INFO: Blender create Mesh node Recut blade mesh.002
+15:41:26 | INFO: Blender create Mesh node Key bow | engraved both sides.001
+15:41:26 | INFO: Blender create Mesh node Key bow | engraved both sides.002
+15:41:26 | INFO: Blender create Mesh node Key bow | engraved both sides.003
+15:41:26 | INFO: glTF import finished in 0.06s
+RENDER_DEVICE OPTIX
+00:08.719  render           | Saved: 'C:\Users\ярославка\Documents\ChatGPT\ceo land\previews\key-glb-check.png'
+ROUNDTRIP_CHECKS [{"name": "cardholder", "source": {"dimensions_xyz_m": [0.10531983524560928, 0.007160775130614638, 0.08434443920850754], "triangles": 35484, "mesh_count": 13}, "roundtrip": {"dimensions_xyz_m": [0.10531983524560928, 0.007160775130614638, 0.08434443920850754], "triangles": 35484, "mesh_count": 13}, "checks": {"textures_packed": true}}, {"name": "key", "source": {"dimensions_xyz_m": [0.028943085111677647, 0.0035200060810893774, 0.06305056437849998], "triangles": 24078, "mesh_count": 2}, "roundtrip": {"dimensions_xyz_m": [0.028943085111677647, 0.0035200060810893774, 0.06305056437849998], "triangles": 24078, "mesh_count": 5}, "checks": {"ring_hole_open": true, "engraving": {"front": {"engraved_ray_hits": 1335, "max_depth_mm": 0.204}, "back": {"engraved_ray_hits": 1160, "max_depth_mm": 0.204}}}}]
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 02:38:20)
+
+Blender quit

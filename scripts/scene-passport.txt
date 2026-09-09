@@ -1,0 +1,64 @@
+SCENE
+- intent: Match the supplied CEOMENTALITY hero, concentrating on the leather cardholder, concrete pedestal and contact shadows.
+- deliverable: Editable cardholder.blend and hero-scene.blend, optimized GLBs, PNG previews, integrated web hero.
+- units: metres; axes: right-handed Z-up. Existing construction helpers use mm internally and convert exactly once at export.
+- render: Cycles, 1599 x 984 hero / 1600 square product; 24 fps; frame 1.
+- dynamic: no; the requested deliverables are reference-matched hero still and PNG previews, with pivots preserved for future web animation.
+
+HIERARCHY
+- collection/object naming: retained semantic leather-part names; ENV_pedestal, CAM_hero, LGT_key, LGT_fill.
+- parent/child relationships: all leather parts remain under cardholder; pedestal separate.
+- protected existing objects: key source/export; original v1 and v2 backups; initial live default scene checkpointed before opening the saved cardholder.
+
+ASSETS
+- A01 cardholder | route EXISTING | detailed | dimensions [0.105,0.0055,0.075] m | location [0.068,0,0.099] approximate until camera gate | orientation [0,0.21,-0.08] rad | centre pivot | no parent | hero.
+- A02 ENV_pedestal_left | route BLOCK | detailed | dimensions [0.115,0.13,0.1] m | contact plane z=0.05 | origin centre | no parent | support.
+- A03 ENV_pedestal_right | route BLOCK | detailed | dimensions [0.15,0.13,0.1] m | adjacent flush top, narrow seam | origin centre | no parent | support.
+- A04 ENV_backdrop | route BLOCK | detailed | dimensions [1,0,1] m | behind product | origin centre | no parent | cool studio architecture.
+- generation estimate/submission state: no generated assets; refine existing meshes and locally authored textures.
+
+SHOT
+- active camera: CAM_hero.
+- framing/lens/target: near orthographic product view; image target card corners (932,306), (1380,400), (1276,732), (829,615) at 1599x984.
+- foreground, subject, background depth: stone ahead of wall; card lowest corner at stone surface; clear space left for live HTML.
+
+LOOK
+- material roles and palette: off-white calf leather, navy printed logo and insert; pale grey concrete with small pores.
+- material route: EXISTING leather reference-derived normal/roughness maps refined in scale and response; locally procedural concrete maps.
+- texture scale: leather ~0.018 m tile; concrete ~0.1 m tile; explicit UVs for GLB.
+- relief polarity: fine leather creases and recessed concrete pores; normal maps, no heavy displacement.
+- dielectric/metallic: dielectric all parts; leather roughness ~0.57-0.7; matte concrete ~0.8.
+- world/background: cool neutral studio with directional window-light gradient.
+
+LIGHTING
+- focal subject: printed cardholder; secondary: stone top and contact; darkest region: left stone front.
+- reference mood: daylight premium product studio.
+- environment route: NONE; no HDRI required.
+- world-only and zero-world baseline: render isolated diagnostics with same exposure.
+- key: broad source above camera-right; grazing enough to reveal grain, soft shadow extending left.
+- fill: restrained ambient recovery, substantially below key.
+- motivation: implied large studio window at upper right.
+- reflection strategy: broad highlight across softened leather lips, no glossy plastic sheen.
+- gobos/flags/atmosphere: architectural wall gradient if needed; no volume.
+- color management: AgX, exposure 0, fixed throughout A/B lighting comparisons.
+
+MOTION
+- fps/frame range: 24 / 1-1.
+- object/camera/light beats: static requested composition.
+- rest poses and loops: centre model pivot preserved independently of hero staging.
+
+ACCEPTANCE
+- structural: three leather layers, two open unstitched horizontal mouths; outer U and exposed backing top stitches; independent stone blocks; packed source maps; valid GLB.
+- motion: not applicable; static hero.
+- visual: narrower corner radii, width/height near 1.4, visible layer thickness, natural micro-grain; navy print follows leather surface; card placement matches measured silhouette; support shadow visible.
+- lighting: world-only/key-only/grayscale checks; no clipping or ambient wash; contact at lowest corner; consistent shadow direction.
+
+refs_read: blender-scene, blender-scene-spec, blender-modeling, blender-lookdev, blender-lighting-camera, blender-audit-finalize, blender-volatile.
+
+CHECKLIST
+- [x] Required modules read.
+- [x] A: Inspect live host and specify scope.
+- [ ] B: Checkpoint live scene and existing assets.
+- [ ] C: Coarse geometry and camera-read gate.
+- [ ] D: Detailed geometry, look development, lighting.
+- [ ] E: Structural, visual, lighting and web verification; save requested deliverables.

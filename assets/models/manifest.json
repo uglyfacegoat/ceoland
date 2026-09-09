@@ -1,0 +1,32 @@
+[
+  {
+    "name": "key",
+    "file": "assets/models/key.glb",
+    "bytes": 830596,
+    "triangles": 24078,
+    "mesh_objects": 5,
+    "dimensions_m": {
+      "width": 0.028943,
+      "height": 0.063051,
+      "depth": 0.00352
+    },
+    "front_gltf": "+Z",
+    "up_gltf": "+Y",
+    "origin": "centered for rotation"
+  },
+  {
+    "name": "cardholder",
+    "file": "assets/models/cardholder.glb",
+    "bytes": 8155532,
+    "triangles": 183309,
+    "mesh_objects": 16,
+    "dimensions_m": {
+      "width": 0.10532,
+      "height": 0.075308,
+      "depth": 0.003574
+    },
+    "front_gltf": "+Z",
+    "up_gltf": "+Y",
+    "origin": "centered for rotation"
+  }
+]

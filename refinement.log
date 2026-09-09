@@ -1,0 +1,60 @@
+00:00.562  blend            | Read blend: "C:\Users\ярославка\Documents\ChatGPT\ceo land\revisions\v1\cardholder.blend"
+INFO Draco is available, use library at C:\Program Files (x86)\Steam\steamapps\common\Blender\5.2\scripts\addons_core\io_scene_gltf2\bf_intern_draco_bridge.dll
+INFO MeshOptimizer is available, use library at C:\Program Files (x86)\Steam\steamapps\common\Blender\5.2\scripts\addons_core\io_scene_gltf2\bf_intern_meshopt_bridge.dll
+15:26:00 | INFO: Starting glTF 2.0 export
+15:26:00 | INFO: Extracting primitive: Back side and bottom stitching
+15:26:00 | INFO: Primitives created: 1
+15:26:00 | INFO: Extracting primitive: Backing painted edge
+15:26:00 | INFO: Primitives created: 1
+15:26:00 | INFO: Extracting primitive: Front leather pocket
+15:26:00 | INFO: Primitives created: 1
+15:26:00 | INFO: Extracting primitive: Front saddle stitching.001
+15:26:00 | INFO: Primitives created: 1
+15:26:00 | INFO: Extracting primitive: Inserted card
+15:26:00 | INFO: Primitives created: 1
+15:26:00 | INFO: Extracting primitive: Joined leather side and bottom welt
+15:26:00 | INFO: Primitives created: 1
+15:26:00 | INFO: Extracting primitive: Leather backing
+15:26:00 | INFO: Primitives created: 1
+15:26:00 | INFO: Extracting primitive: Middle leather pocket | unstitched upper edge
+15:26:00 | INFO: Primitives created: 1
+15:26:00 | INFO: Extracting primitive: Middle pocket rolled lip | no stitching
+15:26:00 | INFO: Primitives created: 1
+15:26:00 | INFO: Extracting primitive: Pocket interior
+15:26:00 | INFO: Primitives created: 1
+15:26:00 | INFO: Extracting primitive: Pocket painted edge
+15:26:00 | INFO: Primitives created: 1
+15:26:00 | INFO: Extracting primitive: Printed logo | Bitch
+15:26:00 | INFO: Primitives created: 1
+15:26:00 | INFO: Extracting primitive: Printed logo | I'm CEO,
+15:26:00 | INFO: Primitives created: 1
+15:26:00 | INFO: Finished glTF 2.0 export in 0.12632417678833008 s
+00:01.562  cycles           | WARNING HIPEW initialization failed: Error opening HIP dynamic library
+
+RENDER_DEVICE OPTIX
+C:\Users\ярославка\Documents\ChatGPT\ceo land\scripts\refine_models.py:487: DeprecationWarning: 'World.use_nodes' is expected to be removed in Blender 6.0
+  scene.world.use_nodes = True
+00:13.141  render           | Saved: 'C:\Users\ярославка\Documents\ChatGPT\ceo land\previews\cardholder-front.png'
+00:24.766  render           | Saved: 'C:\Users\ярославка\Documents\ChatGPT\ceo land\previews\cardholder-straight.png'
+00:37.500  render           | Saved: 'C:\Users\ярославка\Documents\ChatGPT\ceo land\previews\cardholder-detail.png'
+00:37.500  blend            | Read blend: "C:\Users\ярославка\Documents\ChatGPT\ceo land\revisions\v1\key.blend"
+Info: Saved as "cardholder.blend"
+15:26:38 | INFO: Starting glTF 2.0 export
+15:26:38 | INFO: Extracting primitive: Recut blade mesh
+15:26:38 | INFO: Primitives created: 2
+15:26:38 | INFO: Extracting primitive: Key bow | engraved both sides
+15:26:38 | INFO: Primitives created: 3
+15:26:38 | INFO: Extracting primitive: Key shoulder
+15:26:38 | INFO: Primitives created: 2
+15:26:38 | INFO: Finished glTF 2.0 export in 0.07204842567443848 s
+
+RENDER_DEVICE OPTIX
+00:51.359  render           | Saved: 'C:\Users\ярославка\Documents\ChatGPT\ceo land\previews\key-front.png'
+01:03.234  render           | Saved: 'C:\Users\ярославка\Documents\ChatGPT\ceo land\previews\key-back.png'
+01:14.578  render           | Saved: 'C:\Users\ярославка\Documents\ChatGPT\ceo land\previews\key-straight.png'
+01:26.687  render           | Saved: 'C:\Users\ярославка\Documents\ChatGPT\ceo land\previews\key-detail.png'
+Info: Saved as "key.blend"
+REFINED_ASSETS [{"name": "cardholder", "file": "assets/models/cardholder.glb", "bytes": 1789956, "triangles": 35484, "mesh_objects": 13, "dimensions_m": {"width": 0.10532, "height": 0.084344, "depth": 0.007161}, "front_gltf": "+Z", "up_gltf": "+Y", "origin": "centered for rotation"}, {"name": "key", "file": "assets/models/key.glb", "bytes": 1368216, "triangles": 25069, "mesh_objects": 3, "dimensions_m": {"width": 0.028943, "height": 0.063051, "depth": 0.00352}, "front_gltf": "+Z", "up_gltf": "+Y", "origin": "centered for rotation"}]
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 02:38:20)
+
+Blender quit
