@@ -7,6 +7,9 @@ SCENE = 'CEOMENTALITY | Web studio'
 PHOTO = ROOT / 'references/product-photos/client-white-front.png'
 HEIGHT = .07214
 WIDTH = .105
+PANELS = ('WEB_Front leather pocket',
+          'WEB_Middle leather pocket | unstitched upper edge',
+          'WEB_Leather backing')
 
 
 def fit_proportions():
@@ -37,9 +40,7 @@ def fit_proportions():
 def photographic_surface():
     """Fixed-photo projection for front-facing compositions, not a measured PBR scan."""
     scene = bpy.data.scenes[SCENE]
-    for panel_name in ('WEB_Front leather pocket',
-                       'WEB_Middle leather pocket | unstitched upper edge',
-                       'WEB_Leather backing'):
+    for panel_name in PANELS:
         panel = scene.objects[panel_name]
         name = 'CLIENT photographic surface | ' + panel_name
         mat = bpy.data.materials.get(name) or bpy.data.materials.new(name)
@@ -70,11 +71,18 @@ def apply():
     root = bpy.data.scenes[SCENE].objects['WEB_HERO_cardholder']
     root['reference'] = 'Client white front photograph, received 2026-09-09'
     for part in root.children_recursive:
+        if part.name in PANELS:
+            # Older substring matching treated "unstitched upper edge" as a seam.
+            if 'CLIENT_photo_seam' in part:
+                del part['CLIENT_photo_seam']
+            part.hide_render = False
+            part.hide_set(False)
+            continue
         if part.name.startswith('WEB_Printed logo'):
             part.hide_render = True
             part['PHYS_material_print'] = True
             part.hide_set(True)
-        if 'stitch' in part.name.lower():
+        if ' stitching' in part.name.lower():
             part['CLIENT_photo_seam'] = True
             part.hide_render = True
             part.hide_set(True)

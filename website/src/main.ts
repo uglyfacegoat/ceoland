@@ -4,13 +4,14 @@ import "./styles/commerce.css";
 
 import { getQuantity, setQuantity, updateCartBadges } from "./catalog";
 import { initAccessStory } from "./sticky-access";
+import { productImages } from "./product-media";
 import {
   cartPage,
   checkoutPage,
   homePage,
   legalPage,
   productPage,
-  successPage,
+  orderConfirmationPreview,
 } from "./templates";
 
 const app = document.querySelector<HTMLDivElement>("#app");
@@ -24,7 +25,7 @@ const renderers: Record<string, () => string> = {
   "/product": productPage,
   "/cart": () => cartPage(quantity),
   "/checkout": () => checkoutPage(quantity),
-  "/success": successPage,
+  "/preview/order-success": orderConfirmationPreview,
   "/privacy": () => legalPage("privacy"),
   "/terms": () => legalPage("terms"),
 };
@@ -40,11 +41,6 @@ if (renderer) {
 updateCartBadges(quantity);
 if (path === "/") initAccessStory();
 
-const galleryImages = [
-  ["/images/cardholder-front.png", "CEOMENTALITY Access, вид спереди"],
-  ["/images/cardholder-straight.png", "CEOMENTALITY Access, вид сбоку"],
-  ["/images/cardholder-detail.png", "CEOMENTALITY Access, крупный план"],
-] as const;
 const galleryMain = document.querySelector<HTMLImageElement>("[data-gallery-main]");
 const galleryCounter = document.querySelector<HTMLElement>("[data-gallery-counter]");
 const galleryButtons = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-gallery-index]"));
@@ -52,15 +48,16 @@ let galleryIndex = 0;
 
 function showGalleryImage(nextIndex: number) {
   if (!galleryMain) return;
-  galleryIndex = (nextIndex + galleryImages.length) % galleryImages.length;
-  const [source, alt] = galleryImages[galleryIndex];
-  galleryMain.src = source;
-  galleryMain.alt = alt;
+  galleryIndex = (nextIndex + productImages.length) % productImages.length;
+  const picture = productImages[galleryIndex];
+  galleryMain.src = picture.source;
+  galleryMain.alt = picture.alt;
+  if (galleryMain.parentElement) galleryMain.parentElement.dataset.view = picture.view;
   galleryButtons.forEach((button, index) => {
     button.classList.toggle("is-active", index === galleryIndex);
     button.setAttribute("aria-current", index === galleryIndex ? "true" : "false");
   });
-  if (galleryCounter) galleryCounter.textContent = `${String(galleryIndex + 1).padStart(2, "0")} / 03`;
+  if (galleryCounter) galleryCounter.textContent = `${String(galleryIndex + 1).padStart(2, "0")} / ${String(productImages.length).padStart(2, "0")}`;
 }
 
 galleryButtons.forEach((button) => {
@@ -69,13 +66,22 @@ galleryButtons.forEach((button) => {
 document.querySelector("[data-gallery-prev]")?.addEventListener("click", () => showGalleryImage(galleryIndex - 1));
 document.querySelector("[data-gallery-next]")?.addEventListener("click", () => showGalleryImage(galleryIndex + 1));
 
-document.querySelector<HTMLButtonElement>("[data-add-to-cart]")?.addEventListener("click", (event) => {
+const addButton = document.querySelector<HTMLButtonElement>("[data-add-to-cart]");
+if (addButton && quantity === 9) {
+  addButton.disabled = true;
+  addButton.textContent = "В корзине 9 шт.";
+}
+addButton?.addEventListener("click", (event) => {
   const nextQuantity = Math.min(9, getQuantity() + 1);
   setQuantity(nextQuantity);
   updateCartBadges(nextQuantity);
   const button = event.currentTarget as HTMLButtonElement;
   button.firstChild?.replaceWith("Добавлено в корзину ");
   button.classList.add("is-added");
+  if (nextQuantity === 9) {
+    button.disabled = true;
+    button.textContent = "В корзине 9 шт.";
+  }
 });
 
 document.querySelectorAll<HTMLButtonElement>("[data-quantity]").forEach((button) => {
@@ -88,9 +94,47 @@ document.querySelectorAll<HTMLButtonElement>("[data-quantity]").forEach((button)
 });
 
 document.querySelector<HTMLFormElement>("[data-checkout-form]")?.addEventListener("submit", (event) => {
+  // No payment provider is connected. Never clear the cart or pretend an order exists.
   event.preventDefault();
-  const form = event.currentTarget as HTMLFormElement;
-  if (!form.reportValidity()) return;
-  setQuantity(0);
-  window.location.assign("/success");
 });
+
+const header = document.querySelector<HTMLElement>(".site-header");
+const navigationSections = ["about", "how"].map((id) => ({
+  section: document.getElementById(id),
+  link: header?.querySelector<HTMLAnchorElement>(`a[href="/#${id}"]`),
+}));
+const updateHeader = () => {
+  header?.classList.toggle("is-scrolled", window.scrollY > 40);
+  navigationSections.forEach(({ section, link }) => {
+    if (!section || !link) return;
+    const bounds = section.getBoundingClientRect();
+    const active = bounds.top < innerHeight * .5 && bounds.bottom > innerHeight * .5;
+    link.classList.toggle("is-active", active);
+    if (active) link.setAttribute("aria-current", "location");
+    else link.removeAttribute("aria-current");
+  });
+};
+updateHeader();
+window.addEventListener("scroll", updateHeader, { passive: true });
+
+const rail = document.querySelector<HTMLElement>(".product-rail");
+const previous = document.querySelector<HTMLButtonElement>("[data-rail-prev]");
+const next = document.querySelector<HTMLButtonElement>("[data-rail-next]");
+const railProgress = document.querySelector<HTMLElement>("[data-rail-progress]");
+if (rail && previous && next && railProgress) {
+  const updateRail = () => {
+    const distance = rail.scrollWidth - rail.clientWidth;
+    previous.disabled = rail.scrollLeft < 2;
+    next.disabled = rail.scrollLeft >= distance - 2;
+    railProgress.style.width = `${distance > 0 ? 30 + 70 * rail.scrollLeft / distance : 100}%`;
+  };
+  const scrollRail = (direction: number) => rail.scrollBy({
+    left: direction * rail.clientWidth * .8,
+    behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth",
+  });
+  previous.addEventListener("click", () => scrollRail(-1));
+  next.addEventListener("click", () => scrollRail(1));
+  rail.addEventListener("scroll", updateRail, { passive: true });
+  window.addEventListener("resize", updateRail);
+  updateRail();
+}

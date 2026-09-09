@@ -9,7 +9,10 @@ primary research sources, confirmed defects, tested changes, and remaining work.
 - Client photos in `references/product-photos/` are authoritative for the product
   shape and upright printed artwork. Keep the blue card insert in the hero.
 - The latest model uses front-photo projection for front-facing stills. It is
-  not a relightable PBR scan. Generated hero trials are not yet wired into the site.
+  not a relightable PBR scan. Website imagery and its limitations are documented
+  in `references/website-imagery.md`; accepted generated hero/about plates are wired.
+- Do not hide panels by searching for the substring "stitch": the middle panel
+  is named "unstitched upper edge". Use explicit panel names and seam selection.
 - Active working scene: `CEOMENTALITY | Web studio`.
 - The latest hero reference floats above the floor without a podium.
 - Inspect the connected Blender state before writing. Preserve the user's current

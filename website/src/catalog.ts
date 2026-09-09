@@ -29,4 +29,7 @@ export function updateCartBadges(quantity = getQuantity()) {
   document.querySelectorAll<HTMLElement>("[data-cart-count]").forEach((badge) => {
     badge.textContent = String(quantity);
   });
+  document.querySelectorAll<HTMLAnchorElement>(".bag").forEach((link) => {
+    link.setAttribute("aria-label", `Корзина, товаров: ${quantity}`);
+  });
 }

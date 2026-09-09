@@ -1,4 +1,5 @@
 import { ACCESS_PRICE, formatRubles } from "./catalog";
+import { accessFrames, productImages } from "./product-media";
 
 const bagIcon = `
   <svg viewBox="0 0 32 36" fill="none" aria-hidden="true">
@@ -30,9 +31,6 @@ export function footer() {
         <a href="/privacy#details">Реквизиты</a>
         <a href="mailto:hello@ceomentality.ru">Контакты</a>
       </nav>
-      <div class="socials" aria-label="Социальные сети">
-        <a href="#" aria-label="Telegram">↗</a><a href="#" aria-label="YouTube">▶</a><a href="#" aria-label="Instagram">◎</a>
-      </div>
       <div class="footer-rule"></div>
       <p class="copyright">© 2026 CEOMENTALITY.<br />Все права защищены.</p>
       <p class="footer-motto">Люди. Технологии. Возможности. Результат.</p>
@@ -40,30 +38,28 @@ export function footer() {
 }
 
 const collectionProducts = [
-  { name: "CEOMENTALITY Access", type: "Картхолдер", image: "/images/cardholder-front.png", live: true },
-  { name: "CEOMENTALITY Hoodie", type: "Худи", label: "HOODIE" },
-  { name: "CEOMENTALITY Cap", type: "Кепка", label: "CAP" },
-  { name: "CEOMENTALITY T-shirt", type: "Футболка", label: "T-SHIRT" },
-  { name: "CEOMENTALITY Thermos", type: "Термос", label: "THERMOS" },
+  { name: "CEOMENTALITY Access", type: "Картхолдер", image: productImages[0].source, live: true },
+  { name: "CEOMENTALITY Hoodie", type: "Худи", image: "/images/studio/hoodie.png", live: false },
+  { name: "CEOMENTALITY Cap", type: "Кепка", image: "/images/studio/cap.png", live: false },
+  { name: "CEOMENTALITY T-shirt", type: "Футболка", image: "/images/studio/tshirt.png", live: false },
+  { name: "CEOMENTALITY Thermos", type: "Термос", image: "/images/studio/thermos.png", live: false },
 ];
 
 function collection() {
   return `
     <section class="collection" id="collection" aria-labelledby="collection-title">
-      ${header()}
       <div class="section-kicker">КОЛЛЕКЦИЯ</div>
       <div class="collection-heading">
         <h2 id="collection-title">Больше,<br />чем картхолдер</h2>
         <p>Предметы, которые открывают<br />доступ к сообществу, инструментам<br />и возможностям.</p>
-        <a href="/#product">Смотреть всё <span>→</span></a>
+        <div class="rail-controls"><button type="button" data-rail-prev aria-label="Предыдущие товары">←</button><button type="button" data-rail-next aria-label="Следующие товары">→</button></div>
       </div>
       <div class="product-rail">
         ${collectionProducts.map((product) => `
           <article class="collection-card ${product.live ? "is-live" : "is-soon"}">
             <div class="collection-media">
-              ${product.image
-                ? `<img src="${product.image}" alt="${product.name}" />`
-                : `<span class="soon-badge">SOON</span><strong>${product.label}</strong>`}
+              <img src="${product.image}" alt="${product.name}" loading="lazy" width="1254" height="1254" />
+              ${product.live ? "" : '<span class="soon-badge">SOON</span>'}
             </div>
             <div class="collection-meta">
               <h3>${product.name}</h3><span>${product.live ? formatRubles(ACCESS_PRICE) : "—"}</span>
@@ -74,43 +70,33 @@ function collection() {
               : `<button class="card-action is-disabled" type="button" disabled>Скоро в продаже</button>`}
           </article>`).join("")}
       </div>
-      <div class="rail-progress"><b></b><i></i><i></i><i></i><span>05</span></div>
+      <div class="rail-progress" aria-hidden="true"><span>01</span><div><i data-rail-progress></i></div><span>05</span></div>
     </section>`;
 }
 
 function accessStory() {
   const steps = [
-    ["Получаешь код", "Уникальный код приходит внутри коробки, вместе с картхолдером."],
-    ["Заходишь на сайт", "Используешь ссылку из вкладыша CEOMENTALITY."],
-    ["Вводишь свой код", "Код подтверждает подлинность и активирует доступ."],
+    ["Получаешь код", "Уникальный код позволяет активировать доступ."],
+    ["Заходишь на сайт", "Переходишь на платформу CEOMENTALITY."],
+    ["Вводишь свой код", "Используешь уникальный код для активации доступа."],
     ["Получаешь доступ", "Тебе открываются материалы, инструменты и сообщество."],
   ];
   return `
     <section class="access-story" id="how" data-access-story aria-labelledby="access-story-title">
       <div class="access-story-sticky" data-access-sticky data-step="1">
-        ${header("how")}
         <div class="access-copy">
           <div class="section-kicker">КАК ЭТО РАБОТАЕТ</div>
           <h2 id="access-story-title">Один код —<br />и ты внутри</h2>
           <ol class="access-steps">
             ${steps.map((step, index) => `
               <li data-access-step class="${index === 0 ? "is-active" : ""}">
-                <span>${String(index + 1).padStart(2, "0")}</span><i></i>
-                <div><h3>${step[0]}</h3><p>${step[1]}</p></div>
+                <button type="button" data-step-target="${index}" aria-current="${index === 0 ? "step" : "false"}"><span>${String(index + 1).padStart(2, "0")}</span><i></i><span class="step-label">${step[0]}</span></button>
+                <p ${index === 0 ? "" : "hidden"}>${step[1]}</p>
               </li>`).join("")}
           </ol>
         </div>
         <div class="access-visual" aria-hidden="true">
-          <div class="key-object">
-            <div class="key-head">
-              <i class="key-hole"></i>
-              <span class="key-label key-label-front">ACCESS</span>
-              <span class="key-label key-label-back">CM-7X92-KD31</span>
-            </div>
-            <div class="key-neck"></div>
-            <div class="key-blade"><i></i><i></i><i></i><i></i><i></i><i></i></div>
-          </div>
-          <div class="key-shadow"></div>
+          ${accessFrames.map((frame, index) => `<img src="/images/studio/${frame}.png" alt="" width="1672" height="941" loading="lazy" data-key-frame="${index + 1}" />`).join("")}
         </div>
         <div class="story-counter" data-step-counter>01 / 04</div>
         <div class="story-dots"><i></i><i></i><i></i><i></i></div>
@@ -122,24 +108,21 @@ function accessStory() {
 export function homePage() {
   return `
     <main class="home-page">
+      ${header()}
       <section class="hero" aria-labelledby="hero-title">
-        <div class="architecture" aria-hidden="true"><div class="light-band"></div></div>
-        <div class="hero-product" aria-hidden="true">
-          <img src="/images/cardholder-floating.png" alt="" />
-          <div class="hero-shadow"></div>
+        <div class="hero-product">
+          <img src="/images/client/hero-photo.png" alt="Белый картхолдер CEOMENTALITY с синей картой" width="1672" height="941" fetchpriority="high" />
         </div>
-        ${header()}
         <div class="hero-copy">
           <h1 id="hero-title">CEOMENTALITY<br />Access</h1>
-          <p>Практический доступ к инструментам,<br />сообществу и опыту.</p>
+          <p>Практический доступ к инструментам,<br /> сообществу и опыту.</p>
           <a class="primary-button" href="#product">Получить доступ <span>→</span></a>
         </div>
         <div class="hero-values"><span>Люди<br />Технологии<br />Возможности<br />Результат</span><div></div></div>
       </section>
 
       <section class="product-intro" id="about" aria-labelledby="product-intro-title">
-        ${header("about")}
-        <div class="product-intro-media"><img src="/images/cardholder-detail.png" alt="Кожаный картхолдер CEOMENTALITY крупным планом" /></div>
+        <div class="product-intro-media"><img src="/images/client/about-photo.png" alt="Три тонких кожаных кармана и печать CEOMENTALITY" width="1672" height="941" loading="lazy" /></div>
         <div class="product-intro-copy">
           <div class="section-kicker">ПРОДУКТ</div>
           <h2 id="product-intro-title">Больше,<br />чем картхолдер</h2>
@@ -154,22 +137,23 @@ export function homePage() {
     </main>`;
 }
 
-function productShowcase() {
+function productShowcase(standalone = false) {
+  const heading = standalone ? "h1" : "h2";
   return `
       <section class="product-detail" id="product" aria-labelledby="product-title">
         <div class="product-info">
           <div class="section-kicker">ПРОДУКТ</div>
-          <h1 id="product-title">CEOMENTALITY<br />Access</h1>
+          <${heading} id="product-title">CEOMENTALITY<br />Access</${heading}>
           <p>Картхолдер с кодом доступа.<br />Базовый продукт, с которого всё начинается.</p>
           <strong class="price">${formatRubles(ACCESS_PRICE)}</strong>
           <button class="primary-button" type="button" data-add-to-cart>Добавить в корзину <span>→</span></button>
         </div>
         <div class="product-gallery">
-          <div class="product-main-image"><img src="/images/cardholder-front.png" alt="CEOMENTALITY Access, вид спереди" data-gallery-main /></div>
+          <div class="product-main-image" data-view="photo"><img src="${productImages[0].source}" alt="${productImages[0].alt}" width="1254" height="1254" loading="lazy" data-gallery-main /></div>
           <div class="gallery-controls"><span data-gallery-counter>01 / 03</span><button type="button" data-gallery-prev aria-label="Предыдущий кадр">←</button><button type="button" data-gallery-next aria-label="Следующий кадр">→</button></div>
         </div>
         <div class="product-thumbnails">
-          ${["front", "straight", "detail"].map((name, index) => `<button class="${index === 0 ? "is-active" : ""}" type="button" data-gallery-index="${index}"><img src="/images/cardholder-${name}.png" alt="Вид ${index + 1}" /></button>`).join("")}
+          ${productImages.map((picture, index) => `<button class="${index === 0 ? "is-active" : ""}" type="button" data-view="${picture.view}" data-gallery-index="${index}" aria-current="${index === 0}" aria-label="${picture.label}"><img src="${picture.source}" alt="" width="1400" height="1400" loading="lazy" /><span>${picture.label}</span></button>`).join("")}
           <div class="future-product">▢<span>Скоро<br />новые продукты</span></div>
         </div>
       </section>`;
@@ -179,7 +163,7 @@ export function productPage() {
   return `
     <main class="commerce-page product-page">
       ${header()}
-      ${productShowcase()}
+      ${productShowcase(true)}
       ${footer()}
     </main>`;
 }
@@ -198,9 +182,9 @@ export function cartPage(quantity: number) {
             <div class="empty-cart"><h2>Корзина пока пуста</h2><p>Добавьте CEOMENTALITY Access, чтобы продолжить.</p><a class="primary-button" href="/#product">Перейти к продукту <span>→</span></a></div>` : `
             <div class="cart-head"><span>Товар</span><span>Количество</span><span>Цена</span></div>
             <article class="cart-line">
-              <img src="/images/cardholder-front.png" alt="CEOMENTALITY Access" />
+              <img src="${productImages[0].source}" alt="CEOMENTALITY Access" />
               <div><h2>CEOMENTALITY Access</h2><p>Картхолдер</p></div>
-              <div class="quantity-control"><button type="button" data-quantity="${quantity - 1}" aria-label="Уменьшить количество">−</button><span>${quantity}</span><button type="button" data-quantity="${quantity + 1}" aria-label="Увеличить количество">+</button></div>
+              <div class="quantity-control"><button type="button" data-quantity="${quantity - 1}" aria-label="Уменьшить количество">−</button><span>${quantity}</span><button type="button" data-quantity="${quantity + 1}" aria-label="Увеличить количество" ${quantity === 9 ? "disabled" : ""}>+</button></div>
               <strong>${formatRubles(total)}</strong>
               <button class="remove-line" type="button" data-quantity="0" aria-label="Удалить товар">×</button>
             </article>`}
@@ -216,30 +200,32 @@ export function cartPage(quantity: number) {
 }
 
 export function checkoutPage(quantity: number) {
-  const safeQuantity = Math.max(1, quantity);
-  const total = ACCESS_PRICE * safeQuantity;
+  if (quantity === 0) return cartPage(0);
+  const total = ACCESS_PRICE * quantity;
   return `
     <main class="commerce-page checkout-page">
       ${header()}
       <section class="checkout-shell">
         <h1>Оформление заказа</h1>
-        <div class="checkout-product"><img src="/images/cardholder-front.png" alt="" /><span>CEOMENTALITY Access</span><strong>${formatRubles(total)}</strong><span>${safeQuantity} шт.</span></div>
+        <div class="checkout-product"><img src="${productImages[0].source}" alt="" /><span>CEOMENTALITY Access</span><strong>${formatRubles(total)}</strong><span>${quantity} шт.</span></div>
         <form class="checkout-form" data-checkout-form>
           <fieldset><legend>Контактные данные</legend><label>Имя<input name="name" autocomplete="name" required placeholder="Иван Иванов" /></label><label>Телефон<input name="phone" autocomplete="tel" required inputmode="tel" placeholder="+7 (___) ___-__-__" /></label><label>Email<input name="email" type="email" autocomplete="email" required placeholder="ivan@example.com" /></label></fieldset>
           <fieldset><legend>Код доступа</legend><label>Код<input name="code" autocomplete="off" placeholder="Например: LOA7-X92-KD31" /></label><a href="/#how">Где получить код?</a></fieldset>
           <fieldset class="payment-methods"><legend>Способ оплаты</legend><label><input type="radio" name="payment" value="card" checked /> Банковская карта <span>VISA ●</span></label><label><input type="radio" name="payment" value="sbp" /> СБП (система быстрых платежей)</label><label class="consent"><input type="checkbox" required checked /> Я согласен с политикой конфиденциальности</label><label class="consent"><input type="checkbox" required checked /> Я согласен с пользовательским соглашением</label></fieldset>
           <div class="checkout-total"><span>К оплате</span><strong>${formatRubles(total)}</strong></div>
-          <button class="primary-button" type="submit">Перейти к оплате <span>→</span></button>
+          <p class="checkout-notice" role="status">Приём заказов пока не открыт. Товары сохранятся в корзине.</p>
+          <button class="primary-button" type="submit" disabled>Оплата скоро будет доступна</button>
         </form>
       </section>
     </main>`;
 }
 
-export function successPage() {
+export function orderConfirmationPreview() {
   return `
     <main class="success-page">
       <a class="wordmark" href="/">CEOMENTALITY</a>
-      <img src="/images/cardholder-front.png" alt="CEOMENTALITY Access" />
+      <img src="${productImages[0].source}" alt="CEOMENTALITY Access" />
+      <p class="preview-notice">Макет страницы. Заказ не оформлен.</p>
       <div class="success-check">✓</div>
       <h1>Заказ принят</h1><p>Спасибо. Скоро мы свяжемся с вами<br />и предоставим доступ.</p>
       <a class="primary-button" href="/">На главную <span>→</span></a>

@@ -1,6 +1,8 @@
 node_modules/
 dist/
 __pycache__/
+/previews/**/*.log
+/revisions/**/*.blend1
 *.py[cod]
 .venv/
 .vite/
