@@ -8,23 +8,11 @@ const output = resolve(root, "website/public/images/editorial");
 mkdirSync(output, { recursive: true });
 
 const images = [
-  ["hero-mobile", "previews/photo-mobile/hero.png", [480, 960, 1254]],
-  ["about-mobile", "previews/photo-mobile/about.png", [480, 960, 1254]],
   ["key-still", "previews/photo-mobile/key.png", [480, 960, 1448]],
-  [
-    "hero-desktop",
-    "previews/website-archive/images/client/hero-photo.png",
-    [1280, 1672],
-  ],
-  [
-    "about-desktop",
-    "previews/website-archive/images/client/about-photo.png",
-    [1280, 1672],
-  ],
   [
     "product-original",
     "references/product-photos/client-white-front.png",
-    [240, 640, 1254],
+    [1254],
   ],
   ...["hoodie", "cap", "tshirt", "thermos"].map((name) => [
     name,

@@ -40,7 +40,7 @@ if (renderer) {
 updateCartBadges(quantity);
 
 const galleryMain = document.querySelector<HTMLImageElement>(
-  "[data-gallery-main]",
+  ".product-main-image img",
 );
 const galleryCounter = document.querySelector<HTMLElement>(
   "[data-gallery-counter]",
@@ -54,10 +54,9 @@ function showGalleryImage(nextIndex: number) {
   if (!galleryMain) return;
   galleryIndex = (nextIndex + productImages.length) % productImages.length;
   const picture = productImages[galleryIndex];
-  galleryMain.src = picture.source;
   galleryMain.alt = picture.alt;
-  if (galleryMain.parentElement)
-    galleryMain.parentElement.dataset.view = picture.view;
+  const surface = galleryMain.closest<HTMLElement>(".product-main-image");
+  if (surface) surface.dataset.view = picture.view;
   galleryButtons.forEach((button, index) => {
     button.classList.toggle("is-active", index === galleryIndex);
     button.setAttribute(

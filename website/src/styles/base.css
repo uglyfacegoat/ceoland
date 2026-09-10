@@ -47,6 +47,45 @@ img {
   display: block;
   max-width: 100%;
 }
+.product-photo {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 952 / 655;
+}
+.product-photo-surface {
+  position: absolute;
+  inset: 0;
+  mask: url("/images/editorial/product-silhouette.svg") center / 100% 100%
+    no-repeat;
+}
+/* Crop coordinates share the original photograph's 1254 px coordinate space. */
+.product-photo-surface > img {
+  position: absolute;
+  width: 131.7227%;
+  max-width: none;
+  height: 191.4504%;
+  left: -15.7563%;
+  top: -47.6336%;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+.card-insert {
+  position: absolute;
+  left: 4.3%;
+  top: 8.6%;
+  width: 91.8%;
+  height: 10.2%;
+  border-radius: 2% 2% 0 0 / 25% 25% 0 0;
+  background: linear-gradient(112deg, #071e4a, #0c3478 62%, #07275f);
+  box-shadow: inset 0 1px 1px #5781ae66;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 98%);
+}
+.without-card .card-insert {
+  display: none;
+}
+.home-page {
+  overflow-x: clip;
+}
 h1,
 h2,
 h3,
@@ -233,7 +272,7 @@ section[id] {
   display: grid;
   gap: 28px;
   border-top: 1px solid var(--line);
-  background: #eef2f7;
+  background: transparent;
 }
 .footer-wordmark {
   font-size: 13px;
@@ -309,7 +348,7 @@ section[id] {
 }
 @media (min-width: 1024px) {
   :root {
-    --page-x: clamp(48px, 6.4vw, 140px);
+    --page-x: max(clamp(48px, 6.4vw, 110px), calc((100vw - 1680px) / 2));
     --header-height: 100px;
   }
   .site-header {

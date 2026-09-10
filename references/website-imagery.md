@@ -1,43 +1,39 @@
-# Website imagery — photo-first mobile pass
+# Website imagery — one photographed product
 
-Updated 2026-09-10. Client photographs govern the actual product: three thin leather panels, fine pebbled grain and upright navy artwork. The user retained the blue card in staged images and deferred key animation. Landing references govern the cool pearl-white/navy atmosphere and composition.
+Updated 2026-09-10 after the photo-first review. The current implementation is governed by [unified-product-direction.md](unified-product-direction.md). Client photography defines the shape, three panels, fine pebbled leather, stitches and upright navy lettering. The old landing reference governs the atmosphere and blue insert; its italic product lettering does not override the actual client product.
 
-## Current delivery
+## Current sources and composition
 
-All paths in the first column are under `website/public/images/editorial/`. Width suffixes are pixels; responsive sources select an appropriate delivery size.
-
-| Delivery family | Master | Origin and use |
+| Delivery asset under website/public/images/editorial/ | Source | Use |
 | --- | --- | --- |
-| hero-mobile-{480,960,1254}.webp | previews/photo-mobile/hero.png | Newly generated staging from the client photo; mobile/tablet hero and gallery scene |
-| about-mobile-{480,960,1254}.webp | previews/photo-mobile/about.png | Newly generated close-up; mobile/tablet product introduction |
-| key-still-{480,960,1448}.webp | previews/photo-mobile/key.png | Newly generated brushed-metal key from supplied reference; one static instruction image |
-| hero-desktop-{1280,1672}.webp | previews/website-archive/images/client/hero-photo.png | Previously generated wide hero |
-| about-desktop-{1280,1672}.webp | previews/website-archive/images/client/about-photo.png | Previously generated wide product introduction |
-| product-original-{240,640,1254}.webp | references/product-photos/client-white-front.png | Original client photography; gallery, detail crop, collection, cart and checkout |
-| {hoodie,cap,tshirt,thermos}-{480,720}.webp | previews/website-archive/images/studio/*.png | Previously generated collection concepts; coming soon, unavailable to order |
+| product-original-1254.webp | references/product-photos/client-white-front.png | Every cardholder placement; one image, not separate generations |
+| product-silhouette.svg | Hand-authored display mask in the original photograph's coordinate space | Removes surrounding white canvas in the interface without repainting the photo |
+| key-still-{480,960,1448}.webp | previews/photo-mobile/key.png | Generated static key; bounded size with soft edge blending |
+| {hoodie,cap,tshirt,thermos}-{480,720}.webp | previews/website-archive/images/studio/*.png | Earlier generated collection concepts, unavailable to order |
 
-The campaign scenes are generated visualizations, not documentary photographs or current Blender renders. Product identity was compared visually, but exact shape, texture and letter preservation are not guaranteed. The original gallery frame is resized/encoded from the actual client photograph, with no generated detail; its close-up uses CSS cropping. The black client photo remains a reference, not an offered colour variant.
+`website/src/product-photo.ts` renders the same source photograph in the hero, introduction, gallery, collection, cart, checkout and confirmation preview. A simple blue CSS insert covers part of the upper rear panel where the card belongs, behind the photographed middle pocket lip. The insert is a graphic compositing layer, not evidence of a real photoshoot with a card. Cart/collection and the initial gallery view show the actual empty product.
 
-Separate mobile compositions avoid cropping the product out of a wide desktop image. Background shading and shadows are inside the images; the mobile hero uses an edge mask to blend its backdrop into the page. The key section now displays four readable steps in normal page flow; there is no pinned animation or simulated 3D rotation.
+Transforms only move, rotate in the screen plane or crop this same photographed face. There are no claimed side/rear photographs, no invented product texture and no simulated new camera viewpoints. Shadows and the common pearl background are authored in CSS, not reconstructed physical lighting. The product introduction overlaps the previous section's boundary while keeping content readable.
 
-## Reproducible exports
+The key is still a generated image; its animation is deferred. Its soft CSS edge mask is for blending, not a claim of extracted transparency. Collection concepts remain generated. The black client photo remains a reference, not an offered variant.
 
-Run `node scripts/prepare-images.mjs` from `website/`, with FFmpeg in PATH. The script produces 24 WebP files using Lanczos resizing and lossy WebP quality 92 (96 for the original product photograph). Full PNG masters remain preserved. No image generation or retouching occurs during export.
+## Reproduction and archive
 
-Public files occupy 1,507,483 bytes after archiving unused originals and models; the production build is about 1.55 MB. This is total disk size, not a measured first-load transfer or Core Web Vitals score. Responsive sources and lazy loading reduce the assets needed for a particular viewport.
+Run `node scripts/prepare-images.mjs` from `website/`, with FFmpeg in PATH. It exports 12 WebP files using Lanczos resizing, lossy quality 92 (96 for the original product photograph). The source PNGs remain intact. The product mask and CSS are versioned native interface assets.
 
-Old public images and GLBs are preserved in `previews/website-archive/`, outside Vite's copied public directory. Historical export scripts may still target their former public locations and should not be run as the current delivery pipeline.
+Independent generated hero/about frames and their previous WebP derivatives are no longer loaded. Original PNGs are preserved in `previews/photo-mobile/` and `previews/website-archive/images/client/`; old delivery variants are in `previews/website-archive/images/editorial-v1/`. Historical HTML mockups refer to the former layout and are not the current visual specification.
 
-## Planning and verification
+A built-in imagegen extraction attempt produced RGB pixels with a drawn checkerboard and changed leather detail. It was rejected and never shipped. The prompt and rejection reason are recorded in the current direction document.
 
-- [Mobile direction](mobile-photo-direction.md): decisions recorded before implementation.
-- [Five-screen HTML mockup](mobile-photo-layout.html): reviewed before editing the main interface.
-- [New image prompts](mobile-photo-prompts.md): exact prompts, built-in imagegen source outputs and accepted masters.
-- [Browser verification](verification-mobile-photo.md): actual checks and remaining limits.
+## Verification and physical limits
+
+The shared product source, gallery controls, cart/checkout and responsive geometry were checked in Chromium. Widths include 320, 390, 430, 768, 1024, 1440, 1920, 2560 and 3840 px. Current browser results are recorded in [unified-product-direction.md](unified-product-direction.md); earlier pass results remain in [verification-mobile-photo.md](verification-mobile-photo.md).
+
+This is a 2D photo composition. It cannot reveal product depth or unphotographed surfaces. The original visible product is about 940 pixels wide; image display is bounded rather than substituting generated high-frequency details. Real Safari/Android/iPhone hardware and field performance were not measured. Checkout still has no payment/order backend and must not show a false submitted order.
 
 ## Preserved Blender work
 
-`revisions/photorealism/native-lookdev.blend` retains the relightable leather study and independent key scene. Native review masters are in `previews/client-relit/` and `previews/key-relit/`; neither native hero nor native key frames are currently used by the website. The previous four native key delivery WebPs are in the archive. [client-relight-pass.md](client-relight-pass.md) records that earlier stage, including its material and lighting limits.
+`revisions/photorealism/native-lookdev.blend` and native reviews in `previews/client-relit/` / `previews/key-relit/` are unchanged by this website pass. See [client-relight-pass.md](client-relight-pass.md) for their earlier status.
 
 ## Historical desktop generation prompts
 
@@ -59,10 +55,3 @@ Generated source: exec-5d2a043e-ff55-4ddb-a082-42ac3712eb08.png.
 Use case: compositing. Create a landscape 16:9 luxury product photograph for a website product-introduction section. The sole attached image is the exact REAL cardholder; preserve its identity as a photographic object: the same width-to-height ratio 1.46, three thin nearly flat white leather panels with rounded pebbled grain, near-square softly finished top corners, more rounded bottom corners, white perimeter stitching, and EXACT existing upright dark navy printed artwork ("I’m CEO," / "Bitch") at the same size and position. Do not retype, italicize or redesign this artwork. No padded tablet border, no exaggerated leather folds, no extra seams. Keep surface grain from the real photo. Add a narrow deep-blue card insert in the upper pocket.
 Composition: product lies almost flat on a seamless pale cool-gray studio floor in LEFT half, rotated counterclockwise about 20 degrees, front visible. Large tactile close-up, occupying x=-7% to 54% and y=13% to 89%; a little of its left edge may leave the frame, but entire slogan is readable. This is a different view from the floating hero, resting on floor with a believable soft cast shadow stretching to lower-right. Right 42% of canvas is clear pearl-white negative space for later HTML typography. Cool-white photographic daylight from upper left, midtone gray-blue shadow, natural soft reflected fill so dark printing stays dark and fine leather relief visible. No glare, no plastic, no blown highlights. Strong product detail and gentle contrast; premium editorial camera photograph.
 Only the actual slogan on product. NO website UI, no heading or labels, no navbar, no watermark, no props, no podium.
-
-## Remaining fidelity and product limits
-
-- Generated staging approximates the client product; it is not evidence of a pixel-exact recreation or a physical photoshoot.
-- No client side/back photographs were supplied. The gallery intentionally contains the original front, staged scene and front-detail crop.
-- The static key is a generated concept. Continuous movement and reverse-code choreography are deferred.
-- Checkout has no order backend or payment integration; it never pretends an order was accepted or clears the basket on submission. Policy/legal pages still require the merchant's real documents before launch.

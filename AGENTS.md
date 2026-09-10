@@ -4,10 +4,12 @@ Before changing product geometry, materials, lighting, or website imagery, read
 `references/photorealism-playbook.md`. It records the user's current direction,
 primary research sources, confirmed defects, tested changes, and remaining work.
 
-Current website direction: photo-first and mobile-first. Read
-`references/mobile-photo-direction.md` and `references/website-imagery.md`.
-New mobile hero/about and static key images are generated from the supplied
-references. Original client photography remains in the gallery and cart.
+Current website direction: one consistent photographed product, mobile-first,
+with bounded layouts through 3840 px. Read `references/unified-product-direction.md`
+and `references/website-imagery.md`. All cardholder placements use the same client
+photograph through `website/src/product-photo.ts` and one SVG silhouette mask.
+The blue insert is a separate CSS layer. Do not generate different cardholders
+for different sections. The static key remains a generated photograph.
 Key animation is deferred; four instruction steps use normal scrolling.
 Delivery images live in `website/public/images/editorial/`; previous public
 models/images are preserved in `previews/website-archive/`, outside the build.
@@ -21,7 +23,7 @@ models/images are preserved in `previews/website-archive/`, outside the build.
 - The native pass uses independent leather colour, height/roughness maps and
   only an isolated print coverage mask from the client photograph. It is an
   authored PBR material, not a scan of the actual product. Website hero/about
-  plates remain generated; see `references/website-imagery.md` for provenance.
+  now reuse the client photograph; see `references/website-imagery.md` for provenance.
 - The previous four native key frames remain review assets from
   `scripts/key_relit.py`. The current website uses a generated static key photo.
 - Do not hide panels by searching for the substring "stitch": the middle panel
