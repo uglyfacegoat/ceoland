@@ -17,6 +17,8 @@ The two staged product pictures are generated visualizations, not photographs of
 
 ## Blender state
 
+Native continuation, 2026-09-10: `revisions/photorealism/native-lookdev.blend` now contains a relightable leather study and an independent key scene. Review outputs are in `previews/client-relit/` and `previews/key-relit/`. They have **not** replaced website imagery: full-shot texture, background contrast and key machining still need refinement. The projection workflow described below is the retained previous revision; current details are in [client-relight-pass.md](client-relight-pass.md).
+
 scripts/client_cardholder.py calibrates the dimensions of the existing three panels and projects the client photograph onto their front-facing surfaces. The photograph retains captured lighting and is **not a relightable PBR albedo/normal scan**. Front-render.png and detail-render.png remain review exports, not website gallery inputs: the skin and ink still look too flat/pale under the new scene light.
 
 A visibility bug matched the substring "stitch" in the middle panel's name ("unstitched upper edge"). It incorrectly marked that panel CLIENT_photo_seam and hid it. The fix explicitly restores the three named leather panels and only hides objects named as stitching. Verified in the live Blender scene, saved file and rerendered control images. Checkpoint: revisions/photorealism/before-panel-visibility.blend. Current cardholder: revisions/photorealism/client-photo-fit.blend.
