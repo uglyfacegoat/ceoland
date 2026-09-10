@@ -5,22 +5,17 @@
   "status": "structural checks passed; visual quality requires separate review",
   "image_sources": [
     {
-      "name": "Leather037_2K-PNG_Roughness.png",
-      "packed": true,
-      "space": "Non-Color"
-    },
-    {
-      "name": "Leather037_2K-PNG_NormalGL.png",
-      "packed": true,
-      "space": "Non-Color"
-    },
-    {
       "name": "client-white-front.png",
       "packed": true,
       "space": "sRGB"
     },
     {
-      "name": "Leather037_2K-PNG_Displacement.png",
+      "name": "Leather030_2K-PNG_Roughness.png",
+      "packed": true,
+      "space": "Non-Color"
+    },
+    {
+      "name": "Leather030_2K-PNG_Displacement.png",
       "packed": true,
       "space": "Non-Color"
     }

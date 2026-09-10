@@ -16,7 +16,7 @@ SCENE = 'CEOMENTALITY | Key lookdev'
 OUTPUT = ROOT / 'previews/key-relit'
 
 
-def metal(name, polished=False, engraving=False):
+def metal(name, polished=False, engraving=False, longitudinal=False):
     material = bpy.data.materials.get(name) or bpy.data.materials.new(name)
     material.use_nodes = True
     nodes, links = material.node_tree.nodes, material.node_tree.links
@@ -33,7 +33,7 @@ def metal(name, polished=False, engraving=False):
         stretch = nodes.new('ShaderNodeVectorMath')
         stretch.operation = 'MULTIPLY'
         stretch.location = (-650, 0)
-        stretch.inputs[1].default_value = (260, 900, 24000)
+        stretch.inputs[1].default_value = (14000, 900, 100) if longitudinal else (80, 900, 12000)
         links.new(coordinates.outputs['Object'], stretch.inputs[0])
         noise = nodes.new('ShaderNodeTexNoise')
         noise.location = (-420, 0)
@@ -42,16 +42,23 @@ def metal(name, polished=False, engraving=False):
         links.new(stretch.outputs[0], noise.inputs['Vector'])
         rough = nodes.new('ShaderNodeMapRange')
         rough.location = (-170, 130)
-        rough.inputs['To Min'].default_value = .20 if not engraving else .32
-        rough.inputs['To Max'].default_value = .34 if not engraving else .46
+        rough.inputs['To Min'].default_value = .18 if longitudinal else .16 if not engraving else .32
+        rough.inputs['To Max'].default_value = .30 if longitudinal else .38 if not engraving else .46
         links.new(noise.outputs['Fac'], rough.inputs['Value'])
         links.new(rough.outputs[0], shader.inputs['Roughness'])
         bump = nodes.new('ShaderNodeBump')
         bump.location = (-170, -130)
-        bump.inputs['Strength'].default_value = .22
-        bump.inputs['Distance'].default_value = .000002
+        bump.inputs['Strength'].default_value = .35
+        bump.inputs['Distance'].default_value = .000003
         links.new(noise.outputs['Fac'], bump.inputs['Height'])
         links.new(bump.outputs['Normal'], shader.inputs['Normal'])
+        tangent = nodes.new('ShaderNodeVectorTransform')
+        tangent.name = 'Machining direction'
+        tangent.vector_type = 'VECTOR'
+        tangent.convert_from, tangent.convert_to = 'OBJECT', 'WORLD'
+        tangent.inputs[0].default_value = (0, 0, 1) if longitudinal else (1, 0, 0)
+        tangent.location = (180, -320)
+        links.new(tangent.outputs[0], shader.inputs['Tangent'])
     output = nodes.new('ShaderNodeOutputMaterial')
     output.location = (750, 0)
     links.new(shader.outputs[0], output.inputs['Surface'])
@@ -102,6 +109,8 @@ def setup():
         scene.camera = camera
     bpy.context.window.scene = scene
     materials = [metal('KEYRELIT satin nickel'), metal('KEYRELIT machined edges', polished=True), metal('KEYRELIT recessed engraving', engraving=True)]
+    blade_materials = [metal('KEYRELIT longitudinal nickel', longitudinal=True),
+                       metal('KEYRELIT milled flutes', longitudinal=True), materials[2]]
     for name in ('KEYRELIT head', 'KEYRELIT blade'):
         part = scene.objects[name]
         original_name = 'WEB_Key bow | engraved both sides' if name.endswith('head') else 'WEB_Key blade | cut teeth and flutes'
@@ -109,7 +118,7 @@ def setup():
         if len(indices) != len(part.data.polygons):
             raise ValueError(f'Key topology differs from retained source: {name}')
         part.data.materials.clear()
-        for material in materials:
+        for material in materials if name.endswith('head') else blade_materials:
             part.data.materials.append(material)
         for face, material_index in zip(part.data.polygons, indices):
             face.material_index = material_index
@@ -132,7 +141,7 @@ def view(shot):
     root = scene.objects['KEYRELIT key']
     root.scale = (1, 1, 1)
     root.location = (.034, 0, .036)
-    root.rotation_euler = tuple(map(math.radians, (-6, -5, 18)))
+    root.rotation_euler = tuple(map(math.radians, (-6, -5, 30)))
     camera = scene.camera
     camera.location = (0, -.35, .12)
     aim(camera, (0, 0, .034))
@@ -160,10 +169,16 @@ def view(shot):
     reflection = (2*normal.dot(toward_camera)*normal - toward_camera).normalized()
     across = head.matrix_world.to_quaternion() @ Vector((1, 0, 0))
     upper = head.matrix_world.to_quaternion() @ Vector((0, 0, 1))
-    main = area(scene, 'KEYRELIT reflection softbox', center+reflection*.22+across*.055+upper*.025, .28, .13, center, .21)
+    main = area(scene, 'KEYRELIT reflection softbox', center+reflection*.22+across*.055+upper*.045, .20 if shot == 'standing' else .10, .09, center, .10)
     main['purpose'] = 'Broad reflection gradient across the satin head'
-    area(scene, 'KEYRELIT edge strip', (-.13, -.04, .16), 1.5 if shot == 'standing' else .35, .025, center, .22)
-    floor_light = area(scene, 'KEYRELIT floor daylight', (.25, -.10, .38), 3.2, .15, (0, 0, 0), .20)
+    edge = area(scene, 'KEYRELIT edge strip', (-.13, -.04, .16), 1.5 if shot == 'standing' else .35, .025, center, .22)
+    product_receivers = bpy.data.collections.get('KEYRELIT product receivers') or bpy.data.collections.new('KEYRELIT product receivers')
+    for part in root.children_recursive:
+        if part.type == 'MESH' and part.name not in product_receivers.objects:
+            product_receivers.objects.link(part)
+    main.light_linking.receiver_collection = product_receivers
+    edge.light_linking.receiver_collection = product_receivers
+    floor_light = area(scene, 'KEYRELIT floor daylight', (.25, -.10, .38), 7.5, .15, (0, 0, 0), .20)
     receivers = bpy.data.collections.get('KEYRELIT floor receiver') or bpy.data.collections.new('KEYRELIT floor receiver')
     floor = scene.objects['KEYRELIT cyclorama']
     if floor.name not in receivers.objects:
@@ -196,6 +211,18 @@ def view(shot):
     rear.visible_camera = False
     rear.visible_shadow = False
     rear.visible_diffuse = False
+    lower = scene.objects.get('KEYRELIT lower negative fill')
+    if lower is None:
+        lower = bpy.data.objects.new('KEYRELIT lower negative fill', bpy.data.meshes.new('KEYRELIT lower reflection card'))
+        scene.collection.objects.link(lower)
+        lower.data.materials.append(bpy.data.materials['KEYRELIT velvet'])
+    lower.data.clear_geometry()
+    lower.data.from_pydata([(-.3,-.4,.001),(.4,-.4,.001),(.4,-.003,.001),(-.3,-.003,.001)], [], [(0,1,2,3)])
+    lower.data.update()
+    lower.visible_camera = False
+    lower.visible_shadow = False
+    lower.visible_diffuse = False
+    lower['purpose'] = 'Negative fill below the reflected horizon exposes the blade flutes'
     etch = bpy.data.materials['KEYRELIT recessed engraving'].node_tree.nodes.get('Principled BSDF')
     etch.inputs['Emission Color'].default_value = (.003, .075, .8, 1)
     etch.inputs['Emission Strength'].default_value = .8 if shot == 'active' else 0

@@ -1,140 +1,97 @@
-# Native cardholder material pass — 10 September 2026
+# Native material and lighting pass — 10 September 2026
 
-SCENE
-- intent: replace the fixed front photograph shader with a relightable product material.
-- deliverable: native Cycles close-up, front comparison and floating hero; editable live Blender state.
-- units: metres; axes: right-handed Z-up.
-- render: Cycles / 1400 square diagnostic, 1920 × 1080 hero, existing frame 1.
-- dynamic: no; current task is the previously requested product stills. Key animation remains deferred.
+Historical native pass. The subsequent website implementation uses generated photographic staging and a static key image; see [mobile-photo-direction.md](mobile-photo-direction.md) and [website-imagery.md](website-imagery.md). References below to key delivery describe this earlier pass. Native scenes and review masters remain preserved.
 
-HIERARCHY
-- preserve WEB_HERO_cardholder and its separate three leather panels, card and lettering sources.
-- protected: other scenes, key meshes, previous material datablocks and website plates.
-- modify: panel material assignments/UVs, seam surface fit, WEB_CAM_product and key/fill lighting.
-- checkpoint: before-relight-20260910-082950.blend; active file initially client-photo-fit.blend.
+Current editable file: `revisions/photorealism/native-lookdev.blend`.
+Recovery checkpoint: `revisions/photorealism/before-fidelity-20260910-111353.blend`.
+The file was updated in the connected Blender. Background rendering does not save over the live scene.
 
-ASSETS
-- A01 cardholder | [EXISTING] | detailed hero | [0.105, approximately 0.0035, 0.07214] m | diagnostic centre [0,0,0.075] | no diagnostic rotation | central root, separate panels.
-- A02 inserted blue card | [EXISTING] | detailed | retained shape and position relative to root; omitted only for photograph comparison.
-- A03 seamless studio | [EXISTING] | detailed supporting surface | retained floor/cyclorama; no podium.
-- no generation and no credits.
+## Scope and authoritative references
 
-SHOT
-- active camera: WEB_CAM_product.
-- diagnostic: orthographic front and mild three-quarter, width 0.13–0.14 m; entire product and shadow visible.
-- hero: floating object on right; clear left half for website copy; prior no-podium reference.
+SCENE: Cycles, metres, Z-up, frame 1. The current composition floats above a seamless floor without a podium. The client photographs in `references/product-photos/` govern product proportions, leather and upright artwork; the landing reference governs composition. Keep the blue insert in the hero.
 
-LOOK
-- material route [EXISTING]: ambientCG Leather037 normal/roughness with explicit physical UV scale, separately authored pigment.
-- photo only supplies the dark artwork mask within its measured printed bounds, never full surface colour or inferred height.
-- white dielectric leather, navy pigment on same normal field, linen seam, blue insert.
-- tile size initially 0.08 m, normal strength tested against close-up; no photographed illumination in base colour.
-- positive rounded pebbles and fine grooves; avoid exaggerated displacement and bulky corners.
+HIERARCHY: preserve the three separate panels under `WEB_HERO_cardholder`, their thin profiles, native seams and hidden lettering sources. The independent `CEOMENTALITY | Key lookdev` scene retains the original key's topology and engraved faces. Current card scene: `CEOMENTALITY | Web studio`.
 
-LIGHTING
-- focal subject: product texture and exact upright artwork; darkest region: ink and small contact creases.
-- broad daylight from upper right, weak cool fill; existing studio, no HDRI required.
-- broad highlight should reveal lips and grain without washing out white leather.
-- AgX / Medium High Contrast / exposure 0 fixed for comparisons.
-- diagnostic isolated world/key/fill, reversed-key relief comparison and grayscale inspection before final.
+ASSETS: existing cardholder, blue card, key and cyclorama. No image generation in this pass. Approximate product widths are 105 mm for the cardholder and 29 mm for the key head; these remain authored dimensions, not measurements supplied by the client.
 
-MOTION
-- static control views; no continuous key motion claimed.
+SHOT: hero camera `WEB_CAM_product`, 2560 × 1440, 256 samples. Product bounding-box centre is approximately 69.5% across and 53% down, with a 325 mm orthographic camera width. The top leans backward. Neutral front and macro cameras isolate material behaviour. Key stills are 1672 × 941, 192 samples.
 
-ACCEPTANCE
-- three visible panels, tiny upper corner radii, stronger lower radii; thin profile.
-- print agrees with client photo and shares surface relief.
-- grain and thread have actual light response; no double photo/geometry seams.
-- close-up and intended hero resolution visually reviewed, no black intersection artifacts.
-- live state contains the actual changes; recovery copy reopens successfully.
+MOTION: four discrete key poses with the existing browser crossfade. Continuous 3D rotation remains deferred as requested.
 
-refs_read: blender-scene, blender-scene-spec, blender-modeling, blender-lookdev, blender-lighting-camera, blender-audit-finalize.
+## Leather, print and seams
 
-CHECKLIST
-- [x] A: inspect live Blender, source and modules.
-- [x] B: preserve previous saved state.
-- [x] C: clay/camera/proportions reviewed.
-- [x] D: native material, seams and lighting pass applied; artistic acceptance remains open.
-- [x] E: renders reviewed and saved file reopened successfully; live scene uses the new version.
+The previous Leather037 surface produced narrow angular valleys. Current height and roughness use [ambientCG Leather030](https://ambientcg.com/view?id=Leather030), a **procedural** pebbled material under [CC0](https://docs.ambientcg.com/license/). It is not a scan of the actual product. Neither source colour nor a separate normal map is used.
 
-Sources: [Leather037](https://ambientcg.com/view?id=Leather037), [Leather038](https://ambientcg.com/view?id=Leather038), photometric stereo scans under CC0. These are comparable material samples, not scans of the client's product. Dimensions and material parameters remain artistic estimates.
+- UV repeat: 110 mm with a different offset on each panel.
+- Displacement Scale: 90 µm, Midlevel 0.5, Cycles `BOTH` (displacement and bump). Cubic interpolation; height and roughness are Non-Color data. There is one relief path, without stacked normal/bump treatments.
+- Leather: base colour `(0.68, 0.665, 0.64)`, IOR 1.46, Specular IOR Level 0.5, roughness mapped to 0.46–0.65, diffuse roughness 0.15, sheen weight 0.025.
+- Ink: independently authored navy `(0.0009, 0.0016, 0.018)`, roughness 0.50. Only bounded artwork coverage comes from the client photograph; photographed illumination is not used as surface colour. The print shares the leather relief and is assigned only to the pocket exterior.
+- Threads retain the previous surface fit. New needle impressions depress the dense exterior mesh by at most 45 µm around stitch endpoints, with matching endpoint seating. The panels carry an explicit `needle_impressions` marker so repeated application does not deepen them.
 
-## Key stage — separate editable scene
+All material scales are artistic estimates. The client photo still has a different fine grain and more varied seam compression; a stronger displacement value alone will not reproduce it.
 
-SCENE
-- intent: correct the uniform grey metal and coarse brushing in the previous four key renders.
-- deliverable: native standing and close Access/code control stills; no generated plates.
-- units: metres; right-handed Z-up; Cycles, 1672 × 941, frame 1, static per existing four-frame brief.
+## Cardholder lighting
 
-HIERARCHY / ASSETS
-- [EXISTING] copy WEB_HERO_key head and blade into CEOMENTALITY | Key lookdev with independent meshes/materials.
-- original key, cardholder and website images protected.
-- KEYRELIT key root, head and blade; approximate dimensions [0.029,0.0035,0.063] m.
-- [EXISTING] copied cyclorama; [BLOCK] named softbox, strip, floor light and off-camera black reflection card.
-- preserve real engraving geometry; no flat text plane substitution.
+AgX / Medium High Contrast / exposure 0, with a weak cool world at strength 0.035.
 
-SHOT / LOOK
-- standing first, slight three-quarter angle, full blade and hole visible; close Access/code thereafter.
-- independent KEYRELIT camera; orthographic 0.155 m wide standing / 0.125 m close.
-- brushed nickel with micrometre-scale relief, polished machined edges, darker recessed engraving.
-- brushing measured in object metres, primarily horizontal on head.
+| Source | Current setting | Purpose |
+| --- | --- | --- |
+| Hero key | `(0.28, -0.05, 0.27)` m, 2.1 W, rectangle 0.09 × 0.18 m | Grazing relief and pocket lips |
+| Fill | `(-0.20, -0.23, 0.12)` m, 0.1 W, rectangle 0.30 × 0.35 m | Weak cool product fill |
+| Background | `(0.45, -0.30, 0.70)` m, 155 W, point radius 0.10 m | Broad background transition and floor shadow |
+| Diagnostic key | `(0.16, -0.20, 0.28)` m, 5.5 W | Front/macro relief review; separate from hero exposure |
 
-LIGHTING / MOTION
-- reflection softbox aimed through the mirror reflection direction of the head; dark card shapes the opposite edge.
-- edge strip for machined silhouette; floor daylight for support shadow.
-- world-only/key-only/grayscale checks; AgX Medium High Contrast/exposure 0 fixed.
-- static four poses, no motion audit claim.
+Key and fill are linked to product receivers; the background source is linked to the cyclorama. Its shadow blockers include the physical flag and product meshes. This avoids additional direct floor illumination from product lights, while the environment still contributes indirect light.
 
-ACCEPTANCE
-- camera-read gate uses retained reference-matched silhouette; no geometry redesign in this pass.
-- clear silver/dark reflection contrast, softbox must not flatten head to white or grey.
-- engraving, flutes, hole thickness and bevels readable in viewed renders.
-- source scene preserved; saved copy reopens and live Blender exposes both work scenes.
+`RELIT_ENV_window_mullion` contains two tessellated strips. Camera rays locate their intended shadows on the curved cyclorama; each blocker vertex is placed a quarter of the way from receiver to lamp. The previous fixed-height construction could put part of a flag outside that light path. The flag is camera-invisible. This setup uses deliberate light linking and visibility controls; it is not a recovered physical shooting rig.
 
-## Saved result and checks
+## Key material and reflections
 
-Current file: `revisions/photorealism/native-lookdev.blend`, saved from the connected Blender with the cardholder scene active. Four used image sources are packed. The independent key scene is in the same file. Previous client-photo projection and the pre-edit checkpoint remain available.
+The head and blade have separate machining directions. Head brushing runs across the face; blade brushing follows its length. Object-space tangent directions rotate with each mesh. Relief is micrometre-scale, with roughness variation and the original recessed engraving material assignments preserved.
 
-Changes in this pass:
-- Leather037 normal, roughness and height use explicit per-panel UV coordinates, an 80 mm repeat and different offsets. Displacement Scale is 55 micrometres, not a measured grain height; normal strength is 0.8.
-- The front photograph feeds only bounded ink coverage. White leather and navy pigment have independent colours; photographic shadows no longer supply surface colour. The exact upright letter shapes come from the client image.
-- The printed material is assigned only to the exterior face of the front pocket. Its back and thickness use plain leather, preventing the projected artwork from appearing inside the pocket.
-- Native threads are visible again. Each ring was fitted by ray cast to its own panel; thread width was reduced, centres lifted and ends seated into the skin. The middle panel remains explicitly visible.
-- Main cardholder light is a grazing area source at `[0.28, -0.02, 0.27]` m, 3 W, with a weak 0.1 W fill. A 50 W point source with 12 mm radius lights the background through a physical off-camera flag. Light/shadow linking restricts that background source to the cyclorama and its flag, avoiding a second product shadow. This is artistic lighting control, not a recovered real-world shooting setup.
-- The key uses independent meshes, worlds and materials, fine brushing, a satin face, polished edges and dark recessed engraving. Off-camera dark reflectors establish edge and hole thickness. Four stills were rendered; continuous animation is still deferred.
-- Fixed two implementation traps: update the correct scene's dependency graph when switching subjects, and restore original polygon material indices after replacing key material slots. Otherwise the geometry can be posed using stale matrices or lose its engraved finish.
+A 0.09 × 0.10 m reflection softbox sits along the calculated reflection direction of the head: 0.20 W standing, 0.10 W close-up. The narrow edge strip shapes machined edges. Both are linked to the product; a separate 7.5 W floor light creates the support shadow.
 
-Viewed native Cycles outputs:
+Dark reflection cards establish the head edge and hole depth. The new lower card blocks the white floor reflection in the blade flutes; it is visible to glossy rays, hidden from camera, diffuse and shadow rays. The blade now has long dark channels rather than a uniform pale fill. The standing yaw is 30 degrees. The fourth frame uses the retained blue engraving emission.
 
-| Output | What it established |
+This is a native Blender render with real engraving, not generated imagery. Its finish is still cleaner and more uniform than the photographed key reference.
+
+## Saved outputs and verification
+
+| Output | Review purpose |
 | --- | --- |
-| `previews/client-relit/clay.png` | Three panels, thin profile and client proportions in the initial geometry check |
-| `previews/client-relit/hero.png` | 1920 × 1080, 256 samples; floating cardholder, blue insert, current complete lighting |
-| `previews/client-relit/front-beauty.png` | 1200 square; exact upright artwork and three layers, no inserted card for the client-photo comparison |
-| `previews/client-relit/macro-beauty.png`, `macro-reverse.png` | 1400 square; the light reversal changes the actual grain/ink/thread shading |
-| `previews/client-relit/hero-world.png`, `hero-key.png`, `hero-fill.png`, `hero-background.png` | Isolated light contributions: world/fill are weak; the key reveals relief; the background source provides a broad diagonal transition and indirect fill |
-| `previews/key-relit/standing.png`, `access.png`, `code.png`, `active.png` | 1672 × 941, 192 samples; four static poses, real engraving and blue code state |
-| `previews/key-relit/standing-key-only.png`, `standing-world-only.png` | Metal reads from its reflected sources; the unlit world alone does not describe the form |
-| `previews/client-relit/reopen-check.json` | A separate Blender process reopened the saved file and passed the structural/material/image checks |
+| `previews/client-relit/hero.png` | Complete 2560 × 1440 floating composition |
+| `previews/client-relit/front-beauty.png` | 1200 square; three layers and upright print; blue card hidden for photo comparison |
+| `previews/client-relit/macro-beauty.png`, `macro-reverse.png` | 1400 square; actual relief response under reversed key light |
+| `previews/client-relit/hero-world.png`, `hero-key.png`, `hero-fill.png`, `hero-background.png` | Isolated light contributions |
+| `previews/key-relit/standing.png`, `access.png`, `code.png`, `active.png` | Four current native key stills |
+| `previews/key-relit/standing-key-only.png`, `standing-world-only.png` | Reflected source versus environment contribution |
+| `previews/client-relit/reopen-check.json` | Separate-process checks of the saved scene, materials and image sources |
 
-The renders above were inspected visually. No final pixel-level identity or photorealism claim follows from structural checks. A dedicated raw-versus-denoised comparison was not repeated in this pass.
+The complete cardholder views, macro reversal and four key views were visually inspected. Isolated contributions were regenerated. A dedicated raw-versus-denoised comparison was not repeated. Structural checks do not establish photorealism or pixel identity.
 
-## Remaining differences and next pass
+The live scene packs the three used image sources: Leather030 height, Leather030 roughness and client artwork coverage source. Separate-process reopening passes. Reapplying the complete card material/seam pass twice produced identical coordinates for all three panels and four seam meshes; it does not compound the impressions.
 
-1. Leather037 has narrower, more angular valleys than the rounded pebbles in the client's black product photograph. Find or author a closer relief before adding stronger displacement; raising normal strength does not fix the wrong grain shape.
-2. The native hero still has weaker background contrast and a thinner-looking floor shadow than the landing reference. Preserve the product exposure while refining that ratio.
-3. Macro seams are now real geometry, but the stitch entry points and irregular compression do not yet reproduce the photographed seam. Check those against the client photo, not the older inflated reference geometry.
-4. The key head has readable metal edges and engraving, but its blade remains too uniformly light. Shape the reflected environment around the flutes; retain the fine brushing instead of returning to coarse procedural scratches.
-5. These are review assets. Website hero/about remain generated plates and the sticky story still uses the preceding key renders. Do not describe the website's current cardholder as a Blender render.
+The four new key renders are on the website as losslessly encoded 8-bit WebP files (808,888 bytes combined), with the native 16-bit PNG masters retained. Browser checks covered all four steps on desktop and mobile: correct frame and counter, pinned viewport, decoded images, no horizontal overflow or browser errors. `npm run build` passed TypeScript checking and Vite build. There is no configured lint or automated test script; neither is claimed.
 
-Reproduce from the repository root in PowerShell:
+## Remaining differences
+
+1. The native cardholder hero is too pale and its background transitions/shadow are weaker than the no-podium reference. Preserve the current product proportions and separate exposure from backdrop contrast in the next lighting pass.
+2. The new rounded relief is closer in character, but the fine grain and irregular stitch entry/compression still differ from the client photograph. Evaluate at both macro and intended website resolution.
+3. The key now reads as metal, but its machining is too uniform and the surrounding light remains simpler than the reference.
+4. Website cardholder hero/about still use the previously documented generated plates. **Only the key imagery was replaced in this pass.** Do not present the current website cardholder as an export of the native Blender study.
+
+Reference parity has not been achieved. The current files are reproducible progress with these explicit limits.
+
+## Reproduction
+
+From the repository root in PowerShell:
 
 ```powershell
 $blenderExe = 'C:/Program Files (x86)/Steam/steamapps/common/Blender/blender.exe'
-& $blenderExe --background revisions/photorealism/native-lookdev.blend --python-exit-code 1 --python scripts/client_relit.py -- --view hero --name hero --width 1920 --samples 256
+& $blenderExe --background revisions/photorealism/native-lookdev.blend --python-exit-code 1 --python scripts/client_relit.py -- --view hero --name hero --width 2560 --samples 256
 & $blenderExe --background revisions/photorealism/native-lookdev.blend --python-exit-code 1 --python scripts/key_relit.py -- --shot standing
 & $blenderExe --background revisions/photorealism/native-lookdev.blend --python-exit-code 1 --python scripts/review_native.py -- --suite
 & $blenderExe --background revisions/photorealism/native-lookdev.blend --python-exit-code 1 --python scripts/review_native.py
 ```
 
-Rendering and review commands operate on a background copy; they do not save over the live scene. Apply future accepted changes to the connected Blender and save a named checkpoint explicitly, as in this pass.
+Use `--shot access`, `code` or `active` for the other key frames. Rendering commands operate on a background copy and do not save the live Blender file. Preserve a checkpoint before future connected edits. Website encoding is documented in `website-imagery.md`.

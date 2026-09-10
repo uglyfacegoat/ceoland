@@ -12,6 +12,20 @@ import client_relit
 import key_relit
 
 
+def material_images(tree, visited=None):
+    visited = set() if visited is None else visited
+    if tree in visited:
+        return set()
+    visited.add(tree)
+    images = set()
+    for node in tree.nodes:
+        if node.type == 'TEX_IMAGE' and node.image:
+            images.add(node.image)
+        elif node.type == 'GROUP' and node.node_tree:
+            images.update(material_images(node.node_tree, visited))
+    return images
+
+
 def verify():
     card_scene = bpy.data.scenes[client_relit.SCENE]
     key_scene = bpy.data.scenes[key_relit.SCENE]
@@ -21,12 +35,13 @@ def verify():
         assert panel.active_material.name.startswith('RELIT |'), name
         assert panel.data.uv_layers.get('Relit surface'), name
         assert len(panel.data.vertices) > 4000, name
+        assert panel.data.get('needle_impressions'), name
     shader = card_scene.objects[client_relit.PANELS[0]].active_material.node_tree
     front_panel = card_scene.objects[client_relit.PANELS[0]]
     assert all(p.material_index == (0 if p.normal.y < -.5 else 1) for p in front_panel.data.polygons), 'Ink must stay on the exterior face'
     assert shader.nodes['White leather / navy pigment'].outputs[0].is_linked
     assert shader.nodes['Artwork source — colour NOT used'].outputs['Color'].links[0].to_node.name == 'Ink coverage only'
-    assert shader.nodes['Grain relief — 55 micrometres'].inputs['Scale'].default_value < .0001
+    assert shader.nodes['Leather grain relief'].inputs['Scale'].default_value < .0001
     for name in ('KEYRELIT head', 'KEYRELIT blade'):
         part = key_scene.objects[name]
         source = bpy.data.objects['WEB_Key bow | engraved both sides' if name.endswith('head') else 'WEB_Key blade | cut teeth and flutes']
@@ -43,7 +58,7 @@ def verify():
                 continue
             for material in part.data.materials:
                 if material and material.use_nodes:
-                    images.update(n.image for n in material.node_tree.nodes if n.type == 'TEX_IMAGE' and n.image)
+                    images.update(material_images(material.node_tree))
     for image in images:
         assert image.packed_file or Path(bpy.path.abspath(image.filepath)).is_file(), image.filepath
     print('NATIVE_REOPEN_OK: three relightable panels, isolated print mask, independent key, valid textures', flush=True)
@@ -57,6 +72,7 @@ def lighting_pass(subject, role, shot, name):
     bpy.context.window.scene = scene
     if subject == 'card':
         client_relit.diagnostic_camera(shot)
+        client_relit.lighting(shot)
         if shot != 'hero':
             for identifier in ('RELIT_LGT_window_background', 'RELIT_ENV_window_mullion'):
                 scene.objects[identifier].hide_render = True

@@ -15,7 +15,8 @@ from web_studio import aim, pose
 
 SCENE = 'CEOMENTALITY | Web studio'
 OUTPUT = ROOT / 'previews/client-relit'
-TILE = .080
+TILE = .110
+LEATHER = 'Leather030'
 
 
 def node(nodes, kind, name, x, y):
@@ -26,12 +27,13 @@ def node(nodes, kind, name, x, y):
 
 
 def scan(nodes, links, uv, channel, x, y):
-    texture = node(nodes, 'ShaderNodeTexImage', 'Leather037 ' + channel, x, y)
-    path = ROOT / 'blender/textures/ambientcg/Leather037' / f'Leather037_2K-PNG_{channel}.png'
+    texture = node(nodes, 'ShaderNodeTexImage', LEATHER + ' ' + channel, x, y)
+    path = ROOT / 'blender/textures/ambientcg' / LEATHER / f'{LEATHER}_2K-PNG_{channel}.png'
     if not path.is_file():
         raise FileNotFoundError(path)
     texture.image = bpy.data.images.load(str(path), check_existing=True)
     texture.image.colorspace_settings.name = 'Non-Color'
+    texture.interpolation = 'Cubic'
     links.new(uv.outputs['UV'], texture.inputs['Vector'])
     return texture
 
@@ -73,17 +75,12 @@ def leather_material(printed=False):
     material = bpy.data.materials.get(name) or bpy.data.materials.new(name)
     material.use_nodes = True
     material.diffuse_color = (.68, .665, .64, 1)
-    material['source'] = 'ambientCG Leather037 normal/roughness; independent pigment, no photographed lighting'
+    material['source'] = 'ambientCG Leather030 procedural pebble relief; independent pigment, no photographed lighting'
     material['tile_metres'] = TILE
     nodes, links = material.node_tree.nodes, material.node_tree.links
     nodes.clear()
     uv = node(nodes, 'ShaderNodeUVMap', 'Leather coordinates in metres', -1100, 20)
     uv.uv_map = 'Relit surface'
-    normal_texture = scan(nodes, links, uv, 'NormalGL', -850, -210)
-    normal = node(nodes, 'ShaderNodeNormalMap', 'Pebbled grain', -500, -170)
-    normal.uv_map = 'Relit surface'
-    normal.inputs['Strength'].default_value = .8
-    links.new(normal_texture.outputs['Color'], normal.inputs['Color'])
     rough = scan(nodes, links, uv, 'Roughness', -850, 100)
     roughness = node(nodes, 'ShaderNodeMapRange', 'Leather finish', -510, 170)
     roughness.inputs['To Min'].default_value = .46
@@ -95,7 +92,6 @@ def leather_material(printed=False):
     shader.inputs['Specular IOR Level'].default_value = .5
     shader.inputs['Diffuse Roughness'].default_value = .15
     shader.inputs['Sheen Weight'].default_value = .025
-    links.new(normal.outputs['Normal'], shader.inputs['Normal'])
     links.new(roughness.outputs['Result'], shader.inputs['Roughness'])
     if printed:
         mask = artwork_mask(nodes, links)
@@ -107,13 +103,13 @@ def leather_material(printed=False):
         ink_finish = node(nodes, 'ShaderNodeMixRGB', 'Printed surface finish', 360, 270)
         links.new(mask, ink_finish.inputs[0])
         links.new(roughness.outputs[0], ink_finish.inputs[1])
-        ink_finish.inputs[2].default_value = (.36, .36, .36, 1)
+        ink_finish.inputs[2].default_value = (.50, .50, .50, 1)
         links.new(ink_finish.outputs[0], shader.inputs['Roughness'])
     output = node(nodes, 'ShaderNodeOutputMaterial', 'Material Output', 1000, 180)
     links.new(shader.outputs[0], output.inputs['Surface'])
-    height = scan(nodes, links, uv, 'Displacement', -850, -540)
-    displacement = node(nodes, 'ShaderNodeDisplacement', 'Grain relief — 55 micrometres', 650, -390)
-    displacement.inputs['Scale'].default_value = .000055
+    height = scan(nodes, links, uv, 'Displacement', -850, -380)
+    displacement = node(nodes, 'ShaderNodeDisplacement', 'Leather grain relief', 650, -390)
+    displacement.inputs['Scale'].default_value = .00009
     displacement.inputs['Midlevel'].default_value = .5
     links.new(height.outputs['Color'], displacement.inputs['Height'])
     links.new(displacement.outputs[0], output.inputs['Displacement'])
@@ -193,11 +189,61 @@ def fit_threads():
         mesh['relit_thread_fit'] = True
 
 
+def press_seams():
+    """Small needle impressions in the existing dense exterior surface."""
+    from mathutils.kdtree import KDTree
+    scene = bpy.data.scenes[SCENE]
+    seams = {
+        PANELS[0]: ('WEB_Front saddle stitching | sides and bottom',),
+        PANELS[1]: ('WEB_Middle side stitching left', 'WEB_Middle side stitching right'),
+        PANELS[2]: ('WEB_Backing exposed top stitching',),
+    }
+    for panel_name, thread_names in seams.items():
+        panel = scene.objects[panel_name]
+        if panel.data.get('needle_impressions'):
+            continue
+        entries = []
+        for thread_name in thread_names:
+            mesh = scene.objects[thread_name].data
+            for start in range(0, len(mesh.vertices), 80):
+                centers = [sum((v.co for v in mesh.vertices[start+ring*8:start+(ring+1)*8]), Vector())/8 for ring in range(10)]
+                tangent = centers[-1]-centers[0]
+                tangent.y = 0
+                tangent.normalize()
+                entries.extend((center.copy(), tangent) for center in (centers[0], centers[-1]))
+                for ring in range(10):
+                    fraction = ring/9
+                    depth = .000045*(math.exp(-(fraction/.16)**2)+math.exp(-((1-fraction)/.16)**2))
+                    for vertex in mesh.vertices[start+ring*8:start+(ring+1)*8]:
+                        vertex.co.y += depth
+            mesh.update()
+        tree = KDTree(len(entries))
+        for index, (center, _) in enumerate(entries):
+            tree.insert((center.x, 0, center.z), index)
+        tree.balance()
+        exterior = [vertex for vertex in panel.data.vertices if vertex.normal.y < -.5]
+        for vertex in exterior:
+            depth = 0
+            for _, index, _ in tree.find_range((vertex.co.x, 0, vertex.co.z), .0007):
+                center, tangent = entries[index]
+                offset = vertex.co-center
+                offset.y = 0
+                along = offset.dot(tangent)
+                across = offset.x*tangent.z-offset.z*tangent.x
+                depth = max(depth, .000045*math.exp(-(along/.00032)**2-(across/.00022)**2))
+            vertex.co.y += depth
+        panel.data.update()
+        panel.data['needle_impressions'] = True
+
+
 def diagnostic_camera(view='three-quarter'):
     if view not in {'front', 'three-quarter', 'macro', 'hero'}:
         raise ValueError(f'Unknown cardholder view: {view}')
     scene = bpy.data.scenes[SCENE]
     bpy.context.window.scene = scene
+    for name in ('RELIT_LGT_window_background', 'RELIT_ENV_window_mullion'):
+        if name in scene.objects:
+            scene.objects[name].hide_render = view != 'hero'
     pose('hero')
     root = scene.objects['WEB_HERO_cardholder']
     root.location = (0, 0, .075)
@@ -226,22 +272,39 @@ def diagnostic_camera(view='three-quarter'):
         root.location.z += .014-lowest
         camera.location = (0, -.5, .23)
         aim(camera, (0, 0, .052))
-        camera.data.ortho_scale = .28
+        camera.data.ortho_scale = .325
         scene.render.resolution_x, scene.render.resolution_y = 1920, 1080
+        bpy.context.view_layer.update()
+        from bpy_extras.object_utils import world_to_camera_view
+        projected = [world_to_camera_view(scene, camera, scene.objects[name].matrix_world @ vertex.co)
+                     for name in PANELS for vertex in scene.objects[name].data.vertices]
+        center_x = (min(p.x for p in projected)+max(p.x for p in projected))/2
+        center_y = (min(p.y for p in projected)+max(p.y for p in projected))/2
+        rotation = camera.matrix_world.to_quaternion()
+        camera.location += rotation @ Vector(((center_x-.695)*.325, (center_y-.47)*.325*1080/1920, 0))
     bpy.context.view_layer.update()
 
 
-def lighting():
+def lighting(view='hero'):
     scene = bpy.data.scenes[SCENE]
     key = scene.objects['WEB_LGT_key']
-    key.location = (.28, -.02, .27)
+    key.location = (.28, -.05, .27)
     aim(key, (0, 0, .065))
     key.data.shape = 'RECTANGLE'
     key.data.size = .09
     key.data.size_y = .18
-    key.data.energy = 3.0
+    key.data.energy = 2.1
     key.data.color = (1, .98, .95)
+    if view != 'hero':
+        key.location = (.16, -.20, .28)
+        aim(key, (0, 0, .075))
+        key.data.energy = 5.5
     key.hide_render = False
+    receivers = bpy.data.collections.get('RELIT product receivers') or bpy.data.collections.new('RELIT product receivers')
+    for part in scene.objects['WEB_HERO_cardholder'].children_recursive:
+        if part.type == 'MESH' and part.name not in receivers.objects:
+            receivers.objects.link(part)
+    key.light_linking.receiver_collection = receivers
     fill = scene.objects['WEB_LGT_fill']
     fill.location = (-.20, -.23, .12)
     aim(fill, (0, 0, .06))
@@ -250,6 +313,7 @@ def lighting():
     fill.data.size_y = .35
     fill.data.color = (.90, .95, 1)
     fill.hide_render = False
+    fill.light_linking.receiver_collection = receivers
     scene.world.node_tree.nodes['Background'].inputs[0].default_value = (.85, .90, 1, 1)
     scene.world.node_tree.nodes['Background'].inputs[1].default_value = .035
     scene.view_settings.view_transform = 'AgX'
@@ -266,8 +330,8 @@ def background_window():
         scene.collection.objects.link(lamp)
     lamp.location = (.45, -.30, .70)
     lamp.data.type = 'POINT'
-    lamp.data.shadow_soft_size = .012
-    lamp.data.energy = 50
+    lamp.data.shadow_soft_size = .10
+    lamp.data.energy = 155
     lamp.data.color = (.90, .95, 1)
     lamp.hide_render = False
     receivers = bpy.data.collections.get('RELIT window receivers') or bpy.data.collections.new('RELIT window receivers')
@@ -281,20 +345,31 @@ def background_window():
     right, up = rotation @ Vector((1, 0, 0)), rotation @ Vector((0, 1, 0))
     direction = rotation @ Vector((0, 0, -1))
     aspect = scene.render.resolution_y/scene.render.resolution_x
-    corners = []
-    for u, v in ((.30, 0), (.57, 0), (.10, 1), (-.15, 1)):
-        origin = camera.location + right*((u-.5)*camera.data.ortho_scale) + up*((.5-v)*camera.data.ortho_scale*aspect)
-        hit, point, _, _ = floor.ray_cast(origin, direction)
-        if not hit:
-            raise RuntimeError('Window shadow target falls outside the cyclorama')
-        amount = (.45-point.z)/(lamp.location.z-point.z)
-        corners.append(tuple(point.lerp(lamp.location, amount)))
+    vertices, faces = [], []
+    # Follow the curved cyclorama so every blocker stays between light and receiver.
+    for top_left, top_right, bottom_left, bottom_right in ((.38,.66,-.08,.20), (1.05,1.5,.74,1.5)):
+        start = len(vertices)
+        for row in range(13):
+            v = row/12
+            left = top_left*(1-v)+bottom_left*v
+            right_edge = top_right*(1-v)+bottom_right*v
+            for column in range(3):
+                u = left+(right_edge-left)*column/2
+                origin = camera.location + right*((u-.5)*camera.data.ortho_scale) + up*((.5-v)*camera.data.ortho_scale*aspect)
+                hit, point, _, _ = floor.ray_cast(origin, direction)
+                if not hit:
+                    raise RuntimeError('Window shadow target falls outside the cyclorama')
+                vertices.append(tuple(point.lerp(lamp.location, .25)))
+        for row in range(12):
+            for column in range(2):
+                corner = start+row*3+column
+                faces.append((corner,corner+1,corner+4,corner+3))
     flag = scene.objects.get('RELIT_ENV_window_mullion')
     if flag is None:
         flag = bpy.data.objects.new('RELIT_ENV_window_mullion', bpy.data.meshes.new('RELIT window mullion'))
         scene.collection.objects.link(flag)
     flag.data.clear_geometry()
-    flag.data.from_pydata(corners, [], [(0, 1, 2, 3)])
+    flag.data.from_pydata(vertices, [], faces)
     flag.data.update()
     flag.visible_camera = False
     flag.hide_render = False
@@ -303,6 +378,9 @@ def background_window():
     blockers = bpy.data.collections.get('RELIT window blockers') or bpy.data.collections.new('RELIT window blockers')
     if flag.name not in blockers.objects:
         blockers.objects.link(flag)
+    for part in scene.objects['WEB_HERO_cardholder'].children_recursive:
+        if part.type == 'MESH' and part.name not in blockers.objects:
+            blockers.objects.link(part)
     lamp.light_linking.blocker_collection = blockers
 
 
@@ -310,8 +388,9 @@ def apply():
     bpy.context.window.scene = bpy.data.scenes[SCENE]
     apply_materials()
     fit_threads()
+    press_seams()
     diagnostic_camera()
-    lighting()
+    lighting('three-quarter')
     bpy.context.view_layer.update()
 
 
@@ -348,4 +427,7 @@ if __name__ == '__main__':
         apply()
     if args.view:
         diagnostic_camera(args.view)
+        lighting(args.view)
+        if args.view == 'hero':
+            background_window()
     render(args.name, args.width, args.samples)
