@@ -1,12 +1,18 @@
 {
-  "name": "ceomentality-website",
-  "version": "0.1.0",
+  "name": "ceomentality-frontend",
   "private": true,
+  "version": "1.0.0",
   "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
     "dev": "vite --host 127.0.0.1",
-    "build": "tsc --noEmit && vite build",
-    "preview": "vite preview --host 127.0.0.1"
+    "typecheck": "tsc --noEmit",
+    "build": "tsc --noEmit && node scripts/build.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "preview": "vite preview --host 127.0.0.1",
+    "build:release": "tsc --noEmit && node scripts/build.mjs --release"
   },
   "devDependencies": {
     "typescript": "~7.0.2",

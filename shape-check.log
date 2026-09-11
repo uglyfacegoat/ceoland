@@ -1,8 +1,0 @@
-00:00.579  blend            | Read blend: "C:\Users\ярославка\Documents\ChatGPT\ceo land\blender\key.blend"
-C:\Users\ярославка\Documents\ChatGPT\ceo land\scripts\check_key_shape.py:18: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
-  white.use_nodes = True
-00:03.235  render           | Saved: 'C:\Users\ярославка\Documents\ChatGPT\ceo land\previews\key-shape-check.png'
-SHAPE_CHECK {'silhouette_iou': 0.9911785775604327, 'mean_outer_edge_error_pixels': 0.7381567614125754, 'millimeters_per_pixel': 0.054307116104868915}
-Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 02:38:20)
-
-Blender quit
