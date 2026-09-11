@@ -5,3 +5,4 @@ website/.env*
 *.log
 *.tsbuildinfo
 verification/
+.vercel/
