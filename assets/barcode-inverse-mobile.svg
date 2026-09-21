@@ -1,0 +1,44 @@
+<svg width="51" height="252" viewBox="0 0 51 252" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="51" height="252" fill="#1E1E1E"/>
+<g id="00 / CEOMENTALITY &#226;&#128;&#148; &#208;&#191;&#209;&#128;&#208;&#181;&#208;&#183;&#208;&#181;&#208;&#189;&#209;&#130;&#208;&#176;&#209;&#134;&#208;&#184;&#209;&#143;">
+<path d="M-2191 -696C-2191 -697.105 -2190.1 -698 -2189 -698H341C342.104 -698 343 -697.105 343 -696V8945C343 8946.1 342.104 8947 341 8947H-2189C-2190.1 8947 -2191 8946.1 -2191 8945V-696Z" fill="#E8EDF0"/>
+<path d="M-2189 -698V-697H341V-698V-699H-2189V-698ZM343 -696H342V8945H343H344V-696H343ZM341 8947V8946H-2189V8947V8948H341V8947ZM-2191 8945H-2190V-696H-2191H-2192V8945H-2191ZM-2189 8947V8946C-2189.55 8946 -2190 8945.55 -2190 8945H-2191H-2192C-2192 8946.66 -2190.66 8948 -2189 8948V8947ZM343 8945H342C342 8945.55 341.552 8946 341 8946V8947V8948C342.657 8948 344 8946.66 344 8945H343ZM341 -698V-697C341.552 -697 342 -696.552 342 -696H343H344C344 -697.657 342.657 -699 341 -699V-698ZM-2189 -698V-699C-2190.66 -699 -2192 -697.657 -2192 -696H-2191H-2190C-2190 -696.552 -2189.55 -697 -2189 -697V-698Z" fill="white" fill-opacity="0.1"/>
+<g id="Mobile / &#208;&#155;&#208;&#181;&#208;&#189;&#208;&#180;&#208;&#184;&#208;&#189;&#208;&#179;">
+<rect width="390" height="9405" transform="translate(-111 -538)" fill="white"/>
+<g id="001 / Mobile hero">
+<rect width="390" height="790" transform="translate(-111 -538)" fill="white"/>
+<g id="Access signal">
+<rect width="390" height="252" transform="translate(-111)" fill="#171717"/>
+<g id="GFX / barcode" clip-path="url(#clip0_0_1)">
+<rect width="50.6" height="252" fill="white"/>
+<rect id="bar" x="2.77734" width="1.04156" height="252" fill="#171717"/>
+<rect id="bar_2" x="5.55469" width="2.43031" height="252" fill="#171717"/>
+<rect id="bar_3" x="9.02734" width="0.694375" height="252" fill="#171717"/>
+<rect id="bar_4" x="10.7617" width="1.38875" height="252" fill="#171717"/>
+<rect id="bar_5" x="13.8867" width="3.12469" height="252" fill="#171717"/>
+<rect id="bar_6" x="18.0527" width="1.04156" height="252" fill="#171717"/>
+<rect id="bar_7" x="20.1367" width="0.694375" height="252" fill="#171717"/>
+<rect id="bar_8" x="22.5664" width="2.08312" height="252" fill="#171717"/>
+<rect id="bar_9" x="25.6914" width="1.38875" height="252" fill="#171717"/>
+<rect id="bar_10" x="28.1211" width="3.47187" height="252" fill="#171717"/>
+<rect id="bar_11" x="33.3301" width="0.694375" height="252" fill="#171717"/>
+<rect id="bar_12" x="35.0664" width="1.73594" height="252" fill="#171717"/>
+<rect id="bar_13" x="37.8438" width="1.04156" height="252" fill="#171717"/>
+<rect id="bar_14" x="40.6211" width="2.7775" height="252" fill="#171717"/>
+<g id="bar_15">
+<path d="M44.441 0H45.1354V252H44.441V0Z" fill="#171717"/>
+<path d="M30.9316 0H31.626V252H30.9316V0Z" fill="#171717"/>
+</g>
+<rect id="bar_16" x="46.1758" width="1.38875" height="252" fill="#171717"/>
+<rect id="bar_17" x="49.3008" width="2.43031" height="252" fill="#171717"/>
+</g>
+</g>
+</g>
+</g>
+</g>
+<defs>
+<clipPath id="clip0_0_1">
+<rect width="50.6" height="252" fill="white"/>
+</clipPath>
+</defs>
+</svg>

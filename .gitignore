@@ -6,3 +6,11 @@ website/.env*
 *.tsbuildinfo
 verification/
 .vercel/
+
+# Current landing
+node_modules/
+dist/
+.env*
+.DS_Store
+*.log
+.vercel/

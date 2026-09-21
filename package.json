@@ -1,0 +1,10 @@
+{
+  "name": "ceoland",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "node server.mjs",
+    "start": "node server.mjs",
+    "build": "node build.mjs"
+  }
+}

@@ -1,0 +1,17 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="288" height="45" viewBox="0 0 288 45" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Accent / horizontal slash rhythm" clip-path="url(#clip0_0_4)">
+<path id="Vector" d="M36 0L0 45" stroke="#0060FF" stroke-width="1.5"/>
+<path id="Vector_2" d="M72 0L36 45" stroke="#0060FF" stroke-width="1.5"/>
+<path id="Vector_3" d="M108 0L72 45" stroke="#0060FF" stroke-width="1.5"/>
+<path id="Vector_4" d="M144 0L108 45" stroke="#0060FF" stroke-width="1.5"/>
+<path id="Vector_5" d="M180 0L144 45" stroke="#0060FF" stroke-width="1.5"/>
+<path id="Vector_6" d="M216 0L180 45" stroke="#0060FF" stroke-width="1.5"/>
+<path id="Vector_7" d="M252 0L216 45" stroke="#0060FF" stroke-width="1.5"/>
+<path id="Vector_8" d="M288 0L252 45" stroke="#0060FF" stroke-width="1.5"/>
+</g>
+<defs>
+<clipPath id="clip0_0_4">
+<rect width="288" height="45" fill="white"/>
+</clipPath>
+</defs>
+</svg>

@@ -1,0 +1,44 @@
+<svg width="92" height="700" viewBox="0 0 92 700" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="92" height="700" fill="#1E1E1E"/>
+<g id="00 / CEOMENTALITY &#226;&#128;&#148; &#208;&#191;&#209;&#128;&#208;&#181;&#208;&#183;&#208;&#181;&#208;&#189;&#209;&#130;&#208;&#176;&#209;&#134;&#208;&#184;&#209;&#143;">
+<path d="M-1647 -158C-1647 -159.105 -1646.1 -160 -1645 -160H885C886.104 -160 887 -159.105 887 -158V9483C887 9484.1 886.104 9485 885 9485H-1645C-1646.1 9485 -1647 9484.1 -1647 9483V-158Z" fill="#E8EDF0"/>
+<path d="M-1645 -160V-159H885V-160V-161H-1645V-160ZM887 -158H886V9483H887H888V-158H887ZM885 9485V9484H-1645V9485V9486H885V9485ZM-1647 9483H-1646V-158H-1647H-1648V9483H-1647ZM-1645 9485V9484C-1645.55 9484 -1646 9483.55 -1646 9483H-1647H-1648C-1648 9484.66 -1646.66 9486 -1645 9486V9485ZM887 9483H886C886 9483.55 885.552 9484 885 9484V9485V9486C886.657 9486 888 9484.66 888 9483H887ZM885 -160V-159C885.552 -159 886 -158.552 886 -158H887H888C888 -159.657 886.657 -161 885 -161V-160ZM-1645 -160V-161C-1646.66 -161 -1648 -159.657 -1648 -158H-1647H-1646C-1646 -158.552 -1645.55 -159 -1645 -159V-160Z" fill="white" fill-opacity="0.1"/>
+<g id="Desktop / &#208;&#155;&#208;&#181;&#208;&#189;&#208;&#180;&#208;&#184;&#208;&#189;&#208;&#179;">
+<rect width="1440" height="8470" transform="translate(-1087)" fill="white"/>
+<g id="001 / HERO &#226;&#128;&#148; access gate" clip-path="url(#clip0_0_1)">
+<rect width="1440" height="700" transform="translate(-1087)" fill="white"/>
+<g id="GFX / barcode" clip-path="url(#clip1_0_1)">
+<rect width="92" height="702" fill="white"/>
+<rect id="bar" x="5.05078" width="1.89375" height="702" fill="#171717"/>
+<rect id="bar_2" x="10.0996" width="4.41875" height="702" fill="#171717"/>
+<rect id="bar_3" x="16.4121" width="1.2625" height="702" fill="#171717"/>
+<rect id="bar_4" x="19.5684" width="2.525" height="702" fill="#171717"/>
+<rect id="bar_5" x="25.25" width="5.68125" height="702" fill="#171717"/>
+<rect id="bar_6" x="32.8242" width="1.89375" height="702" fill="#171717"/>
+<rect id="bar_7" x="36.6133" width="1.2625" height="702" fill="#171717"/>
+<rect id="bar_8" x="41.0312" width="3.7875" height="702" fill="#171717"/>
+<rect id="bar_9" x="46.7129" width="2.525" height="702" fill="#171717"/>
+<rect id="bar_10" x="51.1309" width="6.3125" height="702" fill="#171717"/>
+<rect id="bar_11" x="60.5996" width="1.2625" height="702" fill="#171717"/>
+<rect id="bar_12" x="63.7559" width="3.15625" height="702" fill="#171717"/>
+<rect id="bar_13" x="68.8066" width="1.89375" height="702" fill="#171717"/>
+<rect id="bar_14" x="73.8555" width="5.05" height="704" fill="#171717"/>
+<g id="bar_15">
+<path d="M80.8008 0H82.0633V704H80.8008V0Z" fill="#171717"/>
+<path d="M56.2383 0H57.5008V704H56.2383V0Z" fill="#171717"/>
+</g>
+<rect id="bar_16" x="83.957" width="2.525" height="704" fill="#171717"/>
+<rect id="bar_17" x="89.6367" width="4.41875" height="704" fill="#171717"/>
+</g>
+</g>
+</g>
+</g>
+<defs>
+<clipPath id="clip0_0_1">
+<rect width="1440" height="700" fill="white" transform="translate(-1087)"/>
+</clipPath>
+<clipPath id="clip1_0_1">
+<rect width="92" height="702" fill="white"/>
+</clipPath>
+</defs>
+</svg>
