@@ -47,6 +47,7 @@
     pointer.x = event.clientX;
     pointer.y = event.clientY;
     pointer.active = event.pointerType !== 'touch';
+    startInteraction();
   }, {passive: true});
   document.documentElement.addEventListener('pointerleave', () => { pointer.active = false; });
   window.addEventListener('blur', () => { pointer.active = false; });
@@ -55,92 +56,94 @@
     const track = document.createElement('div');
     track.className = 'type-flow';
     stage.append(track);
-    const rows = [], particles = [];
+    const particles = [];
     const source = config.glyphs.filter(glyph => glyph.y >= 0 && glyph.y < config.height);
     const count = Math.max(32, source.length);
     const pitch = config.size * 3.2;
     const period = count * pitch;
-    const rowWidth = config.width + 360;
+    const duration = period / 26 * 1000;
     const phrase = 'CEOMENTALITY ';
-    const sizes = [.78, 1.1, 1.65, .9, 1.35, .85, 1.5];
-    const repetitions = Math.ceil(rowWidth / (phrase.length * config.size * .6 * .78)) + 2;
-    for (let copy = -1; copy <= 1; copy++) {
+    const wordSizes = [.78, 1.1, 1.65, .9, 1.35, .85, 1.5];
+    // Only two tiles and only letters inside the horizontal overscan area.
+    // Roboto Mono has a fixed .6em advance: no per-letter layout measurements.
+    for (let copy = -1; copy <= 0; copy++) {
       for (let index = 0; index < count; index++) {
         const phase = index / count * Math.PI * 2;
-        const x = -180 + 44 * Math.sin(phase * 3) + 19 * Math.cos(phase * 5);
+        let x = -180 + 44 * Math.sin(phase * 3) + 19 * Math.cos(phase * 5);
         const y = index * pitch + copy * period;
-        const row = document.createElement('span');
-        row.className = 'type-position type-row';
-        row.style.cssText = `left:${x}px;top:${y}px;width:${rowWidth}px;line-height:${config.size * 2.2}px;letter-spacing:${config.tracking || 0}px;color:${source[index % source.length].color};`;
-        const letters = [];
-        for (let word = 0; word < repetitions; word++) {
-          const size = sizes[(index * 3 + word * 5) % sizes.length];
+        for (let word = 0; x < config.width + 65; word++) {
+          const size = config.size * wordSizes[(index * 3 + word * 5) % wordSizes.length];
+          const advance = size * .6 + (config.tracking || 0);
           for (const character of phrase) {
-            const node = document.createElement('span');
-            node.className = 'flow-letter';
-            node.style.fontSize = `${config.size * size}px`;
-            node.style.verticalAlign = 'middle';
-            if ((index * 7 + word * 3) % 11 < 2) node.style.color = '#0060ff';
-            node.textContent = character;
-            row.append(node);
-            const particle = {node, x: 0, y: 0, dx: 0, dy: 0, base: ''};
-            particles.push(particle);
-            letters.push(particle);
+            const cx = x + size * .3;
+            if (character !== ' ' && cx > -65 && cx < config.width + 65) {
+              const a = phase + cx / 105, b = phase * 2 - cx / 67;
+              const bend = 22 * Math.sin(a) + 8 * Math.sin(b);
+              const slope = 22 / 105 * Math.cos(a) - 8 / 67 * Math.cos(b);
+              const cy = y + config.size * 1.1 + bend;
+              const node = document.createElement('span');
+              node.className = 'flow-letter';
+              const color = (index * 7 + word * 3) % 11 < 2 ? '#0060ff' : source[index % source.length].color;
+              const base = `rotate(${Math.atan(slope) * 180 / Math.PI}deg)`;
+              node.style.cssText = `position:absolute;left:${x}px;top:${cy - size * .6}px;font-size:${size}px;line-height:1.2;color:${color};transform:${base}`;
+              node.textContent = character;
+              track.append(node);
+              particles.push({node, x: cx, y: cy, dx: 0, dy: 0, base});
+            }
+            x += advance;
           }
         }
-        track.append(row);
-        rows.push({x, y, phase, letters});
       }
     }
-    return {track, particles, period, offset: 0, measure() {
-      rows.forEach(({x, y, phase, letters}) => {
-        letters.forEach(p => {
-          p.x = x + p.node.offsetLeft + p.node.offsetWidth / 2;
-          // Periodic in row phase: the seam has the same curvature and spacing
-          // as every other pair of rows, even with different word sizes.
-          const a = phase + p.x / 105;
-          const b = phase * 2 - p.x / 67;
-          const bend = 22 * Math.sin(a) + 8 * Math.sin(b);
-          const slope = 22 / 105 * Math.cos(a) - 8 / 67 * Math.cos(b);
-          p.y = y + p.node.offsetTop + p.node.offsetHeight / 2 + bend;
-          p.base = `translateY(${bend}px) rotate(${Math.atan(slope) * 180 / Math.PI}deg)`;
-          p.node.style.transform = p.base;
-        });
-      });
-    }};
+    const animation = track.animate([
+      {transform: 'translate3d(0,0,0)'},
+      {transform: `translate3d(0,${period}px,0)`}
+    ], {duration, iterations: Infinity, easing: 'linear'});
+    animation.pause();
+    return {track, particles, period, duration, animation};
   }
 
+  function startInteraction() {
+    if (frame || document.hidden || reduced.matches) return;
+    if (![...state.values()].some(item => item.flow && item.visible)) return;
+    frame = requestAnimationFrame(animateFlow);
+  }
+
+  // Continuous scrolling is handled by the browser compositor. JavaScript
+  // runs only while the mouse interacts, or displaced letters settle back.
   function animateFlow(time) {
     frame = 0;
-    const dt = Math.min((time - (lastTime || time)) / 1000, .04);
+    const dt = Math.min((time - (lastTime || time - 16)) / 1000, .04);
     lastTime = time;
     let active = false;
     for (const [object, item] of state) {
       if (!item.flow || !item.visible || document.hidden || reduced.matches) continue;
       const rect = object.getBoundingClientRect();
       if (!rect.width || !rect.height) continue;
-      active = true;
       const {flow, config} = item;
       const sx = rect.width / config.width, sy = rect.height / config.height;
-      flow.offset = (flow.offset + dt * 26) % flow.period;
-      flow.track.style.transform = `translateY(${flow.offset}px)`;
+      const offset = (Number(flow.animation.currentTime || 0) % flow.duration) / flow.duration * flow.period;
       const near = pointer.active && pointer.x > rect.left - 110 && pointer.x < rect.right + 110 && pointer.y > rect.top - 110 && pointer.y < rect.bottom + 110;
+      active ||= near;
       const ease = 1 - Math.exp(-dt * 10);
-      flow.particles.forEach(p => {
-        const dx = (rect.left + p.x * sx) - pointer.x;
-        const dy = (rect.top + (p.y + flow.offset) * sy) - pointer.y;
+      for (const p of flow.particles) {
+        const screenY = rect.top + (p.y + offset) * sy;
+        const displaced = Math.abs(p.dx) + Math.abs(p.dy) >= .02;
+        if (!displaced && (!near || Math.abs(screenY - pointer.y) > 110)) continue;
+        const dx = rect.left + p.x * sx - pointer.x;
+        const dy = screenY - pointer.y;
         const distance = Math.hypot(dx, dy);
         const force = near && distance < 110 ? 85 * (1 - distance / 110) ** 2 : 0;
-        const tx = force ? dx / (distance || 1) * force / sx : 0;
-        const ty = force ? dy / (distance || 1) * force / sy : 0;
+        p.dx += ((force ? dx / (distance || 1) * force / sx : 0) - p.dx) * ease;
+        p.dy += ((force ? dy / (distance || 1) * force / sy : 0) - p.dy) * ease;
         if (!force && Math.abs(p.dx) + Math.abs(p.dy) < .02) {
-          if (p.dx || p.dy) { p.node.style.transform = p.base; p.dx = p.dy = 0; }
-          return;
+          p.node.style.transform = p.base;
+          p.dx = p.dy = 0;
+        } else {
+          active = true;
+          p.node.style.transform = `translate(${p.dx}px,${p.dy}px) ${p.base}`;
         }
-        p.dx += (tx - p.dx) * ease;
-        p.dy += (ty - p.dy) * ease;
-        p.node.style.transform = `translate(${p.dx}px,${p.dy}px) ${p.base}`;
-      });
+      }
     }
     if (active) frame = requestAnimationFrame(animateFlow);
     else lastTime = 0;
@@ -149,8 +152,6 @@
   function syncPlayback() {
     for (const item of state.values()) {
       if (item.flow && reduced.matches) {
-        item.flow.offset = 0;
-        item.flow.track.style.transform = '';
         item.flow.particles.forEach(p => { p.node.style.transform = p.base; p.dx = p.dy = 0; });
       }
       const playing = item.visible && !document.hidden && !reduced.matches;
@@ -160,7 +161,7 @@
         else animation.pause();
       }
     }
-    if (!frame && !document.hidden && !reduced.matches) frame = requestAnimationFrame(animateFlow);
+    if (pointer.active) startInteraction();
   }
 
   const visibility = new IntersectionObserver(entries => {
@@ -181,6 +182,11 @@
     previous?.animations.forEach(animation => animation.cancel());
     const kind = object.dataset.type;
     const variant = object.dataset.variant || (mobile.matches ? 'mobile' : 'desktop');
+    if (kind === 'field' && variant !== (mobile.matches ? 'mobile' : 'desktop')) {
+      object.replaceChildren();
+      state.delete(object);
+      return;
+    }
     const config = designs[kind][variant];
     const stage = document.createElement('div');
     stage.className = 'type-stage';
@@ -190,11 +196,11 @@
     const animations = [];
     if (kind === 'field') {
       const flow = createFlow(stage, config);
+      animations.push(flow.animation);
       object.replaceChildren(stage);
       state.set(object, {stage, config, animations, flow, visible: previous?.visible || false});
       const rect = object.getBoundingClientRect();
       stage.style.transform = `scale(${rect.width / config.width},${rect.height / config.height})`;
-      document.fonts.ready.then(() => { if (state.get(object)?.flow === flow) flow.measure(); });
       return;
     }
     config.glyphs.forEach((glyph, index) => {
