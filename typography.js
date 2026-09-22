@@ -7,7 +7,7 @@
   const objects = [...document.querySelectorAll('[data-type]')];
   const state = new Map();
 
-  // A 12 × 12 letter grid: fixed positions, equal spacing, aligned edges.
+  // A 12 × 12 grid; columns move vertically using the diamond motion.
   const square = {width:320, height:320, font:'Roboto Mono', weight:700, size:20, glyphs:[]};
   for (let row = 0; row < 12; row++) {
     [...'CEOMENTALITY'].forEach((text, column) => {
@@ -19,7 +19,10 @@
   function keyframes(kind, glyph, index, config) {
     const amplitude = config.width / 60;
     if (kind === 'square') {
-      return [{color:glyph.color,offset:0},{color:'#2451b2',offset:.25},{color:glyph.color,offset:.5},{color:glyph.color,offset:1}];
+      const column = index % 12;
+      const side = column % 2 ? -1 : 1;
+      const spread = config.height * (.08 + .05 * Math.sin(column * 1.7) ** 2);
+      return [{transform:'translateY(0)',color:glyph.color},{transform:`translateY(${side * spread}px)`,color:glyph.color},{transform:'translateY(0)',color:glyph.color}];
     }
     if (kind === 'loops') {
       // Fit each original ring separately. Glyphs orbit but remain upright.
@@ -229,8 +232,8 @@
       moving.textContent = glyph.text;
       position.append(moving);
       stage.append(position);
-      const duration = kind === 'square' ? 8000 : kind === 'loops' ? 24000 : kind === 'field' ? 9000 : kind === 'triangle' ? 5400 : 6500;
-      const delay = kind === 'square' ? Math.floor(index / 12) * 240 : kind === 'loops' ? 0 : kind === 'field' ? index * 75 : kind === 'diamond' ? Math.abs(6-index)*95 : index * 45;
+      const duration = kind === 'square' ? 6500 : kind === 'loops' ? 24000 : kind === 'field' ? 9000 : kind === 'triangle' ? 5400 : 6500;
+      const delay = kind === 'square' ? Math.abs(5.5 - index % 12) * 95 : kind === 'loops' ? 0 : kind === 'field' ? index * 75 : kind === 'diamond' ? Math.abs(6-index)*95 : index * 45;
       const animation = moving.animate(keyframes(kind, glyph, index, config), {
         duration, delay: 800 + delay, iterations: Infinity,
         easing: kind === 'loops' ? 'linear' : 'ease-in-out', fill: 'both'

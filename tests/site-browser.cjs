@@ -35,6 +35,21 @@ const base=process.env.SITE_URL||'http://127.0.0.1:4173';
    assert(steps[4].text.includes('РЕШЕНИЕ'));
    for(let i=1;i<steps.length;i++)assert(steps[i].top>=steps[i-1].bottom,'steps overlap');
    if([390,1440].includes(width)){await page.locator('.selection').screenshot({path:`/private/tmp/ceoland-five-steps-${width}.png`});await page.locator('.membership').screenshot({path:`/private/tmp/ceoland-ticket-${width}.png`});}
+   const square=page.locator('.selection-square');
+   if(width<=700)assert.equal(await square.isVisible(),false,'square must be hidden on mobile');
+   else{
+    const clear=await square.evaluate(el=>{
+     const stage=el.closest('li').getBoundingClientRect();
+     const animations=el.getAnimations({subtree:true});
+     animations.forEach(a=>{const t=a.effect.getTiming();a.pause();a.currentTime=t.delay+Number(t.duration)/2;});
+     const obstacles=[...document.querySelectorAll('.steps li')].flatMap(li=>[...li.querySelectorAll(':scope > .step-number,:scope > div')]).map(e=>e.getBoundingClientRect());
+     const letters=[...el.querySelectorAll('.type-glyph')].map(e=>e.getBoundingClientRect());
+     const result=el.getBoundingClientRect().right<stage.left&&letters.every(r=>obstacles.every(o=>r.right<=o.left||r.left>=o.right||r.bottom<=o.top||r.top>=o.bottom));
+     animations.forEach(a=>a.currentTime=0);
+     return result;
+    });
+    assert(clear,`animated square overlaps a stage at ${width}`);
+   }
    assert.equal(await page.locator('.membership-card').count(),0);
    assert.equal(await page.locator('.ticket-art').count(),1);
    if(width<=700){
