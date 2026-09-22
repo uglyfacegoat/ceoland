@@ -21,6 +21,7 @@
   <link rel="stylesheet" href="loader.css">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="typography.css">
+  <link rel="stylesheet" href="wallet-media.css">
 </head>
 <body>
   <div class="loading-screen" role="status" aria-label="Загрузка CEOMENTALITY" aria-live="off">
@@ -58,9 +59,9 @@
   <section class="objects section" id="objects" aria-labelledby="objects-title">
     <header class="section-heading"><h2 class="display" id="objects-title">OBJECTS.</h2><p class="eyebrow">ЛИНЕЙКА ОБЪЕКТОВ<br>CEOMENTALITY.<br>ПРОДУКЦИЯ ≠ ЧЛЕНСТВО.</p></header>
     <article class="product wallet" id="ceowallet">
-      <div class="product-copy"><p class="product-number">OBJ / 01</p><h3><a href="app.html?screen=wallet" data-wallet-link>CEOWALLET</a></h3><p class="material">НАТУРАЛЬНАЯ КОЖА</p><p class="price">29 990 ₽</p></div>
-      <a class="product-image" href="app.html?screen=wallet" data-wallet-link aria-label="Открыть CEOWALLET"><img id="wallet-image" src="assets/imgOriginalCeowalletBlack.png" alt="Чёрный кожаный картхолдер CEOWALLET с надписью I’m CEO, Bitch" width="664" height="543" loading="lazy"></a>
-      <fieldset class="colours"><legend>ЦВЕТ</legend><label><input type="radio" name="colour" value="black" checked><span><img src="assets/imgColourSwatch.svg" alt="" width="15" height="15">Чёрный</span></label><label><input type="radio" name="colour" value="white"><span><img src="assets/imgColourSwatch1.svg" alt="" width="15" height="15">Белый</span></label></fieldset>
+      <div class="product-copy"><p class="product-number">OBJ / 01</p><h3><a href="app.html?screen=wallet-white" data-wallet-link>CEOWALLET</a></h3><p class="material">НАТУРАЛЬНАЯ КОЖА</p><p class="price">2 990 ₽</p></div>
+      <a class="product-image wallet-visual" href="app.html?screen=wallet-white" data-wallet-link aria-label="Открыть CEOWALLET"><img id="wallet-image" src="assets/wallet-white-front.png" alt="Белый кожаный картхолдер CEOWALLET с надписью I’m CEO, Bitch" width="664" height="543" loading="lazy"></a>
+      <fieldset class="colours"><legend>ЦВЕТ</legend><label><input type="radio" name="colour" value="black"><span><img src="assets/imgColourSwatch.svg" alt="" width="15" height="15">Чёрный</span></label><label><input type="radio" name="colour" value="white" checked><span><img src="assets/imgColourSwatch1.svg" alt="" width="15" height="15">Белый</span></label></fieldset>
       <div class="object-arrows decoration type-object" data-type="arrows" aria-hidden="true"></div>
     </article>
     <article class="product nfc" id="nfc">
@@ -86,11 +87,12 @@
   <section class="selection section" id="selection" aria-labelledby="selection-title">
     <header class="section-heading"><h2 class="display" id="selection-title">ОТБОР.</h2><p class="section-lead">Каждую заявку рассматривает команда. Решение о членстве принимается отдельно от покупки продукции.</p></header>
     <ol class="steps">
-      <li><span class="step-number">01</span><div><h3>ЗАЯВКА</h3><p>После получения — анкета <br>по QR внутри картхолдера.</p></div></li>
-      <li><span class="step-number">02</span><div><h3>РАССМОТРЕНИЕ</h3><p>Мы изучаем каждую <br>заявку вручную.</p></div></li>
-      <li><span class="step-number">03</span><div><h3>ПРИГЛАШЕНИЕ</h3><p>После одобрения — <br>приглашение в клуб.</p></div></li>
+      <li><span class="step-number">01</span><div><h3>ЗАЯВКА НА ПОКУПКУ</h3><p>Оставь контакты, чтобы получить код доступа к покупке.</p></div></li>
+      <li><span class="step-number">02</span><div><h3>ПОКУПКА</h3><p>Введи код, выбери картхолдер и дождись доставки.</p></div></li>
+      <li><span class="step-number">03</span><div><h3>ЗАЯВКА В КЛУБ</h3><p>Открой анкету по QR внутри картхолдера и расскажи о себе.</p></div></li>
+      <li><span class="step-number">04</span><div><h3>ОТБОР</h3><p>Команда вручную рассматривает каждую заявку.</p></div></li>
+      <li><span class="step-number">05</span><div><h3>ДА — ДА. НЕТ — НЕТ.</h3><p>Сообщим решение. Если да — пришлём приглашение в клуб.</p></div></li>
     </ol>
-    <img class="route-arrow route-one decoration" src="assets/imgGroup.svg" data-desktop-src="assets/imgGroup.svg" data-mobile-src="assets/route-mobile-one.svg" alt="" width="296" height="123" loading="lazy"><img class="route-arrow route-two decoration" src="assets/imgGroup1.svg" data-desktop-src="assets/imgGroup1.svg" data-mobile-src="assets/route-mobile-two.svg" alt="" width="140" height="134" loading="lazy">
     <div class="chevron decoration type-object" data-type="chevron" aria-hidden="true"></div><img class="selection-slashes decoration" src="assets/imgGroup2.svg" alt="" width="208" height="35" loading="lazy">
   </section>
 
@@ -107,13 +109,13 @@
   <section class="membership section" id="membership" aria-labelledby="membership-title">
     <h2 class="display" id="membership-title">ТВОЙ НОВЫЙ</h2>
     <div class="ticket dark">
-      <h3>КРУГ.</h3><div class="ticket-meta"><img src="assets/ticket-barcode.svg" width="111" height="23" alt=""><span>CEOMENTALITY / MEMBER CARD</span></div>
-      <img class="membership-card" src="assets/imgInvitationSuppliedOriginal.png" alt="Membership confirmed. Welcome to #CEOCOMMUNITY. This card connects you to people like you." width="592" height="345" loading="lazy">
+      <h3>КРУГ.</h3><div class="ticket-meta"><img src="assets/ticket-barcode.svg" width="111" height="23" alt=""><span>CEOMENTALITY / ADMIT ONE</span></div>
+      <div class="ticket-art"><p class="ticket-art-label">ACCESS / BY INVITATION</p><p class="ticket-art-title">СВОИ<br><span>ЛЮДИ.</span></p><div class="ticket-art-bottom"><span>PEOPLE. PLACES. IDEAS.</span><span>001 / ∞</span></div></div>
       <p class="membership-statement">ЧЛЕНСТВО —<br>ПО РЕШЕНИЮ<br class="desktop-break"> КОМАНДЫ.</p>
-      <p class="ticket-caption">КАРТА ПОДТВЕРЖДЁННОГО ЧЛЕНСТВА</p><div class="seal decoration type-object" data-type="seal" aria-hidden="true"></div>
+      <p class="ticket-caption">ТВОЙ БИЛЕТ В СВОЙ КРУГ</p><div class="seal decoration type-object" data-type="seal" aria-hidden="true"></div>
       <img class="ticket-perforation" src="assets/imgTicketPerforatedDivider.svg" data-desktop-src="assets/imgTicketPerforatedDivider.svg" data-mobile-src="assets/perforation-mobile.svg" width="2" height="410" alt=""><img class="ticket-cutout cutout-one" src="assets/imgTicketEdgeCutout.svg" width="22" height="22" alt=""><img class="ticket-cutout cutout-two" src="assets/imgTicketEdgeCutout.svg" width="22" height="22" alt="">
     </div>
-    <div class="membership-bottom"><p>Карта подтверждённого членства.<br>Решение о вступлении — после ручного отбора.</p></div>
+    <div class="membership-bottom"><p>Свой круг начинается с людей.<br>Решение о вступлении — после ручного отбора.</p></div>
   </section>
 
   <section class="faq section" id="faq" aria-labelledby="faq-title">
@@ -133,7 +135,7 @@
     <h2>СВОЙ<br>КРУГ.</h2><p class="footer-description">Закрытый клуб молодых предпринимателей.<br>Ручной отбор. Общение. Общие цели.</p>
     <nav class="footer-nav" aria-label="Навигация по сайту">
       <div><h3>КЛУБ</h3><a href="#community">О сообществе</a><a href="app.html?screen=join">КАК ВСТУПИТЬ</a><a href="#faq">Вопросы и ответы</a></div>
-      <div><h3>ОБЪЕКТЫ</h3><a href="#objects">Вся линейка</a><a href="app.html?screen=wallet">CEOWALLET</a><a href="app.html?screen=nfc">NFC CARD</a></div>
+      <div><h3>ОБЪЕКТЫ</h3><a href="#objects">Вся линейка</a><a href="app.html?screen=wallet-white">CEOWALLET</a><a href="app.html?screen=nfc">NFC CARD</a></div>
       <div><h3>ИНФОРМАЦИЯ</h3><a href="app.html?screen=contact">Контакты</a><a href="app.html?screen=privacy">Конфиденциальность</a><a href="app.html?screen=agreement">Соглашение</a><a href="app.html?screen=purchase-terms">Условия покупки</a><a href="app.html?screen=company">Реквизиты</a></div>
     </nav>
     <div class="footer-serial"><img src="assets/serial.svg" width="185" height="64" alt=""><p>EST. 2024<br>001 / ∞</p></div><div class="triangle decoration type-object" data-type="triangle" aria-hidden="true"></div>

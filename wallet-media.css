@@ -1,0 +1,15 @@
+/* Match the visible product bounds, not the whitespace in each source image.
+   Reference silhouette: x=73, y=80, width=519, height=384 on a 664×543 stage.
+   Source photographs remain unchanged. */
+.wallet-visual{display:block;overflow:hidden;aspect-ratio:664/543;background:#fff;isolation:isolate}
+.wallet-visual:not(.product-image){position:relative}
+.wallet-visual>img{position:absolute;display:block;max-width:none;left:0;top:0;width:100%;height:100%;object-fit:fill}
+.wallet-visual>img[src$="wallet-white-front.png"]{width:95.346268%;height:124.726671%;left:2.402167%;top:-13.812932%;}
+.wallet-visual>img[src$="wallet-white.png"]{width:95.346268%;height:124.726671%;left:2.402167%;top:-13.812932%;}
+.wallet-visual>img[src$="wallet-black-back.png"]{width:95.346268%;height:128.896312%;left:2.402167%;top:-14.767228%;}
+.wallet-visual>img[src$="wallet-white-back.png"]{width:89.024490%;height:120.653963%;left:5.527560%;top:-10.764085%;}
+
+/* Use one stage ratio in every product context, including mobile and summaries. */
+.site-page .summary-photo.wallet-visual{height:auto;aspect-ratio:664/543}
+.site-page .gallery-thumbs .wallet-visual{width:100%;height:100%;aspect-ratio:auto}
+@media(max-width:700px){.product-image.wallet-visual{width:min(100%,357px);height:auto;aspect-ratio:664/543;top:188px;left:50%;right:auto;transform:translateX(-50%)}}

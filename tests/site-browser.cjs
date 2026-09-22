@@ -23,21 +23,49 @@ const base=process.env.SITE_URL||'http://127.0.0.1:4173';
      overflow:[...document.querySelectorAll('main h1,main h2,main h3,main p,main input,main button')].filter(e=>e.getBoundingClientRect().right>innerWidth+1).map(e=>e.textContent.slice(0,70))
     }));
     if(state.scroll>width||state.broken.length||state.overflow.length)failures.push({width,screen:new URL(url).searchParams.get('screen'),...state});
-    if([390,1440].includes(width)&&['wallet','checkout','access','faq','join','privacy','objects'].includes(new URL(url).searchParams.get('screen'))){
+    if([390,1440].includes(width)&&['wallet','wallet-white','checkout','access','faq','join','privacy','objects'].includes(new URL(url).searchParams.get('screen'))){
      await page.screenshot({path:`/private/tmp/ceoland-${new URL(url).searchParams.get('screen')}-${width}.png`,fullPage:true});
     }
    }
    await page.goto(base+'/#selection');await page.evaluate(()=>document.fonts.ready);
    const steps=await page.locator('.steps li').evaluateAll(els=>els.map(el=>({text:el.textContent,top:el.getBoundingClientRect().top,bottom:el.getBoundingClientRect().bottom,children:[...el.children].map(c=>c.getBoundingClientRect().toJSON())})));
-   assert(steps[0].text.includes('анкета по QR'),'missing whitespace in steps');
+   assert.equal(steps.length,5,'five application stages');
+   assert(steps[0].text.includes('ЗАЯВКА НА ПОКУПКУ'));
+   assert(steps[2].text.includes('ЗАЯВКА В КЛУБ'));
+   assert(steps[4].text.includes('ДА — ДА. НЕТ — НЕТ.'));
    for(let i=1;i<steps.length;i++)assert(steps[i].top>=steps[i-1].bottom,'steps overlap');
-   if(width===390)await page.locator('.selection').screenshot({path:'/private/tmp/ceoland-selection-fixed.png'});
+   if([390,1440].includes(width)){await page.locator('.selection').screenshot({path:`/private/tmp/ceoland-five-steps-${width}.png`});await page.locator('.membership').screenshot({path:`/private/tmp/ceoland-ticket-${width}.png`});}
+   assert.equal(await page.locator('.membership-card').count(),0);
+   assert.equal(await page.locator('.ticket-art').count(),1);
+   if(width<=700){
+    const gap=await page.evaluate(()=>document.querySelector('.colours').getBoundingClientRect().top-document.querySelector('.product-image').getBoundingClientRect().bottom);
+    assert(gap>=0,`product photo overlaps colour controls at ${width}`);
+   }
    console.log(`${width}px: ${routes.length} public screens and landing steps checked`);
   }
   await page.setViewportSize({width:390,height:844});
+  // The source files have different padding. Compare their visible product bounds.
+  for(const width of [390,1440]){
+   await page.setViewportSize({width,height:900});
+   const bounds=[];
+   for(const name of ['wallet','wallet-white']){
+    await page.goto(base+`/app.html?screen=${name}&demo=1`);await page.evaluate(()=>document.fonts.ready);
+    bounds.push(await page.locator('#gallery-main').evaluate(img=>{
+     const r=img.getBoundingClientRect(),stage=img.parentElement.getBoundingClientRect();
+     const [x,y,w,h,sw,sh]=img.src.includes('white')?[113,287,1028,711,1254,1254]:[73,80,519,384,664,543];
+     return {x:r.x-stage.x+x/sw*r.width,y:r.y-stage.y+y/sh*r.height,width:w/sw*r.width,height:h/sh*r.height};
+    }));
+   }
+   for(const key of ['x','y','width','height'])assert(Math.abs(bounds[0][key]-bounds[1][key])<.2,`visible product ${key} mismatch at ${width}`);
+  }
+  await page.setViewportSize({width:390,height:844});
+  await page.evaluate(()=>sessionStorage.clear());
   await page.goto(base+'/#ceowallet');
   assert.equal(await page.locator('.wallet > .text-action').count(),0);
   assert.equal(await page.locator('.wallet > .object-arrows').count(),1);
+  assert(await page.locator('input[value=white]').isChecked());
+  assert.equal((await page.locator('.wallet .price').innerText()).replace(/\s/g,''),'2990₽');
+  await page.locator('input[value=black]').check();
   await page.locator('input[value=white]').check();
   await page.locator('.wallet h3 a').click();
   assert(new URL(page.url()).searchParams.get('screen')==='wallet-white');
@@ -51,6 +79,7 @@ const base=process.env.SITE_URL||'http://127.0.0.1:4173';
   await page.waitForURL('**screen=cart**');
   await page.getByRole('button',{name:'Увеличить количество'}).click();
   assert.equal(await page.locator('.quantity output').innerText(),'2');
+  assert.equal((await page.locator('.cart-summary .total').innerText()).replace(/\s/g,''),'5980₽');
   await page.reload();assert.equal(await page.locator('.quantity output').innerText(),'2');
   await page.getByRole('link',{name:'ОФОРМИТЬ ЗАКАЗ'}).click();
   await page.locator('button[type=submit]').click();

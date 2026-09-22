@@ -26,7 +26,7 @@ document.querySelectorAll('[data-faq-link]').forEach(link=>link.addEventListener
 const wallet=document.querySelector('#wallet-image');
 document.querySelectorAll('input[name="colour"]').forEach(input=>input.addEventListener('change',()=>{
   const white=input.value==='white';
-  wallet.src=white?'assets/wallet-white.png':'assets/imgOriginalCeowalletBlack.png';
+  wallet.src=white?'assets/wallet-white-front.png':'assets/imgOriginalCeowalletBlack.png';
   wallet.alt=`${white?'Белый':'Чёрный'} кожаный картхолдер CEOWALLET`;
   document.querySelectorAll('[data-wallet-link]').forEach(link=>link.href=`app.html?screen=${white?'wallet-white':'wallet'}`);
 }));
