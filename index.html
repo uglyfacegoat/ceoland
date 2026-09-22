@@ -12,7 +12,7 @@
     if (!location.hash || location.hash === '#top') {
       document.documentElement.classList.add('is-loading');
       window.ceoLoaderTimeout = setTimeout(() => {
-        document.documentElement.classList.remove('is-loading', 'is-revealing');
+        document.documentElement.classList.remove('is-loading', 'is-revealing', 'is-docking');
         document.querySelectorAll('[inert]').forEach(node => { node.inert = false; });
         window.dispatchEvent(new Event('ceo:loader-timeout'));
       }, 7000);

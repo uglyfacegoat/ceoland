@@ -12,4 +12,5 @@ html.is-loading{overflow:hidden}
 @media(max-width:700px){.loading-wordmark{left:24px;width:calc(100% - 48px);top:47.630332%;font-size:calc((100vw - 48px)*.132930);color:#171717}.loading-meter{width:120px;top:55.92417%}}
 @media(prefers-reduced-motion:reduce){.loading-screen:before,.loading-meter,.loading-progress{transition:none}}
 
-.loading-letters{display:inline-block;transform-origin:left center}
+.loading-letters{display:inline-block}
+.is-loading.is-docking .identity .wordmark{visibility:visible}
