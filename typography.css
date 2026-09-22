@@ -16,7 +16,8 @@
  .mobile-inverse{display:none}
  .mobile-field{position:absolute;left:40px;right:0;top:0;bottom:0;overflow:hidden}
  .object-arrows.type-object{height:50px;margin-top:32px;margin-bottom:32px}
- .diamond.type-object{top:562px;width:220px;height:164px;aspect-ratio:auto}
+ .manifesto{height:557px}
+ .diamond.type-object{left:auto;right:-42px;top:467px;transform:none;width:220px;height:164px;aspect-ratio:auto}
  .chevron.type-object{width:180px;height:84px}
  .loops.type-object{width:240px;height:92px}
  .seal.type-object{width:211.56px;height:49.02px}

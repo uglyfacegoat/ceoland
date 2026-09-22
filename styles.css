@@ -66,19 +66,19 @@ dialog{width:min(720px,calc(100% - 32px));padding:32px;border:0;color:var(--ink)
 @media(max-width:700px){.answer h3{max-width:calc(100% - 84px)}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
 
-/* Third product teaser mirrors the NFC composition and reflows below it on mobile. */
+/* Alternate product photos: right, left, right. */
 .next-item{top:103.5vw;height:30.9028vw}
-.next-item .product-copy{left:53.75vw;top:.9028vw;width:37.3611vw}
+.next-item .product-copy{left:0;top:.9028vw;width:39.0278vw}
 .next-item .product-number{color:var(--blue)}
 .next-item h3{font-size:4.8611vw;margin-top:1.6667vw}
 .next-item .material{margin-top:1.6667vw}
-.next-item-image{position:absolute;left:0;top:0;width:44.8611vw;height:29.5833vw;object-fit:cover}
-.next-item .development{top:16.5vw}
+.next-item-image{position:absolute;right:0;top:0;width:44.8611vw;height:29.5833vw;object-fit:cover}
+.next-item .development{left:0;top:16.5vw}
 @media(max-width:700px){
- .next-item{height:516px;margin-top:32px}
+ .next-item{inset:auto;height:auto;margin-top:32px;display:flex;flex-direction:column}
  .next-item .product-copy{position:static;width:auto}
  .next-item h3{font-size:40px;line-height:47px;margin-top:16px}
  .next-item .material{font-size:12px;line-height:17px;margin-top:15px}
- .next-item-image{top:134px;left:0;width:100%;height:226px;object-fit:cover}
- .next-item .development{top:390px;left:0}
+ .next-item-image{position:static;width:100%;height:auto;aspect-ratio:646/426;margin-top:39px;object-fit:cover}
+ .next-item .development{position:static;margin-top:30px}
 }
