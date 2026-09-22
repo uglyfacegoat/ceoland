@@ -4,7 +4,6 @@
   const screen = document.querySelector('.loading-screen');
   if (!root.classList.contains('is-loading')) { screen?.remove(); return; }
   const title = screen.querySelector('.loading-wordmark');
-  const letters = screen.querySelector('.loading-letters');
   const progress = screen.querySelector('.loading-progress');
   const caption = screen.querySelector('.loading-caption');
   const logo = document.querySelector('.identity .wordmark');
@@ -29,15 +28,7 @@
   const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
   const imageReady = image => image?.decode ? image.decode().catch(() => {}) : Promise.resolve();
   const fontReady = (font, text) => document.fonts?.load(font, text).catch(() => {}) || Promise.resolve();
-  const identityReady = fontReady('800 32px Inter', 'CEOMENTALITY').then(() => {
-    if (finished) return;
-    const natural = letters.getBoundingClientRect().width;
-    if (natural) {
-      const size = parseFloat(getComputedStyle(title).fontSize);
-      title.style.fontSize = `${size * title.getBoundingClientRect().width / natural}px`;
-    }
-  });
-  const tasks = [identityReady, fontReady('700 14px "Roboto Mono"', 'CEOMENTALITY'), imageReady(logo)];
+  const tasks = [imageReady(title), imageReady(logo)];
   let done = 0;
   function update() {
     const value = Math.round(done / tasks.length * 100);

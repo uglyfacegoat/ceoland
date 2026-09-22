@@ -6,6 +6,7 @@
 .word-field.type-object{position:absolute;top:0;height:100%;overflow:hidden}
 .mobile-signal{position:relative;background:var(--ink)}
 @media(max-width:700px){
+ .signal{display:none!important}
  .hero{min-height:auto}
  .intro{padding-bottom:28px}
  .signal{width:calc(100% - 48px);margin:4px 24px 40px;min-height:0;background:#fff}
