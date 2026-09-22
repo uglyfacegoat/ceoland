@@ -41,6 +41,14 @@ const base=process.env.SITE_URL||'http://127.0.0.1:4173';
     const gap=await page.evaluate(()=>document.querySelector('.colours').getBoundingClientRect().top-document.querySelector('.product-image').getBoundingClientRect().bottom);
     assert(gap>=0,`product photo overlaps colour controls at ${width}`);
    }
+   await page.goto(base+'/#top');
+   await page.locator('.landing-menu').click();
+   await page.waitForURL('**screen=menu');
+   await page.goto(base+'/app.html?screen=contact');
+   await page.locator('[name=name]').click();
+   assert.equal(await page.locator('#name-error').evaluate(el=>getComputedStyle(el).outlineStyle),'none','input focus outlines an error panel');
+   await page.keyboard.press('Tab');
+   assert.equal(await page.locator('#email-error').evaluate(el=>getComputedStyle(el).outlineStyle),'none','keyboard focus outlines an error panel');
    console.log(`${width}px: ${routes.length} public screens and landing steps checked`);
   }
   await page.setViewportSize({width:390,height:844});

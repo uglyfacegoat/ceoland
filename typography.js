@@ -1,4 +1,4 @@
-/* Live typography. Positions and colours come from Figma, not traced pictures. */
+/* Live typography. Figma letterforms and an original spiral, rendered as live text. */
 (() => {
   const designs = window.CEO_TYPE_OBJECTS;
   const mobile = matchMedia('(max-width: 700px)');
@@ -7,8 +7,22 @@
   const objects = [...document.querySelectorAll('[data-type]')];
   const state = new Map();
 
+  const spiral = {width:320, height:440, font:'Roboto Mono', weight:700, size:12, glyphs:[]};
+  const phrase = 'CEOMENTALITY ';
+  const turns = Math.PI * 6;
+  for (let theta = 0, index = 0; theta < turns; index++) {
+    const radius = .13 + .87 * theta / turns;
+    const dx = 145 * (.87 / turns * Math.cos(theta) - radius * Math.sin(theta));
+    const dy = 205 * (.87 / turns * Math.sin(theta) + radius * Math.cos(theta));
+    spiral.glyphs.push({text:phrase[index % phrase.length], x:154 + 145 * radius * Math.cos(theta), y:210 + 205 * radius * Math.sin(theta), color:Math.floor(index / phrase.length) % 4 === 0 ? '#2451b2' : '#171717'});
+    theta += 10 / Math.hypot(dx, dy);
+  }
+
   function keyframes(kind, glyph, index, config) {
     const amplitude = config.width / 60;
+    if (kind === 'spiral') {
+      return [{transform:'translate(0,0)'},{transform:`translate(${(glyph.x-154)*.035}px,${(glyph.y-210)*.035}px)`},{transform:'translate(0,0)'}];
+    }
     if (kind === 'loops') {
       // Fit each original ring separately. Glyphs orbit but remain upright.
       const ring = config.glyphs.filter(g => g.color === glyph.color);
@@ -189,7 +203,7 @@
       state.delete(object);
       return;
     }
-    const original = designs[kind][variant];
+    const original = kind === 'spiral' ? spiral : designs[kind][variant];
     const config = kind === 'field' && variant === 'mobile'
       ? {...original, width:302, height:148, light:true}
       : original;
@@ -197,7 +211,7 @@
     stage.className = 'type-stage';
     stage.style.cssText = `width:${config.width}px;height:${config.height}px;font-family:'${config.font}',monospace;font-weight:${config.weight};font-size:${config.size}px;`;
     object.style.aspectRatio = `${config.width} / ${config.height}`;
-    object.dataset.figmaNode = config.nodeId;
+    if (config.nodeId) object.dataset.figmaNode = config.nodeId;
     const animations = [];
     if (kind === 'field') {
       const flow = createFlow(stage, config);
@@ -217,7 +231,7 @@
       moving.textContent = glyph.text;
       position.append(moving);
       stage.append(position);
-      const duration = kind === 'loops' ? 24000 : kind === 'field' ? 9000 : kind === 'triangle' ? 5400 : 6500;
+      const duration = kind === 'spiral' ? 12000 : kind === 'loops' ? 24000 : kind === 'field' ? 9000 : kind === 'triangle' ? 5400 : 6500;
       const delay = kind === 'loops' ? 0 : kind === 'field' ? index * 75 : kind === 'diamond' ? Math.abs(6-index)*95 : index * 45;
       const animation = moving.animate(keyframes(kind, glyph, index, config), {
         duration, delay: 800 + delay, iterations: Infinity,
