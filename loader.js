@@ -10,7 +10,6 @@
   const logo = document.querySelector('.identity .wordmark');
   const content = [...document.querySelectorAll('body > main, body > footer')];
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
-  const mobile = matchMedia('(max-width: 700px)');
   const animations = [];
   let finished = false;
   content.forEach(node => { node.inert = true; });
@@ -48,7 +47,7 @@
   Promise.all([Promise.all(tasks.map(task => task.finally(() => { done++; update(); }))), wait(reduced.matches ? 0 : 650)])
     .then(async () => {
       if (finished) return;
-      if (reduced.matches || mobile.matches) { cleanup(); return; }
+      if (reduced.matches) { cleanup(); return; }
       await wait(180);
       if (finished) return;
       const from = title.getBoundingClientRect();

@@ -3,7 +3,7 @@
   const designs = window.CEO_TYPE_OBJECTS;
   const mobile = matchMedia('(max-width: 700px)');
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
-  const motionDisabled = () => mobile.matches || reduced.matches;
+  const motionDisabled = () => reduced.matches;
   const objects = [...document.querySelectorAll('[data-type]')];
   const state = new Map();
 
@@ -47,7 +47,7 @@
   window.addEventListener('pointermove', event => {
     pointer.x = event.clientX;
     pointer.y = event.clientY;
-    pointer.active = event.pointerType !== 'touch' && !motionDisabled();
+    pointer.active = event.pointerType !== 'touch' && !motionDisabled() && !mobile.matches;
     startInteraction();
   }, {passive: true});
   document.documentElement.addEventListener('pointerleave', () => { pointer.active = false; });
@@ -106,7 +106,7 @@
   }
 
   function startInteraction() {
-    if (frame || document.hidden || motionDisabled()) return;
+    if (frame || document.hidden || motionDisabled() || mobile.matches) return;
     if (![...state.values()].some(item => item.flow && item.visible)) return;
     frame = requestAnimationFrame(animateFlow);
   }
@@ -119,7 +119,7 @@
     lastTime = time;
     let active = false;
     for (const [object, item] of state) {
-      if (!item.flow || !item.visible || document.hidden || motionDisabled()) continue;
+      if (!item.flow || !item.visible || document.hidden || motionDisabled() || mobile.matches) continue;
       const rect = object.getBoundingClientRect();
       if (!rect.width || !rect.height) continue;
       const {flow, config} = item;
@@ -156,7 +156,7 @@
       if (item.flow && reduced.matches) {
         item.flow.particles.forEach(p => { p.node.style.transform = p.base; p.dx = p.dy = 0; });
       }
-      const playing = item.visible && !document.hidden && !motionDisabled();
+      const playing = item.visible && !document.hidden && !motionDisabled() && !(item.flow && mobile.matches);
       for (const animation of item.animations) {
         if (reduced.matches) { animation.pause(); animation.currentTime = 0; }
         else if (playing) animation.play();
