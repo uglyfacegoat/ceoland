@@ -144,3 +144,10 @@ dialog{width:min(720px,calc(100% - 32px));padding:32px;border:0;color:var(--ink)
  .selection .steps li:nth-child(even){margin-left:12px;width:calc(100% - 12px)}
  .ticket-art-title{font-size:62px}
 }
+
+/* Interlocking typographic rings occupy the open left side of stages 03–04. */
+.selection-orbit{display:none}
+@media(min-width:701px){
+ .selection-orbit{display:block;position:absolute;left:calc(-92.307692% + 1vw);top:7vw;width:18vw;height:8.4vw;transform:rotate(-32deg);transform-origin:center;}
+ .selection-orbit .type-position:nth-child(-n+24){color:var(--ink)!important}
+}
