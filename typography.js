@@ -1,4 +1,4 @@
-/* Live typography. Figma letterforms and an original spiral, rendered as live text. */
+/* Live typography. Figma letterforms and an original text asterisk, rendered as live text. */
 (() => {
   const designs = window.CEO_TYPE_OBJECTS;
   const mobile = matchMedia('(max-width: 700px)');
@@ -7,21 +7,25 @@
   const objects = [...document.querySelectorAll('[data-type]')];
   const state = new Map();
 
-  const spiral = {width:320, height:440, font:'Roboto Mono', weight:700, size:12, glyphs:[]};
-  const phrase = 'CEOMENTALITY ';
-  const turns = Math.PI * 6;
-  for (let theta = 0, index = 0; theta < turns; index++) {
-    const radius = .13 + .87 * theta / turns;
-    const dx = 145 * (.87 / turns * Math.cos(theta) - radius * Math.sin(theta));
-    const dy = 205 * (.87 / turns * Math.sin(theta) + radius * Math.cos(theta));
-    spiral.glyphs.push({text:phrase[index % phrase.length], x:154 + 145 * radius * Math.cos(theta), y:210 + 205 * radius * Math.sin(theta), color:Math.floor(index / phrase.length) % 4 === 0 ? '#2451b2' : '#171717'});
-    theta += 10 / Math.hypot(dx, dy);
+  // Six straight text arms form a familiar asterisk.
+  const asterisk = {width:320, height:320, font:'Roboto Mono', weight:700, size:12, glyphs:[]};
+  for (let arm = 0; arm < 6; arm++) {
+    const angle = arm * Math.PI / 3;
+    for (let row = -1; row <= 1; row++) {
+      [...'CEOMENTALITY'].forEach((text, index) => {
+        const radius = 28 + index * 10;
+        asterisk.glyphs.push({text,
+          x:154 + radius * Math.cos(angle) - row * 13 * Math.sin(angle),
+          y:154 + radius * Math.sin(angle) + row * 13 * Math.cos(angle),
+          rotation:arm * 60, color:arm === 0 || arm === 3 ? '#2451b2' : '#171717'});
+      });
+    }
   }
 
   function keyframes(kind, glyph, index, config) {
     const amplitude = config.width / 60;
-    if (kind === 'spiral') {
-      return [{transform:'translate(0,0)'},{transform:`translate(${(glyph.x-154)*.035}px,${(glyph.y-210)*.035}px)`},{transform:'translate(0,0)'}];
+    if (kind === 'asterisk') {
+      return [{transform:'translate(0,0)'},{transform:`translate(${(glyph.x-154)*.035}px,${(glyph.y-154)*.035}px)`},{transform:'translate(0,0)'}];
     }
     if (kind === 'loops') {
       // Fit each original ring separately. Glyphs orbit but remain upright.
@@ -203,7 +207,7 @@
       state.delete(object);
       return;
     }
-    const original = kind === 'spiral' ? spiral : designs[kind][variant];
+    const original = kind === 'asterisk' ? asterisk : designs[kind][variant];
     const config = kind === 'field' && variant === 'mobile'
       ? {...original, width:302, height:148, light:true}
       : original;
@@ -225,13 +229,13 @@
     config.glyphs.forEach((glyph, index) => {
       const position = document.createElement('span');
       position.className = 'type-position';
-      position.style.cssText = `left:${glyph.x}px;top:${glyph.y}px;color:${glyph.color};`;
+      position.style.cssText = `left:${glyph.x}px;top:${glyph.y}px;color:${glyph.color};${glyph.rotation !== undefined ? `transform:rotate(${glyph.rotation}deg);transform-origin:4px 7px;` : ''}`;
       const moving = document.createElement('span');
       moving.className = 'type-glyph';
       moving.textContent = glyph.text;
       position.append(moving);
       stage.append(position);
-      const duration = kind === 'spiral' ? 12000 : kind === 'loops' ? 24000 : kind === 'field' ? 9000 : kind === 'triangle' ? 5400 : 6500;
+      const duration = kind === 'asterisk' ? 12000 : kind === 'loops' ? 24000 : kind === 'field' ? 9000 : kind === 'triangle' ? 5400 : 6500;
       const delay = kind === 'loops' ? 0 : kind === 'field' ? index * 75 : kind === 'diamond' ? Math.abs(6-index)*95 : index * 45;
       const animation = moving.animate(keyframes(kind, glyph, index, config), {
         duration, delay: 800 + delay, iterations: Infinity,

@@ -146,8 +146,8 @@ dialog{width:min(720px,calc(100% - 32px));padding:32px;border:0;color:var(--ink)
  .ticket-art-title{font-size:62px}
 }
 
-/* A tall typographic spiral fills the open space beside stages 03–04. */
-.selection-spiral{display:none}
+/* A typographic asterisk fills the open space beside stages 03–04. */
+.selection-asterisk{display:none}
 @media(min-width:701px){
- .selection-spiral{display:block;position:absolute;left:-92.307692%;top:-3vw;width:20vw;height:27.5vw;}
+ .selection-asterisk{display:block;position:absolute;left:-92.307692%;top:1vw;width:20vw;height:20vw;}
 }
