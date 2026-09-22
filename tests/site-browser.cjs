@@ -32,8 +32,9 @@ const base=process.env.SITE_URL||'http://127.0.0.1:4173';
    assert.equal(steps.length,5,'five application stages');
    assert(steps[0].text.includes('ЗАЯВКА НА ПОКУПКУ'));
    assert(steps[2].text.includes('ЗАЯВКА В КЛУБ'));
-   assert(steps[4].text.includes('ДА — ДА. НЕТ — НЕТ.'));
-   for(let i=1;i<steps.length;i++)assert(steps[i].top>=steps[i-1].bottom,'steps overlap');
+   assert(steps[4].text.includes('РЕШЕНИЕ'));
+   if(width<=700){for(let i=1;i<steps.length;i++)assert(steps[i].top>=steps[i-1].bottom,'steps overlap');}
+   else {assert.equal(steps[0].top,steps[1].top);assert.equal(steps[1].top,steps[2].top);assert.equal(steps[3].top,steps[4].top);assert(steps[3].top>steps[2].bottom);for(const [a,b] of [[0,1],[1,2],[3,4]])assert(steps[a].children[0].x<steps[b].children[0].x,'steps must read left to right');}
    if([390,1440].includes(width)){await page.locator('.selection').screenshot({path:`/private/tmp/ceoland-five-steps-${width}.png`});await page.locator('.membership').screenshot({path:`/private/tmp/ceoland-ticket-${width}.png`});}
    assert.equal(await page.locator('.membership-card').count(),0);
    assert.equal(await page.locator('.ticket-art').count(),1);
