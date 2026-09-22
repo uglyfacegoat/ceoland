@@ -24,14 +24,9 @@ tabs.forEach((tab,index)=>{
 });
 document.querySelectorAll('[data-faq-link]').forEach(link=>link.addEventListener('click',()=>selectQuestion(Number(link.dataset.faqLink))));
 const wallet=document.querySelector('#wallet-image');
-const dialog=document.querySelector('#wallet-preview');
-const previewImage=dialog.querySelector('img');
 document.querySelectorAll('input[name="colour"]').forEach(input=>input.addEventListener('change',()=>{
   const white=input.value==='white';
   wallet.src=white?'assets/wallet-white.png':'assets/imgOriginalCeowalletBlack.png';
-  wallet.alt=`${white?'Белый':'Чёрный'} кожаный картхолдер CEOWALLET с надписью I’m CEO, Bitch`;
-  previewImage.src=wallet.src;previewImage.alt=wallet.alt;
+  wallet.alt=`${white?'Белый':'Чёрный'} кожаный картхолдер CEOWALLET`;
+  document.querySelectorAll('[data-wallet-link]').forEach(link=>link.href=`app.html?screen=${white?'wallet-white':'wallet'}`);
 }));
-document.querySelectorAll('[data-wallet-preview]').forEach(button=>button.addEventListener('click',()=>dialog.showModal()));
-dialog.querySelector('.close').addEventListener('click',()=>dialog.close());
-dialog.addEventListener('click',event=>{if(event.target===dialog){const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)dialog.close();}});

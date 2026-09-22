@@ -27,19 +27,19 @@
     if (kind === 'diamond') {
       const side = index % 2 ? -1 : 1;
       const spread = config.width * (.08 + .05 * Math.sin(index * 1.7) ** 2);
-      return [{transform:'translateX(0)',color:glyph.color},{transform:`translateX(${side * spread}px)`,color:index===6?'#0060ff':glyph.color},{transform:'translateX(0)',color:glyph.color}];
+      return [{transform:'translateX(0)',color:glyph.color},{transform:`translateX(${side * spread}px)`,color:index===6?'#2451b2':glyph.color},{transform:'translateX(0)',color:glyph.color}];
     }
     if (kind === 'arrows' || kind === 'chevron') {
       const direction = kind === 'arrows' && glyph.x > config.width / 2 ? -1 : 1;
       return [{transform:'translateX(0)'},{transform:`translateX(${direction * amplitude}px)`},{transform:'translateX(0)'}];
     }
     if (kind === 'seal') {
-      return [{transform:'translateY(0)',color:glyph.color},{transform:'translateY(-2px)',color:'#0060ff'},{transform:'translateY(0)',color:glyph.color}];
+      return [{transform:'translateY(0)',color:glyph.color},{transform:'translateY(-2px)',color:'#2451b2'},{transform:'translateY(0)',color:glyph.color}];
     }
     if (kind === 'triangle') {
       return [{transform:'translateY(0)',opacity:1},{transform:'translateY(-3px)',opacity:.55},{transform:'translateY(0)',opacity:1}];
     }
-    return [{transform:'translateY(0)',color:glyph.color},{transform:'translateY(-2px)',color:'#0060ff'},{transform:'translateY(0)',color:glyph.color}];
+    return [{transform:'translateY(0)',color:glyph.color},{transform:'translateY(-2px)',color:'#2451b2'},{transform:'translateY(0)',color:glyph.color}];
   }
 
   const pointer = {x: 0, y: 0, active: false};
@@ -85,7 +85,7 @@
               const node = document.createElement('span');
               node.className = 'flow-letter';
               const sourceColor = source[index % source.length].color;
-              const color = (index * 7 + word * 3) % 11 < 2 ? '#0060ff' : config.light && sourceColor === '#ffffff' ? '#171717' : sourceColor;
+              const color = (index * 7 + word * 3) % 11 < 2 ? '#2451b2' : config.light && sourceColor === '#ffffff' ? '#171717' : sourceColor;
               const base = `rotate(${Math.atan(slope) * 180 / Math.PI}deg)`;
               node.style.cssText = `position:absolute;left:${x}px;top:${cy - size * .6}px;font-size:${size}px;line-height:1.2;color:${color};transform:${base}`;
               node.textContent = character;

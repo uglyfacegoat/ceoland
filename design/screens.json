@@ -1,0 +1,242 @@
+[
+  {
+    "id": "1:1916",
+    "name": "Desktop / 22 / Loading"
+  },
+  {
+    "id": "1:1923",
+    "name": "Mobile / 22 / Loading"
+  },
+  {
+    "id": "1:1930",
+    "name": "Desktop / 35 / Navigation"
+  },
+  {
+    "id": "1:1967",
+    "name": "Mobile / 35 / Navigation"
+  },
+  {
+    "id": "1:1997",
+    "name": "Desktop / 21 / FAQ"
+  },
+  {
+    "id": "1:2076",
+    "name": "Mobile / 21 / FAQ"
+  },
+  {
+    "id": "1:2114",
+    "name": "Desktop / 34 / Contact"
+  },
+  {
+    "id": "1:2155",
+    "name": "Mobile / 34 / Contact"
+  },
+  {
+    "id": "1:2192",
+    "name": "Desktop / 01 / Objects"
+  },
+  {
+    "id": "1:2240",
+    "name": "Mobile / 01 / Objects"
+  },
+  {
+    "id": "1:2281",
+    "name": "Desktop / 02 / CEOWALLET"
+  },
+  {
+    "id": "1:2326",
+    "name": "Mobile / 02 / CEOWALLET"
+  },
+  {
+    "id": "1:2364",
+    "name": "Desktop / 16 / CEOWALLET — White"
+  },
+  {
+    "id": "1:2409",
+    "name": "Mobile / 16 / CEOWALLET — White"
+  },
+  {
+    "id": "1:2447",
+    "name": "Desktop / 03 / NFC CARD — в разработке"
+  },
+  {
+    "id": "1:2493",
+    "name": "Mobile / 03 / NFC CARD — в разработке"
+  },
+  {
+    "id": "1:2535",
+    "name": "Desktop / 04 / Cart"
+  },
+  {
+    "id": "1:2586",
+    "name": "Mobile / 04 / Cart"
+  },
+  {
+    "id": "1:2630",
+    "name": "Desktop / 10 / Checkout"
+  },
+  {
+    "id": "1:2689",
+    "name": "Mobile / 10 / Checkout"
+  },
+  {
+    "id": "1:2741",
+    "name": "Desktop / 08 / Access code"
+  },
+  {
+    "id": "1:2792",
+    "name": "Mobile / 08 / Access code"
+  },
+  {
+    "id": "1:2836",
+    "name": "Desktop / 11 / Payment"
+  },
+  {
+    "id": "1:2920",
+    "name": "Mobile / 11 / Payment"
+  },
+  {
+    "id": "1:3000",
+    "name": "Desktop / 12 / Payment processing"
+  },
+  {
+    "id": "1:3068",
+    "name": "Mobile / 12 / Payment processing"
+  },
+  {
+    "id": "1:3129",
+    "name": "Desktop / 14 / Thank you"
+  },
+  {
+    "id": "1:3205",
+    "name": "Mobile / 14 / Thank you"
+  },
+  {
+    "id": "1:3274",
+    "name": "Desktop / 19 / Order status"
+  },
+  {
+    "id": "1:3334",
+    "name": "Mobile / 19 / Order status"
+  },
+  {
+    "id": "1:3387",
+    "name": "Desktop / 13 / Payment failed"
+  },
+  {
+    "id": "1:3454",
+    "name": "Mobile / 13 / Payment failed"
+  },
+  {
+    "id": "1:3517",
+    "name": "PRIVATE / Desktop / Анкета — после QR"
+  },
+  {
+    "id": "1:3566",
+    "name": "PRIVATE / Mobile / Анкета — после QR"
+  },
+  {
+    "id": "1:3608",
+    "name": "Desktop / 07 / Application received"
+  },
+  {
+    "id": "1:3675",
+    "name": "Mobile / 07 / Application received"
+  },
+  {
+    "id": "1:3735",
+    "name": "Desktop / 15 / Membership confirmed"
+  },
+  {
+    "id": "1:3771",
+    "name": "Mobile / 15 / Membership confirmed"
+  },
+  {
+    "id": "1:3803",
+    "name": "Desktop / 17 / Purchase application"
+  },
+  {
+    "id": "1:3844",
+    "name": "Mobile / 17 / Purchase application"
+  },
+  {
+    "id": "1:3878",
+    "name": "Desktop / 18 / Purchase application received"
+  },
+  {
+    "id": "1:3945",
+    "name": "Mobile / 18 / Purchase application received"
+  },
+  {
+    "id": "1:4005",
+    "name": "Desktop / 20 / Checkout — validation"
+  },
+  {
+    "id": "1:4067",
+    "name": "Mobile / 20 / Checkout — validation"
+  },
+  {
+    "id": "1:4122",
+    "name": "Desktop / 09 / Code error"
+  },
+  {
+    "id": "1:4174",
+    "name": "Mobile / 09 / Code error"
+  },
+  {
+    "id": "1:4222",
+    "name": "Desktop / 05 / Cart empty"
+  },
+  {
+    "id": "1:4289",
+    "name": "Mobile / 05 / Cart empty"
+  },
+  {
+    "id": "1:4349",
+    "name": "Desktop / 36 / Contact received"
+  },
+  {
+    "id": "1:4416",
+    "name": "Mobile / 36 / Contact received"
+  },
+  {
+    "id": "1:5762",
+    "name": "Desktop / 37 / Privacy policy"
+  },
+  {
+    "id": "1:5903",
+    "name": "Mobile / 37 / Privacy policy"
+  },
+  {
+    "id": "1:6032",
+    "name": "Desktop / 38 / User agreement"
+  },
+  {
+    "id": "1:6173",
+    "name": "Mobile / 38 / User agreement"
+  },
+  {
+    "id": "1:6302",
+    "name": "Desktop / 39 / Purchase terms"
+  },
+  {
+    "id": "1:6443",
+    "name": "Mobile / 39 / Purchase terms"
+  },
+  {
+    "id": "1:6572",
+    "name": "Desktop / 40 / Company details"
+  },
+  {
+    "id": "1:6714",
+    "name": "Mobile / 40 / Company details"
+  },
+  {
+    "id": "338:975",
+    "name": "Desktop / 41 / Как вступить — получение и QR"
+  },
+  {
+    "id": "338:1089",
+    "name": "Mobile / 41 / Как вступить — получение и QR"
+  }
+]
