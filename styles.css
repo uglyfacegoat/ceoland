@@ -149,6 +149,5 @@ dialog{width:min(720px,calc(100% - 32px));padding:32px;border:0;color:var(--ink)
 /* A square letter grid fills the open space beside stages 03–04. */
 .selection-square{display:none}
 @media(min-width:701px){
- .selection .steps li:nth-child(3){margin-top:8vw;min-height:25vw}
- .selection-square{display:block;position:absolute;left:-92.307692%;top:6.5vw;width:28vw;height:28vw;transform:translateY(-50%);}
+ .selection-square{display:block;position:absolute;left:-92.307692%;top:6.5vw;width:21.5vw;height:21.5vw;transform:translateY(-50%);}
 }
