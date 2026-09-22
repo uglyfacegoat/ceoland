@@ -146,8 +146,8 @@ dialog{width:min(720px,calc(100% - 32px));padding:32px;border:0;color:var(--ink)
  .ticket-art-title{font-size:62px}
 }
 
-/* A typographic asterisk fills the open space beside stages 03–04. */
-.selection-asterisk{display:none}
+/* A square letter grid fills the open space beside stages 03–04. */
+.selection-square{display:none}
 @media(min-width:701px){
- .selection-asterisk{display:block;position:absolute;left:-92.307692%;top:1vw;width:20vw;height:20vw;}
+ .selection-square{display:block;position:absolute;left:-92.307692%;top:50%;width:20vw;height:20vw;transform:translateY(-50%);}
 }
