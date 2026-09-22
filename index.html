@@ -8,10 +8,25 @@
   <title>CEOMENTALITY — More than a club.</title>
   <link rel="icon" href="data:,">
   <link rel="preload" href="assets/inter-extrabold.ttf" as="font" type="font/ttf" crossorigin>
+  <script>
+    if (!location.hash || location.hash === '#top') {
+      document.documentElement.classList.add('is-loading');
+      window.ceoLoaderTimeout = setTimeout(() => {
+        document.documentElement.classList.remove('is-loading', 'is-revealing');
+        document.querySelectorAll('[inert]').forEach(node => { node.inert = false; });
+        window.dispatchEvent(new Event('ceo:loader-timeout'));
+      }, 7000);
+    }
+  </script>
+  <link rel="stylesheet" href="loader.css">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="typography.css">
 </head>
 <body>
+  <div class="loading-screen" role="status" aria-label="Загрузка CEOMENTALITY" aria-live="off">
+    <p class="loading-wordmark" aria-hidden="true"><span class="loading-letters">CEOMENTALITY</span></p>
+    <div class="loading-meter" aria-hidden="true"><div class="loading-rail"><div class="loading-progress"></div></div><p class="loading-caption">ЗАГРУЗКА / 000</p></div>
+  </div>
   <main>
   <section class="hero" aria-labelledby="hero-title" id="top">
     <header class="identity">
@@ -124,5 +139,6 @@
   <script src="assets/type-objects.js" defer></script>
   <script src="typography.js" defer></script>
   <script src="main.js" defer></script>
+  <script src="loader.js" defer></script>
 </body>
 </html>

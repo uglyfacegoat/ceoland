@@ -6,11 +6,14 @@
 .word-field.type-object{position:absolute;top:0;height:100%;overflow:hidden}
 .mobile-signal{position:relative;background:var(--ink)}
 @media(max-width:700px){
- .mobile-signal{height:auto;aspect-ratio:390/252;min-height:0}
+ .hero{min-height:auto}
+ .intro{padding-bottom:28px}
+ .signal{width:calc(100% - 48px);margin:4px 24px 40px;min-height:0;background:#fff}
+ .mobile-signal{height:148px;aspect-ratio:auto;min-height:0;background:#fff}
  .mobile-signal>img{position:absolute;top:0;height:100%;object-fit:fill}
- .mobile-barcode{left:0;width:28.461538%}
- .mobile-inverse{left:28.461538%;width:12.974359%}
- .mobile-field{position:absolute;left:41.538462%;right:0;top:0;bottom:0;overflow:hidden}
+ .mobile-signal>.mobile-barcode{left:0;top:20px;width:24px;height:108px;opacity:.8}
+ .mobile-inverse{display:none}
+ .mobile-field{position:absolute;left:40px;right:0;top:0;bottom:0;overflow:hidden}
  .object-arrows.type-object{height:50px;margin-top:32px;margin-bottom:32px}
  .diamond.type-object{top:548px;width:min(300px,calc(100vw - 32px));height:auto;aspect-ratio:220/164}
  .chevron.type-object{width:180px;height:84px}
@@ -26,3 +29,5 @@
 .type-flow{position:absolute;inset:0;will-change:transform}
 .type-flow .type-slant{position:relative}
 .flow-letter{display:inline-block;white-space:pre}
+
+@media(max-width:370px){.signal{width:calc(100% - 40px);margin-left:20px;margin-right:20px}}

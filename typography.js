@@ -83,7 +83,8 @@
               const cy = y + config.size * 1.1 + bend;
               const node = document.createElement('span');
               node.className = 'flow-letter';
-              const color = (index * 7 + word * 3) % 11 < 2 ? '#0060ff' : source[index % source.length].color;
+              const sourceColor = source[index % source.length].color;
+              const color = (index * 7 + word * 3) % 11 < 2 ? '#0060ff' : config.light && sourceColor === '#ffffff' ? '#171717' : sourceColor;
               const base = `rotate(${Math.atan(slope) * 180 / Math.PI}deg)`;
               node.style.cssText = `position:absolute;left:${x}px;top:${cy - size * .6}px;font-size:${size}px;line-height:1.2;color:${color};transform:${base}`;
               node.textContent = character;
@@ -187,7 +188,10 @@
       state.delete(object);
       return;
     }
-    const config = designs[kind][variant];
+    const original = designs[kind][variant];
+    const config = kind === 'field' && variant === 'mobile'
+      ? {...original, width:302, height:148, light:true}
+      : original;
     const stage = document.createElement('div');
     stage.className = 'type-stage';
     stage.style.cssText = `width:${config.width}px;height:${config.height}px;font-family:'${config.font}',monospace;font-weight:${config.weight};font-size:${config.size}px;`;
