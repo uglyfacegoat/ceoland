@@ -35,10 +35,15 @@ for(const mobile of [false,true])test(`${mobile?'mobile':'desktop'}: bounded DOM
  assert(letters.length<3000,`too many letters: ${letters.length}`);
  assert(letters.length>100);
  assert.equal(app.animations.length,1);
- app.show();assert(app.animations[0].playing);assert.equal(app.frames.length,0);
+ app.show();
+ if (mobile) assert(!app.animations[0].playing);
+ else assert(app.animations[0].playing);
+ assert.equal(app.frames.length,0);
  app.events.pointermove({clientX:120,clientY:120,pointerType:'mouse'});
+ if (mobile) assert.equal(app.frames.length,0);
  let time=0;for(let i=0;i<12;i++)app.frames.shift()?.(time+=16);
- assert(letters.some(n=>n.style.transform?.startsWith('translate(')));
+ if (mobile) assert(!letters.some(n=>n.style.transform?.startsWith('translate(')));
+ else assert(letters.some(n=>n.style.transform?.startsWith('translate(')));
  app.events.pointermove({clientX:-1000,clientY:-1000,pointerType:'mouse'});
  for(let i=0;i<150 && app.frames.length;i++)app.frames.shift()(time+=16);
  assert.equal(app.frames.length,0,'JS must stop once letters settle');
