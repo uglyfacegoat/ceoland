@@ -1,9 +1,9 @@
-const {chromium}=require(process.env.PLAYWRIGHT_MODULE || require('node:path').join(require('node:os').homedir(),'.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright'));
+const {launch,artifact}=require('./browser-helpers.cjs');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const base=process.env.SITE_URL||'http://127.0.0.1:4173';
 (async()=>{
- const browser=await chromium.launch({executablePath:process.env.CHROME_PATH||'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',headless:true});
+ const browser=await launch();
  const failures=[],errors=[];
  try{
   const context=await browser.newContext({reducedMotion:'reduce'});
@@ -24,7 +24,7 @@ const base=process.env.SITE_URL||'http://127.0.0.1:4173';
     }));
     if(state.scroll>width||state.broken.length||state.overflow.length)failures.push({width,screen:new URL(url).searchParams.get('screen'),...state});
     if([390,1440].includes(width)&&['wallet','wallet-white','checkout','access','faq','join','privacy','objects'].includes(new URL(url).searchParams.get('screen'))){
-     await page.screenshot({path:`/private/tmp/ceoland-${new URL(url).searchParams.get('screen')}-${width}.png`,fullPage:true});
+     await page.screenshot({path:artifact(`ceoland-${new URL(url).searchParams.get('screen')}-${width}.png`),fullPage:true});
     }
    }
    await page.goto(base+'/#selection');await page.evaluate(()=>document.fonts.ready);
@@ -34,7 +34,7 @@ const base=process.env.SITE_URL||'http://127.0.0.1:4173';
    assert(steps[2].text.includes('ЗАЯВКА В КЛУБ'));
    assert(steps[4].text.includes('РЕШЕНИЕ'));
    for(let i=1;i<steps.length;i++)assert(steps[i].top>=steps[i-1].bottom,'steps overlap');
-   if([390,1440].includes(width)){await page.locator('.selection').screenshot({path:`/private/tmp/ceoland-five-steps-${width}.png`});await page.locator('.membership').screenshot({path:`/private/tmp/ceoland-ticket-${width}.png`});}
+   if([390,1440].includes(width)){await page.locator('.selection').screenshot({path:artifact(`ceoland-five-steps-${width}.png`)});await page.locator('.membership').screenshot({path:artifact(`ceoland-ticket-${width}.png`)});}
    const square=page.locator('.selection-square');
    if(width<=700)assert.equal(await square.isVisible(),false,'square must be hidden on mobile');
    else{
@@ -121,7 +121,7 @@ const base=process.env.SITE_URL||'http://127.0.0.1:4173';
   await page.goto(base+'/app.html?screen=thank-you');assert(!/Покупка подтверждена/.test(await page.locator('main').innerText()));
   await page.goto(base+'/app.html?screen=faq');await page.locator('[data-faq="0"]').focus();await page.keyboard.press('ArrowDown');assert.equal(await page.locator('[data-faq="1"]').getAttribute('aria-selected'),'true');
   console.log('PASS: gallery, product links, invalid/valid code, cart persistence, quantity/removal, checkout validation, payment states, contact form, FAQ keyboard navigation, non-demo guards');
-  fs.writeFileSync('/private/tmp/ceoland-site-validation.json',JSON.stringify({screens:routes.length,widths:7,failures,errors},null,2));
+  fs.writeFileSync(artifact('ceoland-site-validation.json'),JSON.stringify({screens:routes.length,widths:7,failures,errors},null,2));
   console.log(JSON.stringify({failures,errors},null,2));
   assert.equal(failures.length,0,'responsive layout failures');assert.equal(errors.length,0,'browser errors');
  }finally{await browser.close();}

@@ -1,16 +1,9 @@
-website/node_modules/
-website/dist/
-website/.env*
-!website/.env.example
-*.log
-*.tsbuildinfo
-verification/
-.vercel/
-
-# Current landing
 node_modules/
 dist/
 .env*
+!.env.example
 .DS_Store
 *.log
 .vercel/
+test-results/
+playwright-report/

@@ -3,7 +3,25 @@
 (() => {
   'use strict';
   const params = new URLSearchParams(location.search);
-  const demo = params.get('demo') === '1';
+  const config = window.CEO_CONFIG || {};
+  const demo = config.previewEnabled === true && params.get('demo') === '1';
+  const live = !demo && config.mode === 'api';
+  const api = window.CEO_API.createClient(config);
+  const lifetime = new AbortController();
+  const fragment = new URLSearchParams(location.hash.slice(1));
+  let invitationToken = fragment.get('invitation'), orderToken = fragment.get('order');
+  if(invitationToken||orderToken)history.replaceState(null,'',location.pathname+location.search);
+  window.addEventListener('pagehide', () => lifetime.abort(), {once:true});
+  let ready = !live, loadError = null, session = null, catalogData = null, quote = null, orderData = null, membershipData = null;
+  const requestKeys = new Map();
+  function requestKey(kind, payload) {
+    const fingerprint = JSON.stringify(payload);
+    const previous = requestKeys.get(kind);
+    if (previous?.fingerprint === fingerprint) return previous.key;
+    const key = crypto.randomUUID();
+    requestKeys.set(kind, {fingerprint,key});
+    return key;
+  }
   const screen = params.get('screen') || 'objects';
   const root = document.querySelector('#site-root');
   const PRICE = 2990;
@@ -16,13 +34,15 @@
   const cartKey = demo ? 'ceo-preview-cart-v1' : 'ceo-cart-v1';
   let cart = read(cartKey, []);
   if (!Array.isArray(cart)) cart=[];
-  cart=cart.filter(x=>x && ['black','white'].includes(x.colour) && Number.isInteger(x.quantity) && x.quantity>0 && x.quantity<=10);
+  cart=window.CEO_STORE.cart(cart);
   const selected = params.get('colour') === 'black' || screen === 'wallet' ? 'black' : 'white';
   const sampleCart = [{colour:selected,quantity:1}];
-  if(demo && screen==='cart' && !sessionStorage.getItem(cartKey)) {cart=sampleCart;write(cartKey,cart);}
-  const activeCart = cart.length ? cart : (demo ? sampleCart : []);
+  if(demo && screen==='cart' && read(cartKey,null)===null) {cart=sampleCart;write(cartKey,cart);}
+  let activeCart = cart.length ? cart : (demo ? sampleCart : []);
   const count = items => items.reduce((n,x)=>n+x.quantity,0);
-  const total = items => count(items)*PRICE;
+  const unitPrice = colour => (catalogData?.variants.find(v=>v.variantId==='ceowallet-'+colour)?.unitPrice ?? PRICE*100)/100;
+  const total = items => items.reduce((sum,x)=>sum+x.quantity*unitPrice(x.colour),0);
+  const variant = colour => catalogData?.variants.find(v=>v.variantId==='ceowallet-'+colour);
   const colourName = c => c==='white'?'Белый':'Чёрный';
   const photo = c => c==='white'?'assets/wallet-white-front.png':'assets/imgOriginalCeowalletBlack.png';
   const link = (text,name,outline=false,extra={}) => `<a class="site-button${outline?' outline':''}" href="${route(name,extra)}"><span>${text}</span><span aria-hidden="true">→</span></a>`;
@@ -33,11 +53,11 @@
   const rule = '<hr class="rule">';
   const slashes = '<img class="site-slashes" src="assets/imgAccentHorizontalSlashRhythm.svg" width="320" height="40" alt="">';
   const alert = '<p class="form-alert" role="alert" data-form-alert></p>';
-  const field = (name,label,placeholder='',type='text',required=true,value='') => `<label class="field" for="${name}">${label}<input id="${name}" name="${name}" type="${type}" placeholder="${placeholder}" ${required?'required':''} ${type==='email'?'autocomplete="email"':type==='tel'?'autocomplete="tel"':name==='name'?'autocomplete="name"':''} value="${escape(value)}" aria-describedby="${name}-error" ${name==='code'?'autocapitalize="characters" spellcheck="false" maxlength="64"':''}><span class="field-error" id="${name}-error"></span></label>`;
-  const textarea = (name,label,placeholder) => `<label class="field" for="${name}">${label}<textarea id="${name}" name="${name}" placeholder="${placeholder}" required aria-describedby="${name}-error"></textarea><span class="field-error" id="${name}-error"></span></label>`;
+  const field = (name,label,placeholder='',type='text',required=true,value='') => `<label class="field" for="${name}">${label}<input id="${name}" name="${name}" type="${type}" maxlength="${name==='code'?64:name==='email'?254:name==='comment'?2000:300}" placeholder="${placeholder}" ${required?'required':''} ${type==='email'?'autocomplete="email"':type==='tel'?'autocomplete="tel"':name==='name'?'autocomplete="name"':''} value="${escape(value)}" aria-describedby="${name}-error" ${name==='code'?'autocapitalize="characters" spellcheck="false"':''}><span class="field-error" id="${name}-error"></span></label>`;
+  const textarea = (name,label,placeholder) => `<label class="field" for="${name}">${label}<textarea maxlength="5000" id="${name}" name="${name}" placeholder="${placeholder}" required aria-describedby="${name}-error"></textarea><span class="field-error" id="${name}-error"></span></label>`;
   const consent = (name='privacy') => {
     const labels={privacy:'политикой конфиденциальности',agreement:'пользовательским соглашением','purchase-terms':'условиями покупки'};
-    return `<label class="consent"><input type="checkbox" name="${name}" required><span>Согласен с <a href="${route(name)}" target="_blank" rel="noopener">${labels[name]}</a>.</span></label>`;
+    return `<label class="consent"><input type="checkbox" id="consent-${name}" name="${name}" required aria-describedby="consent-${name}-error"><span>Согласен с <a href="${route(name)}" target="_blank" rel="noopener">${labels[name]}</a>.<span class="field-error" id="consent-${name}-error"></span></span></label>`;
   };
   const intro = (title,caption='',cls='') => `<header class="page-intro ${cls}"><h1>${title}</h1>${caption?`<p>${caption}</p>`:''}</header>`;
   const signature = '<div class="signature" aria-hidden="true">CEOMENTALITY<span>CEOMENTALITY</span></div>';
@@ -49,20 +69,20 @@
   const colours = c => `<nav class="colour-options" aria-label="Цвет картхолдера">${['black','white'].map((x,i)=>`<a class="colour-option" href="${route(x==='white'?'wallet-white':'wallet')}" aria-current="${x===c}"><img src="assets/imgColourSwatch${i?'1':''}.svg" width="15" height="15" alt="">${colourName(x)}</a>`).join('')}</nav>`;
   const review = (items=activeCart) => {
     const list=items.length?items:sampleCart;
-    return `<div class="stack summary"><h3>ТВОЙ ОБЪЕКТ</h3><div class="summary-photo wallet-visual"><img src="${photo(list[0].colour)}" alt="CEOWALLET — ${colourName(list[0].colour)}" width="624" height="510"></div>${list.map(x=>row(`CEOWALLET × ${x.quantity}`,money(x.quantity*PRICE))+row('Цвет',colourName(x.colour))).join('')}${row('Доставка','По адресу')}${rule}<p class="total">${money(total(list))}</p><p class="small muted">Стоимость объекта без доставки</p></div>`;
+    return `<div class="stack summary"><h3>ТВОЙ ОБЪЕКТ</h3><div class="summary-photo wallet-visual"><img src="${photo(list[0].colour)}" alt="CEOWALLET — ${colourName(list[0].colour)}" width="624" height="510"></div>${list.map(x=>row(`CEOWALLET × ${x.quantity}`,money(x.quantity*unitPrice(x.colour)))+row('Цвет',colourName(x.colour))).join('')}${row('Доставка','По адресу')}${rule}<p class="total">${money(total(list))}</p><p class="small muted">Стоимость объекта без доставки</p></div>`;
   };
   function product() {
     const white=screen==='wallet-white';
     const c=white?'white':'black';
     const images=white?[photo(c),'assets/wallet-white-angle.png','assets/wallet-white-back.png','assets/wallet-white-side.png']:[photo(c),'assets/wallet-black-back.png'];
-    return intro('CEOWALLET.','OBJECT 01 / LIMITED EDITION')+`<div class="product-detail"><p class="detail-price">${money(PRICE)}</p><div class="product-gallery"><div class="gallery-main wallet-visual"><img id="gallery-main" src="${images[0]}" alt="CEOWALLET — ${colourName(c)}, вид спереди" width="624" height="510"></div><div class="gallery-thumbs" aria-label="Ракурсы">${images.map((src,i)=>`<button type="button" data-gallery="${src}" aria-label="Ракурс ${i+1}" aria-pressed="${i===0}"><span class="wallet-visual"><img src="${src}" alt="" width="138" height="130"></span></button>`).join('')}</div><p class="gallery-caption">CEOMENTALITY / CEOWALLET　 •　 РАКУРСЫ</p></div><div class="stack product-information"><p>Натуральная кожа. Два цвета. Предмет из линейки CEOMENTALITY.</p><p>Покупка CEOWALLET не гарантирует вступление в клуб. Заявка на членство рассматривается отдельно.</p>${colours(c)}${row('КОЛЛЕКЦИЯ','Access')}${rule}<p class="small">Для покупки нужен действующий код доступа.</p><div class="action-stack">${link('КУПИТЬ ПО КОДУ','access',false,{colour:c})}${link('НЕТ КОДА? ЗАПРОСИТЬ','purchase-application',true,{colour:c})}</div><p class="small muted">Условия доставки и оплаты — при оформлении заказа.</p></div></div>`;
+    return intro('CEOWALLET.','OBJECT 01 / LIMITED EDITION')+`<div class="product-detail"><p class="detail-price">${money(unitPrice(c))}</p><div class="product-gallery"><div class="gallery-main wallet-visual"><img id="gallery-main" src="${images[0]}" alt="CEOWALLET — ${colourName(c)}, вид спереди" width="624" height="510"></div><div class="gallery-thumbs" aria-label="Ракурсы">${images.map((src,i)=>`<button type="button" data-gallery="${src}" aria-label="Ракурс ${i+1}" aria-pressed="${i===0}"><span class="wallet-visual"><img src="${src}" alt="" width="138" height="130"></span></button>`).join('')}</div><p class="gallery-caption">CEOMENTALITY / CEOWALLET　 •　 РАКУРСЫ</p></div><div class="stack product-information"><p>Натуральная кожа. Два цвета. Предмет из линейки CEOMENTALITY.</p><p>Покупка CEOWALLET не гарантирует вступление в клуб. Заявка на членство рассматривается отдельно.</p>${colours(c)}${row('КОЛЛЕКЦИЯ','Access')}${rule}<p class="small">Для покупки нужен действующий код доступа.</p><div class="action-stack">${live&&(!variant(c)?.available||!variant(c)?.maxQuantity)?'<p role="status">ЭТОТ ЦВЕТ ПОКА НЕДОСТУПЕН</p>':link('КУПИТЬ ПО КОДУ','access',false,{colour:c})}${link('НЕТ КОДА? ЗАПРОСИТЬ','purchase-application',true,{colour:c})}</div><p class="small muted">Условия доставки и оплаты — при оформлении заказа.</p></div></div>`;
   }
   function catalog() {
     return intro('OBJECTS.','ЛИНЕЙКА ОБЪЕКТОВ CEOMENTALITY.<br>ПРОДУКЦИЯ ≠ ЧЛЕНСТВО.')+`<div class="catalog-list">${[
       ['wallet-white','CEOWALLET','НАТУРАЛЬНАЯ КОЖА',photo('white')],
       ['nfc','NFC CARD','МЕТАЛЛИЧЕСКАЯ NFC-ВИЗИТКА','assets/imgOriginalNfcTeaserSuppliedPhotograph.png'],
       ['next-item','NEXT ITEM','СЛЕДУЮЩИЙ ОБЪЕКТ CEOMENTALITY','assets/imgOriginalNfcTeaserSuppliedPhotograph.png']
-    ].map(([r,name,material,src],i)=>`<article class="catalog-item"><div class="catalog-copy"><p class="eyeline accent">OBJ / 0${i+1}${i?' — СКОРО':''}</p><h2><a href="${route(r)}">${name}</a></h2><p class="small muted">${material}</p>${i?'<p class="accent" style="margin-top:32px">В РАЗРАБОТКЕ</p>':`<p class="detail-price">${money(PRICE)}</p>${colours('white')}<div class="catalog-arrows type-object" data-type="arrows" aria-hidden="true"></div>`}</div><a class="catalog-photo ${i===0?'wallet-visual':''}" href="${route(r)}" aria-label="Открыть ${name}"><img src="${src}" alt="${i?'Будущий объект под белой тканью':name}" width="664" height="543"></a></article>`).join('')}</div>`;
+    ].map(([r,name,material,src],i)=>`<article class="catalog-item"><div class="catalog-copy"><p class="eyeline accent">OBJ / 0${i+1}${i?' — СКОРО':''}</p><h2><a href="${route(r)}">${name}</a></h2><p class="small muted">${material}</p>${i?'<p class="accent" style="margin-top:32px">В РАЗРАБОТКЕ</p>':`<p class="detail-price">${money(unitPrice('white'))}</p>${colours('white')}<div class="catalog-arrows type-object" data-type="arrows" aria-hidden="true"></div>`}</div><a class="catalog-photo ${i===0?'wallet-visual':''}" href="${route(r)}" aria-label="Открыть ${name}"><img src="${src}" alt="${i?'Будущий объект под белой тканью':name}" width="664" height="543"></a></article>`).join('')}</div>`;
   }
   function teaser() {
     const next=screen==='next-item';
@@ -75,11 +95,11 @@
   function emptyCart() {return statusPage('ПОКА ПУСТО.','В корзине ещё нет объектов.','Начни с того, что откликается.<br><br>Лимитированные объекты CEOMENTALITY ждут в каталоге.',link('К ОБЪЕКТАМ','objects')+homeButton('НА ГЛАВНУЮ',true),'000 / ∞');}
   function cartPage() {
     if(screen==='cart-empty'||!cart.length)return emptyCart();
-    return intro('КОРЗИНА.','Твой выбор / продукция CEOMENTALITY')+`<div class="site-grid wide-left"><div class="stack"><div class="cart-items">${cart.map((x,i)=>`<article class="cart-item"><div class="wallet-visual"><img src="${photo(x.colour)}" alt="CEOWALLET — ${colourName(x.colour)}" width="230" height="230"></div><div class="stack"><h3><a href="${route(x.colour==='white'?'wallet-white':'wallet')}">CEOWALLET</a></h3><p class="small muted">Натуральная кожа<br>${colourName(x.colour)}</p><p>${money(x.quantity*PRICE)}</p><div class="quantity" aria-label="Количество"><button type="button" data-quantity="${i}" data-delta="-1" aria-label="Уменьшить количество">−</button><output>${x.quantity}</output><button type="button" data-quantity="${i}" data-delta="1" aria-label="Увеличить количество" ${x.quantity>=10?'disabled':''}>+</button></div><button class="text-link" type="button" data-remove="${i}">УДАЛИТЬ ×</button></div></article>`).join('')}</div>${link('ПРОДОЛЖИТЬ ПОКУПКИ','objects',true)}</div><aside class="stack cart-summary"><h3>ИТОГО</h3><p class="total">${money(total(cart))}</p>${row('Объекты',String(count(cart)))}${rule}<p class="muted">Стоимость доставки будет рассчитана при оформлении заказа.</p>${link('ОФОРМИТЬ ЗАКАЗ',demo&&read('ceo-preview-access',false)?'checkout':'access')}<p class="small">${demo&&read('ceo-preview-access',false)?'✓ Код для покупки подтверждён.':'Для покупки нужен действующий код доступа.'}</p></aside></div>`;
+    return intro('КОРЗИНА.','Твой выбор / продукция CEOMENTALITY')+`<div class="site-grid wide-left"><div class="stack"><div class="cart-items">${cart.map((x,i)=>`<article class="cart-item"><div class="wallet-visual"><img src="${photo(x.colour)}" alt="CEOWALLET — ${colourName(x.colour)}" width="230" height="230"></div><div class="stack"><h3><a href="${route(x.colour==='white'?'wallet-white':'wallet')}">CEOWALLET</a></h3><p class="small muted">Натуральная кожа<br>${colourName(x.colour)}</p><p>${money(x.quantity*unitPrice(x.colour))}</p><div class="quantity" aria-label="Количество"><button type="button" data-quantity="${i}" data-delta="-1" aria-label="Уменьшить количество">−</button><output>${x.quantity}</output><button type="button" data-quantity="${i}" data-delta="1" aria-label="Увеличить количество" ${x.quantity>=(variant(x.colour)?.maxQuantity??10)?'disabled':''}>+</button></div><button class="text-link" type="button" data-remove="${i}">УДАЛИТЬ ×</button></div></article>`).join('')}</div>${link('ПРОДОЛЖИТЬ ПОКУПКИ','objects',true)}</div><aside class="stack cart-summary">${alert}<h3>ИТОГО</h3><p class="total">${money(total(cart))}</p>${row('Объекты',String(count(cart)))}${rule}<p class="muted">Стоимость доставки будет рассчитана при оформлении заказа.</p>${link('ОФОРМИТЬ ЗАКАЗ',(demo&&read('ceo-preview-access',false))||(live&&session?.accessGranted)?'checkout':'access')}<p class="small">${(demo&&read('ceo-preview-access',false))||(live&&session?.accessGranted)?'✓ Код для покупки подтверждён.':'Для покупки нужен действующий код доступа.'}</p></aside></div>`;
   }
   function checkout() {
-    const invalid=screen==='checkout-validation';
-    return intro('ОФОРМЛЕНИЕ.','КОД ✓　/　КОРЗИНА ✓　/　ДАННЫЕ　/　ОПЛАТА')+`<form data-form="checkout" novalidate>${invalid?'<p class="form-alert" style="margin-bottom:28px">Проверь email, телефон и обязательные согласия. Остальные данные сохранены.</p>':''}<div class="site-grid wide-left"><div class="stack form-fields"><h3>01 / КОНТАКТЫ</h3>${field('name','ИМЯ И ФАМИЛИЯ','Как к вам обращаться')}${field('email','EMAIL','you@example.com','email',true,invalid?'you@':'')}${field('phone','ТЕЛЕФОН','+7 ___ ___-__-__','tel',true,invalid?'+7 900':'')}<h3>02 / ДОСТАВКА</h3>${field('city','ГОРОД','Укажи город')}${field('address','АДРЕС','Улица, дом, квартира')}${field('comment','КОММЕНТАРИЙ · НЕОБЯЗАТЕЛЬНО','Что нужно знать о доставке','text',false)}<p class="small muted">Стоимость доставки рассчитывается по адресу.</p></div><aside class="stack">${review()}${consent()}${consent('agreement')}${consent('purchase-terms')}${alert}${submit(invalid?'ИСПРАВИТЬ ДАННЫЕ':'ПЕРЕЙТИ К ОПЛАТЕ')}<p class="eyeline">✓ Код подтверждён. Следующий шаг — оплата.</p></aside></div></form>`;
+    const invalid=demo&&screen==='checkout-validation';
+    return intro('ОФОРМЛЕНИЕ.','КОД ✓　/　КОРЗИНА ✓　/　ДАННЫЕ　/　ОПЛАТА')+`<form data-form="checkout" novalidate>${invalid?'<p class="form-alert" style="margin-bottom:28px">Проверь email, телефон и обязательные согласия. Остальные данные сохранены.</p>':''}<div class="site-grid wide-left"><div class="stack form-fields"><h3>01 / КОНТАКТЫ</h3>${field('name','ИМЯ И ФАМИЛИЯ','Как к вам обращаться')}${field('email','EMAIL','you@example.com','email',true,invalid?'you@':'')}${field('phone','ТЕЛЕФОН','+7 ___ ___-__-__','tel',true,invalid?'+7 900':'')}<h3>02 / ДОСТАВКА</h3>${field('city','ГОРОД','Укажи город')}${field('address','АДРЕС','Улица, дом, квартира')}${field('comment','КОММЕНТАРИЙ · НЕОБЯЗАТЕЛЬНО','Что нужно знать о доставке','text',false)}<p class="small muted">Стоимость доставки рассчитывается по адресу.</p></div><aside class="stack">${review()}${consent()}${consent('agreement')}${consent('purchase-terms')}${alert}<div data-quote-summary></div>${submit(live?'РАССЧИТАТЬ ДОСТАВКУ':invalid?'ИСПРАВИТЬ ДАННЫЕ':'ПЕРЕЙТИ К ОПЛАТЕ')}<p class="eyeline">✓ Код подтверждён. Следующий шаг — оплата.</p></aside></div></form>`;
   }
   function formPage(kind) {
     const purchase=kind==='purchase-application', membership=kind==='application';
@@ -130,7 +150,15 @@
   function unavailableStatus() {return intro('СТАТУС.','Информация по твоему обращению')+`<div class="stack" style="max-width:680px"><p>Для просмотра статуса нужна действующая ссылка из подтверждения заказа или приглашения.</p>${link('СВЯЗАТЬСЯ С КОМАНДОЙ','contact')}${homeButton('НА ГЛАВНУЮ',true)}</div>`;}
   function render() {
     let content;
-    if(confirmedScreens.includes(screen)&&!demo) content=unavailableStatus();
+    activeCart = cart.length ? cart : (demo ? sampleCart : []);
+    if(live && !ready) content=intro('ЗАГРУЖАЕМ.','Получаем актуальные данные…');
+    else if(live && loadError) content=intro('НЕТ СОЕДИНЕНИЯ.','Не удалось загрузить данные.')+`<div class="stack">${alert}${action('ПОВТОРИТЬ','retry-load')}</div>`;
+    else if(live && ['payment','processing','payment-failed','thank-you','order'].includes(screen)) content=liveOrderPage();
+    else if(live && screen==='membership-confirmed') content=membershipData?.status==='approved'?membershipConfirmed():statusPage('СТАТУС ЗАЯВКИ.','Решение по вступлению',membershipData?.status==='pending'?'Заявка рассматривается командой.':membershipData?.status==='rejected'?'Отбор завершён. Подробности можно уточнить у команды.':'Подтверждённого приглашения пока нет.',link('СВЯЗАТЬСЯ С КОМАНДОЙ','contact'));
+    else if(live && screen==='application'&&!session?.membershipAllowed) content=statusPage('НУЖНО ПРИГЛАШЕНИЕ.','Анкета доступна по QR','Открой QR-ссылку внутри полученного картхолдера.',link('КАК ВСТУПИТЬ','join'));
+    else if(live && ['checkout','checkout-validation'].includes(screen)&&(!session?.accessGranted||!cart.length)) content=cart.length?access():emptyCart();
+    else if(!demo&&!live&&['checkout','checkout-validation','payment','processing','payment-failed'].includes(screen)) content=unavailableStatus();
+    else if(confirmedScreens.includes(screen)&&!demo && !(live&&read('ceo-receipt-'+screen,null))) content=unavailableStatus();
     else if(window.CEO_DOCUMENTS[screen]) content=documents();
     else switch(screen){
       case 'wallet':case 'wallet-white':content=product();break;
@@ -145,14 +173,16 @@
       case 'membership-confirmed':content=membershipConfirmed();break;
       case 'join':content=join();break;
       case 'faq':content=faq();break;
-      case 'screens':content=gallery();break;
+      case 'screens':content=config.previewEnabled?gallery():intro('НЕ НАЙДЕНО.','Такого экрана нет.')+homeButton();break;
       case 'menu':content=intro('НАВИГАЦИЯ.','CEOMENTALITY / свой круг')+`<nav class="menu-links" aria-label="Все разделы">${[['КЛУБ',home+'#community'],['ОБЪЕКТЫ',route('objects')],['ВОПРОСЫ',route('faq')],['КОНТАКТЫ',route('contact')],['КОРЗИНА',route('cart')]].map(([t,r])=>`<a href="${r}">${t}</a>`).join('')}</nav>`;break;
       case 'loading':content=`<div class="loading-preview"><img src="assets/wordmark.svg" alt="CEOMENTALITY" width="900" height="64"><div class="loading-track" aria-hidden="true"></div><p class="eyeline muted">ЗАГРУЗКА / 060</p><a href="${home}" class="text-link">НА ГЛАВНУЮ →</a></div>`;break;
       default:content=status()||intro('НЕ НАЙДЕНО.','Такого экрана нет.')+homeButton();
     }
     document.title=(screens.find(x=>x[0]===screen)?.[2]||'Все экраны')+' — CEOMENTALITY';
     root.innerHTML=(demo?`<div class="preview-banner"><span>Предпросмотр · данные не отправляются, оплата тестовая</span><a href="${route('screens')}">Все экраны ↗</a></div>`:'')+header()+`<main class="site-main" id="site-main" tabindex="-1">${content}</main>`+(window.CEO_DOCUMENTS[screen]?fullFooter():footer());
-    if(screen==='checkout-validation') validate(document.querySelector('form'),false);
+    if(demo&&screen==='checkout-validation') validate(document.querySelector('form'),false);
+    if(loadError) showAlert(window.CEO_API.message(loadError));
+    document.dispatchEvent(new Event('ceo:render'));
   }
   function showAlert(message,scope=document) {const el=scope.querySelector('[data-form-alert]');if(el){el.textContent=message;el.scrollIntoView({block:'nearest',behavior:'smooth'});}}
   function validate(form,focus=true) {
@@ -160,6 +190,7 @@
     for(const el of form.querySelectorAll('input,textarea')) {
       let message='';
       if(el.required && (el.type==='checkbox'?!el.checked:!el.value.trim())) message=el.type==='checkbox'?'Подтверди обязательные согласия.':'Заполни это поле.';
+      else if(el.maxLength>0&&el.value.length>el.maxLength) message='Сократи значение поля.';
       else if(el.type==='email'&&el.value&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(el.value)) message='Укажи email в формате name@example.com.';
       else if(el.type==='tel'&&el.value&&(el.value.replace(/\D/g,'').length<10||el.value.replace(/\D/g,'').length>15)) message='Укажи полный номер телефона.';
       el.setAttribute('aria-invalid',String(!!message));
@@ -169,14 +200,140 @@
     if(first){showAlert('Проверь обязательные поля и согласия. Введённые данные сохранены в форме.',form);if(focus)first.focus();return false;}
     showAlert('',form);return true;
   }
+  function apiError(error,scope=document) {
+    if(error.code==='ABORTED')return;
+    if(scope.tagName==='FORM'){
+      for(const [name,code] of Object.entries(error.fields||{})){
+        const el=scope.elements.namedItem(name);
+        if(!el||!el.setAttribute)continue;
+        el.setAttribute('aria-invalid','true');
+        const out=document.getElementById(el.id+'-error');
+        if(out)out.textContent=code==='REQUIRED'?'Заполни это поле.':'Проверь значение поля.';
+      }
+      scope.querySelector('[aria-invalid="true"]')?.focus();
+    }
+    showAlert(window.CEO_API.message(error),scope);
+  }
+  const customer = data => ({name:data.name,email:data.email,phone:window.CEO_STORE.phone(data.phone),city:data.city,address:data.address,comment:data.comment||''});
+  const consents = data => ({privacy:data.privacy==='on',agreement:data.agreement==='on',purchaseTerms:data['purchase-terms']==='on'});
+  function serverSummary(data){
+    return `<div class="stack">${data.items.map(x=>row(`CEOWALLET / ${colourName(x.variantId.endsWith('white')?'white':'black')} × ${x.quantity}`,money(x.unitPrice*x.quantity/100))).join('')}${row('Объекты',money(data.subtotal/100))}${row('Доставка',money(data.delivery/100))}${rule}${row('Итого',money(data.total/100))}</div>`;
+  }
+  function liveOrderPage(){
+    if(!orderData)return unavailableStatus();
+    const paid=['paid','shipped','delivered'].includes(orderData.status);
+    const labels={awaiting_payment:'ОЖИДАЕТ ОПЛАТЫ.',processing:'ПРОВЕРЯЕМ ОПЛАТУ.',paid:'ОПЛАЧЕН.',shipped:'ОТПРАВЛЕН.',delivered:'ДОСТАВЛЕН.',payment_failed:'ПЛАТЁЖ НЕ ПРОШЁЛ.',cancelled:'ЗАКАЗ ОТМЕНЁН.'};
+    const canPay=['awaiting_payment','payment_failed'].includes(orderData.status);
+    return intro(labels[orderData.status],`ЗАКАЗ / ${escape(orderData.id)}`)+`<div class="site-grid"><div class="stack"><p>${paid?'Оплата подтверждена. Покупка не гарантирует вступление в клуб.':canPay?'Оплата откроется на защищённой странице платёжного сервиса.':'Статус получен от сервера. Не оплачивай заказ повторно, пока платёж проверяется.'}</p>${alert}${canPay?action('ПЕРЕЙТИ К ОПЛАТЕ','pay'):''}${action('ОБНОВИТЬ СТАТУС','refresh-order',true)}${link('СВЯЗАТЬСЯ С КОМАНДОЙ','contact',true)}</div><aside>${serverSummary(orderData)}${orderData.tracking?row('Служба доставки',escape(orderData.tracking.carrier))+row('Трек-номер',escape(orderData.tracking.number)):''}</aside></div>`;
+  }
+  async function initialize(){
+    ready=false;loadError=null;render();
+    try{
+      [session,catalogData]=await Promise.all([api.session(lifetime.signal),api.catalog(lifetime.signal)]);
+      if(invitationToken){await api.claimInvitation(invitationToken,requestKey('invitation',invitationToken),lifetime.signal);invitationToken=null;session=await api.session(lifetime.signal);}
+      if(orderToken){const claimed=await api.claimOrder(orderToken,requestKey('order-claim',orderToken),lifetime.signal);params.set('orderId',claimed.orderId);write('ceo-order-id',claimed.orderId);orderToken=null;history.replaceState(null,'',route(screen,{orderId:claimed.orderId}));}
+      if(['payment','processing','payment-failed','thank-you','order'].includes(screen)){
+        const orderId=params.get('orderId')||read('ceo-order-id',null);
+        if(orderId)orderData=await api.order(orderId,lifetime.signal);
+      }
+      if(screen==='membership-confirmed')membershipData=await api.membershipStatus(lifetime.signal);
+      ready=true;render();
+    }catch(error){if(error.code==='ABORTED')return;loadError=error;ready=true;render();}
+  }
+  async function handleLiveAction(button){
+    if(button.disabled)return;
+    button.disabled=true;
+    try{
+      if(button.dataset.action==='retry-load'){await initialize();return;}
+      if(!orderData)return;
+      if(button.dataset.action==='pay'){
+        const data=await api.payment(orderData.id,requestKey('payment',orderData.id),lifetime.signal);
+        location.assign(api.paymentURL(data.paymentUrl));
+      }else if(['refresh-order','refresh-payment'].includes(button.dataset.action)){
+        orderData=await api.order(orderData.id,lifetime.signal);render();
+      }
+    }catch(error){apiError(error);}finally{button.disabled=false;}
+  }
+  function resetQuote(form){
+    quote=null;requestKeys.delete('quote');requestKeys.delete('order');
+    const output=form.querySelector('[data-quote-summary]');if(output)output.replaceChildren();
+    const label=form.querySelector('button[type="submit"] span');if(label)label.textContent='РАССЧИТАТЬ ДОСТАВКУ';
+  }
+  document.addEventListener('input',event=>{
+    const form=event.target.closest('[data-form]');if(!form)return;
+    if(live&&form.dataset.form==='checkout')resetQuote(form);
+    if(event.target.getAttribute('aria-invalid')==='true'){
+      event.target.removeAttribute('aria-invalid');
+      const error=document.getElementById(event.target.id+'-error');if(error)error.textContent='';
+    }
+  });
+  async function submitLive(form){
+    const data=Object.fromEntries([...new FormData(form)].map(([key,value])=>[key,typeof value==='string'?value.trim():value]));
+    const kind=form.dataset.form;
+    const controls=[...form.querySelectorAll('input,textarea,button')].map(el=>[el,el.disabled]);
+    form.dataset.busy='true';form.setAttribute('aria-busy','true');controls.forEach(([el])=>el.disabled=true);
+    try{
+      if(!session)throw new window.CEO_API.ApiError('UNAUTHORIZED');
+      if(kind==='access'){
+        if(!variant(selected)?.available||!variant(selected)?.maxQuantity)throw new window.CEO_API.ApiError('OUT_OF_STOCK');
+        const body={code:data.code,variantId:'ceowallet-'+selected};
+        await api.checkAccess(body,requestKey(kind,body),lifetime.signal);
+        if(!cart.some(x=>x.colour===selected))cart.push({colour:selected,quantity:1});
+        if(!write(cartKey,cart))throw new window.CEO_API.ApiError('SERVER_ERROR');
+        location.href=route('cart');return;
+      }
+      if(kind==='checkout'){
+        const body={items:window.CEO_STORE.items(cart),customer:customer(data),consents:consents(data)};
+        if(!quote){
+          quote=await api.quote(body,requestKey('quote',body),lifetime.signal);
+          if(Date.parse(quote.expiresAt)<=Date.now()){resetQuote(form);throw new window.CEO_API.ApiError('QUOTE_EXPIRED');}
+          form.querySelector('[data-quote-summary]').innerHTML=serverSummary(quote);
+          form.querySelector('button[type="submit"] span').textContent='ПОДТВЕРДИТЬ '+money(quote.total/100);
+          form.querySelector('[data-quote-summary]').scrollIntoView({block:'nearest'});return;
+        }
+        if(Date.parse(quote.expiresAt)<=Date.now()){resetQuote(form);throw new window.CEO_API.ApiError('QUOTE_EXPIRED');}
+        const payload={quoteId:quote.id,customer:body.customer,consents:body.consents};
+        const created=await api.createOrder(payload,requestKey('order',payload),lifetime.signal);
+        write('ceo-order-id',created.id);
+        location.href=route('payment',{orderId:created.id});return;
+      }
+      const common={name:data.name,email:data.email,consents:{privacy:data.privacy==='on'}};
+      let body,operation;
+      if(kind==='contact'){body={...common,message:data.message};operation=api.contact;}
+      else if(kind==='purchase-application'){body={...common,phone:window.CEO_STORE.phone(data.phone),comment:data.comment||'',variantId:'ceowallet-'+selected};operation=api.purchase;}
+      else if(kind==='application'){body={...common,phone:window.CEO_STORE.phone(data.phone),telegram:data.telegram,project:data.project,invitation:data.invitation||''};operation=api.membership;}
+      if(!operation)return;
+      const receipt=await operation(body,requestKey(kind,body),lifetime.signal);
+      const next={contact:'contact-received','purchase-application':'purchase-received',application:'application-received'}[kind];
+      if(write('ceo-receipt-'+next,{id:receipt.id}))location.href=route(next);
+      else form.innerHTML='<h2>ПРИНЯТО.</h2><p>Данные получены. Команда вернётся с ответом.</p>';
+    }catch(error){
+      if(error.code==='QUOTE_EXPIRED'&&kind==='checkout')resetQuote(form);
+      apiError(error,form);
+    }finally{
+      form.dataset.busy='false';form.removeAttribute('aria-busy');controls.forEach(([el,disabled])=>el.disabled=disabled);
+      form.querySelector('[aria-invalid="true"]')?.focus();
+    }
+  }
+  try {sessionStorage.removeItem('ceo-preview-checkout');} catch {}
   render();
+  if(live) initialize();
   document.addEventListener('click',event=>{
     const galleryButton=event.target.closest('[data-gallery]');
     if(galleryButton){document.querySelector('#gallery-main').src=galleryButton.dataset.gallery;document.querySelector('#gallery-main').alt=`CEOWALLET — ${galleryButton.getAttribute('aria-label')}`;document.querySelectorAll('[data-gallery]').forEach(b=>b.setAttribute('aria-pressed',String(b===galleryButton)));}
     const quantity=event.target.closest('[data-quantity]'),remove=event.target.closest('[data-remove]');
-    if(quantity||remove){const index=Number((quantity||remove).dataset[quantity?'quantity':'remove']);if(!cart[index])return;if(remove)cart.splice(index,1);else{cart[index].quantity+=Number(quantity.dataset.delta);cart=cart.filter(x=>x.quantity>0);}if(!write(cartKey,cart)){showAlert('Не удалось сохранить корзину. Разреши хранение данных в браузере.');return;}render();}
+    if(quantity||remove){
+      const index=Number((quantity||remove).dataset[quantity?'quantity':'remove']);if(!cart[index])return;
+      const next=cart.map(x=>({...x}));
+      if(remove)next.splice(index,1);else next[index].quantity=Math.min(10,next[index].quantity+Number(quantity.dataset.delta));
+      const updated=window.CEO_STORE.cart(next);
+      if(live&&quantity&&Number(quantity.dataset.delta)>0&&updated.some(x=>!variant(x.colour)?.available||x.quantity>variant(x.colour).maxQuantity)){showAlert('Выбранного количества сейчас нет в наличии.');return;}
+      if(!write(cartKey,updated)){showAlert('Не удалось сохранить корзину. Разреши хранение данных в браузере.');return;}
+      cart=updated;render();
+    }
     const faqButton=event.target.closest('[data-faq]');if(faqButton)selectFaq(Number(faqButton.dataset.faq));
     const a=event.target.closest('[data-action]');if(!a)return;
+    if(live){handleLiveAction(a);return;}
     switch(a.dataset.action){
       case 'fill-code':document.querySelector('[name=code]').value='CEO-DEMO-2026';break;
       case 'pay':if(demo)location.href=route('processing');else showAlert('Оплата пока недоступна. Платёжный сервис ещё не подключён. Деньги не списаны.');break;
@@ -196,9 +353,10 @@
     const index=Number(tab.dataset.faq),next=event.key==='ArrowDown'?(index+1)%6:event.key==='ArrowUp'?(index+5)%6:event.key==='Home'?0:event.key==='End'?5:null;
     if(next!==null){event.preventDefault();selectFaq(next);document.querySelector(`[data-faq="${next}"]`).focus();}
   });
-  document.addEventListener('submit',event=>{
+  document.addEventListener('submit',async event=>{
     const form=event.target.closest('[data-form]');if(!form)return;event.preventDefault();
-    if(!validate(form))return;
+    if(form.dataset.busy==='true'||!validate(form))return;
+    if(live){await submitLive(form);return;}
     if(!demo){showAlert('Отправка пока недоступна. Сервис ещё не подключён; данные не отправлены. Попробуй позже.',form);return;}
     const kind=form.dataset.form;
     if(kind==='access') {
@@ -208,15 +366,11 @@
       location.href=route('cart');return;
     }
     if(kind==='checkout'){
-      // Keep contact details only in this tab, never collect payment card data.
-      if(!write('ceo-preview-checkout',Object.fromEntries(new FormData(form)))){showAlert('Не удалось сохранить данные в этом браузере.',form);return;}
+      // Preview never persists contact details or payment data.
       location.href=route('payment');return;
     }
     const next={contact:'contact-received','purchase-application':'purchase-received',application:'application-received'}[kind];
     if(next)location.href=route(next);
   });
-  if(['checkout','checkout-validation'].includes(screen)&&demo){
-    const values=read('ceo-preview-checkout',{}),form=document.querySelector('form');
-    for(const [key,value] of Object.entries(values)){const el=form.elements.namedItem(key);if(el){if(el.type==='checkbox')el.checked=true;else el.value=String(value);}}
-  }
+
 })();

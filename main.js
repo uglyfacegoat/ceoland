@@ -30,3 +30,19 @@ document.querySelectorAll('input[name="colour"]').forEach(input=>input.addEventL
   wallet.alt=`${white?'Белый':'Чёрный'} кожаный картхолдер CEOWALLET`;
   document.querySelectorAll('[data-wallet-link]').forEach(link=>link.href=`app.html?screen=${white?'wallet-white':'wallet'}`);
 }));
+
+// Refresh presentation prices; only the server quote can authorize a final total.
+if(window.CEO_CONFIG?.mode==='api'){
+  const catalogClient=window.CEO_API.createClient(window.CEO_CONFIG);
+  catalogClient.catalog().then(catalog=>{
+    const update=()=>{
+      const colour=document.querySelector('input[name="colour"]:checked')?.value||'white';
+      const variant=catalog.variants.find(v=>v.variantId==='ceowallet-'+colour);
+      const price=document.querySelector('.wallet .price');
+      if(price)price.textContent=new Intl.NumberFormat('ru-RU').format(variant.unitPrice/100)+' ₽';
+    };
+    update();document.querySelectorAll('input[name="colour"]').forEach(input=>input.addEventListener('change',update));
+  }).catch(()=>{
+    const price=document.querySelector('.wallet .price');if(price)price.textContent='Цена уточняется';
+  });
+}

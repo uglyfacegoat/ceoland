@@ -4,7 +4,7 @@
   const mobile = matchMedia('(max-width: 700px)');
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const motionDisabled = () => reduced.matches;
-  const objects = [...document.querySelectorAll('[data-type]')];
+  let objects = [...document.querySelectorAll('[data-type]')];
   const state = new Map();
 
   // A 12 × 12 grid; columns move vertically using the diamond motion.
@@ -254,6 +254,14 @@
   }
   syncVariants();
   objects.forEach(object=>{sizes.observe(object);visibility.observe(object);});
+  document.addEventListener('ceo:render', () => {
+    for (const [object,item] of state) {
+      if (!object.isConnected) {item.animations.forEach(a=>a.cancel());sizes.unobserve(object);visibility.unobserve(object);state.delete(object);}
+    }
+    objects = [...document.querySelectorAll('[data-type]')];
+    objects.filter(object=>!state.has(object)).forEach(object=>{build(object);sizes.observe(object);visibility.observe(object);});
+    syncPlayback();
+  });
   mobile.addEventListener('change',syncVariants);
   reduced.addEventListener('change',syncPlayback);
   document.addEventListener('visibilitychange',syncPlayback);

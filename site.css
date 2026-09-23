@@ -68,3 +68,10 @@
  .join-steps li:nth-child(3):after,.join-steps li:nth-child(4):after{right:auto;left:0;background-image:url('assets/route-mobile-two.svg')}
 }
 @media(max-width:700px){.join-steps li:nth-child(4){margin-left:24px}.join-steps li:nth-child(4):after{left:-20px;right:auto;background-image:url('assets/route-mobile-two.svg')}}
+
+/* Integration states keep existing forms and keyboard focus usable. */
+[data-form][aria-busy=true]{cursor:progress}
+.site-button:disabled{cursor:wait;opacity:.6}
+.field-error:empty{display:none}
+.consent .field-error{display:block;margin-top:4px}
+[data-quote-summary]:not(:empty){border-top:1px solid #dfdfdf;padding-top:24px}
