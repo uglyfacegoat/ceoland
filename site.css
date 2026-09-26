@@ -75,3 +75,11 @@
 .field-error:empty{display:none}
 .consent .field-error{display:block;margin-top:4px}
 [data-quote-summary]:not(:empty){border-top:1px solid #dfdfdf;padding-top:24px}
+
+.catalog-action{display:flex;align-items:center;justify-content:space-between;gap:28px;width:max-content;min-width:180px;min-height:54px;padding:0 18px;margin-top:22px;border-radius:3px;background:var(--ink);color:#fff;font-size:14px;font-weight:600}
+.catalog-action span{font-size:24px;line-height:1;font-weight:400}
+.catalog-action:hover{background:var(--blue);color:#fff}
+.site-page .catalog-action.is-locked{justify-content:center;border:0;cursor:not-allowed;opacity:1}
+.catalog-action.is-locked:hover{background:var(--ink)}
+.catalog-action.is-locked img{width:20px;height:20px}
+@media(max-width:700px){.catalog-action{width:100%;min-height:50px;margin-top:22px;font-size:13px}}

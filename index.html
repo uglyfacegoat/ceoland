@@ -9,7 +9,20 @@
   <link rel="icon" href="data:,">
   <link rel="preload" href="assets/inter-extrabold.ttf" as="font" type="font/ttf" crossorigin>
   <script>
-    if (!location.hash || location.hash === '#top') {
+    let heroVariant = 0;
+    try {
+      const savedVariant = sessionStorage.getItem('ceo-hero-variant-v1');
+      const previous = savedVariant === null ? -1 : Number(savedVariant);
+      heroVariant = Number.isInteger(previous) && previous >= 0 && previous < 9 ? (previous + 1) % 9 : 0;
+      sessionStorage.setItem('ceo-hero-variant-v1', String(heroVariant));
+    } catch {}
+    document.documentElement.dataset.heroVariant = String(heroVariant);
+    let showIntro = !location.hash || location.hash === '#top';
+    try {
+      if (sessionStorage.getItem('ceo-intro-seen') === '1') showIntro = false;
+      else if (showIntro) sessionStorage.setItem('ceo-intro-seen', '1');
+    } catch {}
+    if (showIntro) {
       document.documentElement.classList.add('is-loading');
       window.ceoLoaderTimeout = setTimeout(() => {
         document.documentElement.classList.remove('is-loading', 'is-revealing', 'is-docking');
@@ -53,6 +66,7 @@
         <div class="word-field type-object" data-type="field" data-variant="desktop" aria-hidden="true"></div>
       </div>
       <div class="mobile-signal"><img class="mobile-barcode" src="assets/barcode-mobile.svg" width="111" height="252" alt=""><img class="mobile-inverse" src="assets/barcode-inverse-mobile.svg" width="51" height="252" alt=""><div class="mobile-field type-object" data-type="field" data-variant="mobile" aria-hidden="true"></div></div>
+      <canvas class="hero-canvas" aria-hidden="true"></canvas>
     </div>
   </section>
 
@@ -63,16 +77,21 @@
       <a class="product-image wallet-visual" href="app.html?screen=wallet-white" data-wallet-link aria-label="Открыть CEOWALLET"><img id="wallet-image" src="assets/wallet-white-front.png" alt="Белый кожаный картхолдер CEOWALLET с надписью I’m CEO, Bitch" width="664" height="543" loading="lazy"></a>
       <fieldset class="colours"><legend>ЦВЕТ</legend><label><input type="radio" name="colour" value="black"><span><img src="assets/imgColourSwatch.svg" alt="" width="15" height="15">Чёрный</span></label><label><input type="radio" name="colour" value="white" checked><span><img src="assets/imgColourSwatch1.svg" alt="" width="15" height="15">Белый</span></label></fieldset>
       <div class="object-arrows decoration type-object" data-type="arrows" aria-hidden="true"></div>
+      <a class="buy-action" href="app.html?screen=access&amp;colour=white" data-buy-link aria-label="Купить CEOWALLET по коду доступа">КУПИТЬ <span aria-hidden="true">↗</span></a>
     </article>
     <article class="product nfc" id="nfc">
       <div class="product-copy"><p class="product-number">OBJ / 02 — СКОРО</p><h3><a href="app.html?screen=nfc">NFC CARD</a></h3><p class="material">МЕТАЛЛИЧЕСКАЯ NFC-ВИЗИТКА</p></div>
       <a class="nfc-image" href="app.html?screen=nfc"><img  src="assets/imgOriginalNfcTeaserSuppliedPhotograph.png" alt="Будущий объект под белой тканью с надписью SOON" width="646" height="426" loading="lazy"></a>
-      <p class="development">В РАЗРАБОТКЕ</p><a class="text-action" href="app.html?screen=nfc">УЗНАТЬ О ДРОПЕ <span aria-hidden="true">↗</span></a>
+      <p class="development">В РАЗРАБОТКЕ</p>
+      <div class="teaser-arrows decoration type-object" data-type="arrows" aria-hidden="true"></div>
+      <button class="teaser-action" type="button" disabled aria-label="NFC CARD пока в разработке"><img src="assets/lock.svg" alt="" width="20" height="20"></button>
     </article>
     <article class="product next-item" id="next-item">
       <div class="product-copy"><p class="product-number">OBJ / 03 — СКОРО</p><h3><a href="app.html?screen=next-item">NEXT ITEM</a></h3><p class="material">СЛЕДУЮЩИЙ ОБЪЕКТ CEOMENTALITY</p></div>
       <a class="next-item-image" href="app.html?screen=next-item"><img  src="assets/imgOriginalNfcTeaserSuppliedPhotograph.png" alt="Будущий объект под белой тканью с надписью SOON" width="646" height="426" loading="lazy"></a>
       <p class="development">В РАЗРАБОТКЕ</p>
+      <div class="teaser-arrows decoration type-object" data-type="arrows" aria-hidden="true"></div>
+      <button class="teaser-action" type="button" disabled aria-label="NEXT ITEM пока в разработке"><img src="assets/lock.svg" alt="" width="20" height="20"></button>
     </article>
   </section>
 
@@ -89,10 +108,11 @@
     <ol class="steps">
       <li><span class="step-number">01</span><div><h3>ЗАЯВКА НА ПОКУПКУ</h3><p>Оставь контакты, чтобы получить код доступа к покупке.</p></div></li>
       <li><span class="step-number">02</span><div><h3>ПОКУПКА</h3><p>Введи код, выбери картхолдер и дождись доставки.</p></div></li>
-      <li><span class="step-number">03</span><div><h3>ЗАЯВКА В КЛУБ</h3><p>Открой анкету по QR внутри картхолдера и расскажи о себе.</p></div><span class="selection-square decoration type-object" data-type="square" data-variant="desktop" aria-hidden="true"></span></li>
+      <li><span class="step-number">03</span><div><h3>ЗАЯВКА В КЛУБ</h3><p>Открой анкету по QR внутри картхолдера и расскажи о себе.</p></div><span class="selection-mark decoration" aria-hidden="true"><svg viewBox="0 0 589 122"><path d="M0 122L60 0H85L25 122Z" fill="var(--ink)"/><path d="M63 122L123 0H148L88 122Z" fill="var(--ink)"/><path d="M126 122L186 0H211L151 122Z" fill="var(--ink)"/><path d="M189 122L249 0H274L214 122Z" fill="var(--ink)"/><path d="M252 122L312 0H337L277 122Z" fill="var(--ink)"/><path d="M315 122L375 0H400L340 122Z" fill="var(--blue)"/><path d="M378 122L438 0H463L403 122Z" fill="var(--ink)"/><path d="M441 122L501 0H526L466 122Z" fill="var(--ink)"/><path d="M504 122L564 0H589L529 122Z" fill="var(--ink)"/></svg></span></li>
       <li><span class="step-number">04</span><div><h3>ОТБОР</h3><p>Команда вручную рассматривает каждую заявку.</p></div></li>
       <li><span class="step-number">05</span><div><h3>РЕШЕНИЕ</h3><p>Сообщим результат отбора. При одобрении — пригласим в клуб.</p></div></li>
     </ol>
+    <div class="selection-code decoration" aria-hidden="true"><svg viewBox="0 0 202 48" fill="currentColor"><rect x="10.0996" width="4.41875" height="48"/><rect x="16.4121" width="1.2625" height="48"/><rect x="19.5684" width="2.525" height="48"/><rect x="25.25" width="5.68125" height="48"/><rect x="32.8242" width="1.89375" height="48"/><rect x="36.6133" width="1.2625" height="48"/><rect x="41.0312" width="3.7875" height="48"/><rect x="46.7129" width="2.525" height="48"/><rect x="51.1309" width="6.3125" height="48"/><rect x="60.5996" width="1.2625" height="48"/><rect x="63.7559" width="3.15625" height="48"/><rect x="68.8066" width="1.89375" height="48"/><rect x="73.8555" width="5.05" height="48"/><rect x="80.8008" width="1.2625" height="48"/><rect x="83.957" width="2.525" height="48"/><rect x="89.6367" width="4.41875" height="48"/><rect x="95.9492" width="1.89375" height="48"/><rect x="99.7383" width="6.94375" height="48"/><rect x="109.838" width="1.2625" height="48" fill="var(--blue)"/><rect x="112.994" width="3.15625" height="48"/><rect x="118.043" width="1.89375" height="48"/><rect x="123.094" width="3.7875" height="48"/><rect x="128.775" width="1.2625" height="48"/><rect x="131.932" width="5.05" height="48"/><rect x="140.137" width="1.89375" height="48"/><rect x="143.926" width="2.525" height="48"/><rect x="148.344" width="6.3125" height="48"/><rect x="157.812" width="1.2625" height="48"/><rect x="160.969" width="3.7875" height="48"/><rect x="166.65" width="1.89375" height="48"/><rect x="172" width="5" height="48"/><rect x="179" width="1" height="48"/><rect x="182" width="2" height="48"/><rect x="197" width="3" height="48"/><rect x="187" width="5" height="48"/><rect x="194" width="1" height="48"/></svg><div class="selection-code-label"><span>CEOMENTALITY</span><span>001 / ∞</span></div></div>
     <div class="chevron decoration type-object" data-type="chevron" aria-hidden="true"></div><img class="selection-slashes decoration" src="assets/imgGroup2.svg" alt="" width="208" height="35" loading="lazy">
   </section>
 
@@ -106,16 +126,12 @@
     </div>
   </section>
 
-  <section class="membership section" id="membership" aria-labelledby="membership-title">
-    <h2 class="display" id="membership-title">ТВОЙ НОВЫЙ</h2>
-    <div class="ticket dark">
-      <h3>КРУГ.</h3><div class="ticket-meta"><img src="assets/ticket-barcode.svg" width="111" height="23" alt=""><span>CEOMENTALITY / ADMIT ONE</span></div>
-      <div class="ticket-art"><p class="ticket-art-label">ACCESS / BY INVITATION</p><p class="ticket-art-title">СВОИ<br><span>ЛЮДИ.</span></p><div class="ticket-art-bottom"><span>PEOPLE. PLACES. IDEAS.</span><span>001 / ∞</span></div></div>
-      <p class="membership-statement">ЧЛЕНСТВО —<br>ПО РЕШЕНИЮ<br class="desktop-break"> КОМАНДЫ.</p>
-      <p class="ticket-caption">ТВОЙ БИЛЕТ В СВОЙ КРУГ</p><div class="seal decoration type-object" data-type="seal" aria-hidden="true"></div>
-      <img class="ticket-perforation" src="assets/imgTicketPerforatedDivider.svg" data-desktop-src="assets/imgTicketPerforatedDivider.svg" data-mobile-src="assets/perforation-mobile.svg" width="2" height="410" alt=""><img class="ticket-cutout cutout-one" src="assets/imgTicketEdgeCutout.svg" width="22" height="22" alt=""><img class="ticket-cutout cutout-two" src="assets/imgTicketEdgeCutout.svg" width="22" height="22" alt="">
+  <section class="membership section dark" id="membership" aria-labelledby="membership-title">
+    <div class="membership-note">
+      <p class="membership-label">CEOMENTALITY / ЧЛЕНСТВО</p>
+      <h2 id="membership-title">ЧЛЕНСТВО —<br>ПО РЕШЕНИЮ<br>КОМАНДЫ.</h2>
+      <p class="membership-copy">Свой круг начинается с людей.<br>Решение о вступлении — после ручного отбора.</p>
     </div>
-    <div class="membership-bottom"><p>Свой круг начинается с людей.<br>Решение о вступлении — после ручного отбора.</p></div>
   </section>
 
   <section class="faq section" id="faq" aria-labelledby="faq-title">
@@ -143,6 +159,10 @@
   </footer>
   <script src="assets/type-objects.js" defer></script>
   <script src="typography.js" defer></script>
+  <script src="hero-variants-extra-a.js" defer></script>
+  <script src="hero-variants-extra-b.js" defer></script>
+  <script src="hero-variants-extra-c.js" defer></script>
+  <script src="hero-variants.js" defer></script>
   <script src="runtime-config.js" defer></script>
   <script src="integration/api.js" defer></script>
   <script src="main.js" defer></script>

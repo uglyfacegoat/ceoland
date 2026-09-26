@@ -82,7 +82,11 @@
       ['wallet-white','CEOWALLET','НАТУРАЛЬНАЯ КОЖА',photo('white')],
       ['nfc','NFC CARD','МЕТАЛЛИЧЕСКАЯ NFC-ВИЗИТКА','assets/imgOriginalNfcTeaserSuppliedPhotograph.png'],
       ['next-item','NEXT ITEM','СЛЕДУЮЩИЙ ОБЪЕКТ CEOMENTALITY','assets/imgOriginalNfcTeaserSuppliedPhotograph.png']
-    ].map(([r,name,material,src],i)=>`<article class="catalog-item"><div class="catalog-copy"><p class="eyeline accent">OBJ / 0${i+1}${i?' — СКОРО':''}</p><h2><a href="${route(r)}">${name}</a></h2><p class="small muted">${material}</p>${i?'<p class="accent" style="margin-top:32px">В РАЗРАБОТКЕ</p>':`<p class="detail-price">${money(unitPrice('white'))}</p>${colours('white')}<div class="catalog-arrows type-object" data-type="arrows" aria-hidden="true"></div>`}</div><a class="catalog-photo ${i===0?'wallet-visual':''}" href="${route(r)}" aria-label="Открыть ${name}"><img src="${src}" alt="${i?'Будущий объект под белой тканью':name}" width="664" height="543"></a></article>`).join('')}</div>`;
+    ].map(([r,name,material,src],i)=>{
+      const details=i?'<p class="accent" style="margin-top:32px">В РАЗРАБОТКЕ</p>':`<p class="detail-price">${money(unitPrice('white'))}</p>${colours('white')}`;
+      const action=i?`<button class="catalog-action is-locked" type="button" disabled aria-label="${name} пока в разработке"><img src="assets/lock.svg" alt="" width="20" height="20"></button>`:`<a class="catalog-action" href="${route('access',{colour:'white'})}">КУПИТЬ <span aria-hidden="true">↗</span></a>`;
+      return `<article class="catalog-item"><div class="catalog-copy"><p class="eyeline accent">OBJ / 0${i+1}${i?' — СКОРО':''}</p><h2><a href="${route(r)}">${name}</a></h2><p class="small muted">${material}</p>${details}<div class="catalog-arrows type-object" data-type="arrows" aria-hidden="true"></div>${action}</div><a class="catalog-photo ${i===0?'wallet-visual':''}" href="${route(r)}" aria-label="Открыть ${name}"><img src="${src}" alt="${i?'Будущий объект под белой тканью':name}" width="664" height="543"></a></article>`;
+    }).join('')}</div>`;
   }
   function teaser() {
     const next=screen==='next-item';

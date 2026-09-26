@@ -24,6 +24,10 @@ h1 span{color:var(--blue)}
 .bar-one{left:35.6048%;width:4.1738%}.bar-two{left:36.6269%;width:3.7479%}
 .stripe{position:absolute;top:0;bottom:0;background:#fff;width:.5111%}.s1{left:35.0937%}.s2{left:37.3083%}.s3{left:39.1823%}.s4{left:37.9898%;width:.1704%}.s5{left:35.9455%;width:.6814%}
 .mobile-signal{display:none}
+.hero-canvas{display:none;position:absolute;left:55.5366%;top:0;width:44.4634%;height:100%;z-index:0;pointer-events:none}
+.desktop-signal,.mobile-signal{z-index:1}
+html[data-hero-variant]:not([data-hero-variant="0"]) .hero-canvas{display:block}
+html[data-hero-ready] .word-field{visibility:hidden}
 .info{border:1px solid #ddd;border-radius:6px;padding:44px 36px;width:min(460px,calc(100% - 40px));color:var(--ink);font-family:inherit;box-shadow:0 20px 80px #0002}.info::backdrop{background:#17171755}.info h2{font-size:28px;letter-spacing:-1px;margin-bottom:18px}.info p{font-size:18px;line-height:1.5;color:var(--muted)}.close{position:absolute;right:12px;top:8px;background:none;border:0;font-size:28px;color:var(--ink)}
 @media(min-width:1800px){.intro{padding-top:calc(126px + (100vw - 1800px)*.06)}}
 @media(max-width:1000px) and (min-width:701px){.actions{gap:20px}.primary{width:210px;padding:0 18px}.intro h2{font-size:26px}.description{font-size:16px}.edition{right:4vw}.intro{padding-top:150px}}
@@ -146,8 +150,50 @@ dialog{width:min(720px,calc(100% - 32px));padding:32px;border:0;color:var(--ink)
  .ticket-art-title{font-size:62px}
 }
 
-/* A square letter grid fills the open space beside stages 03–04. */
-.selection-square{display:none}
+/* Crop through two adjacent slashes so both fragments emerge from the left edge. */
+.selection-mark,.selection-code{display:none;pointer-events:none}
+.selection-code svg{display:block;width:100%;height:auto}
+.selection-code-label{display:flex;justify-content:space-between;align-items:center;margin-top:1vw;font-size:.78vw;font-weight:500;line-height:1.3;letter-spacing:.12em}
+.selection-code-label span:last-child{color:var(--blue);letter-spacing:.04em}
+.selection-mark svg{display:block;width:100%;height:auto}
 @media(min-width:701px){
- .selection-square{display:block;position:absolute;left:-92.307692%;top:6.5vw;width:21.5vw;height:21.5vw;transform:translateY(-50%);}
+ .selection-mark{display:block;position:absolute;left:calc(-92.3076923% - 9.60761vw);top:50%;transform:translateY(-50%);width:41.94659vw}
+ .selection-code{display:block;position:absolute;right:4.4444vw;top:25.5vw;width:25vw}
+}
+
+/* Direct purchase action and concise membership message. */
+.wallet>.buy-action{position:absolute;left:0;top:34vw;width:12.5vw;min-height:3.75vw;display:flex;align-items:center;justify-content:space-between;gap:1vw;padding:0 1.25vw;border-radius:3px;background:var(--ink);color:#fff;font-size:1vw;font-weight:600;transition:background .15s}
+.wallet>.buy-action span{font-size:1.75vw;line-height:1;font-weight:400}
+.wallet>.buy-action:hover{background:var(--blue)}
+.membership{height:auto;min-height:34vw;padding:5.5vw 4.4444vw 6vw}
+.membership-note{display:grid;grid-template-columns:1fr 1fr;column-gap:4vw;border-top:1px solid #ffffff5c;padding-top:2vw}
+.membership-label{grid-column:1/-1;color:#adadad;font-size:.9vw;letter-spacing:.08em}
+.membership-note h2{font-size:clamp(42px,5.2vw,92px);line-height:1.04;letter-spacing:-.05em;font-weight:800;margin-top:3.2vw}
+.membership-copy{align-self:end;font-size:1.45vw;line-height:1.45;color:#d3d3d3;padding-bottom:.4vw}
+@media(max-width:700px){
+ .wallet{height:735px}
+ .wallet>.object-arrows.type-object{top:581px}
+ .wallet>.buy-action{top:660px;width:100%;min-height:50px;gap:14px;padding:0 18px;font-size:13px}
+ .wallet>.buy-action span{font-size:24px}
+ .membership{min-height:0;padding:72px 24px 80px}
+ .membership-note{display:block;padding-top:18px}
+ .membership-label{font-size:10px;line-height:1.5}
+ .membership-note h2{font-size:clamp(37px,10.25vw,56px);line-height:1.04;letter-spacing:-.05em;margin-top:46px}
+ .membership-copy{font-size:16px;line-height:1.5;margin-top:44px;padding:0}
+}
+
+/* The two upcoming objects share the same animated signature and action pattern. */
+.teaser-arrows{position:absolute;top:20.2vw;width:31.8056vw;height:4.6vw}
+.nfc .teaser-arrows{left:53.75vw}
+.next-item .teaser-arrows{left:0}
+.product>.teaser-action{position:absolute;top:26.15vw;width:12.5vw;min-height:3.75vw;display:flex;align-items:center;justify-content:center;border:0;border-radius:3px;background:var(--ink);cursor:not-allowed}
+.product>.teaser-action img{display:block;width:20px;height:20px}
+.nfc>.teaser-action{left:53.75vw}
+.next-item>.teaser-action{left:0}
+@media(max-width:700px){
+ .nfc{height:580px}
+ .nfc .teaser-arrows{left:0;top:435px;width:260px;height:50px}
+ .nfc>.teaser-action{left:0;top:509px;width:100%;min-height:50px}
+ .next-item .teaser-arrows{position:relative;inset:auto;width:260px;height:50px;flex:none;margin-top:24px}
+ .next-item>.teaser-action{position:relative;inset:auto;width:100%;min-height:50px;flex:none;margin-top:24px}
 }
