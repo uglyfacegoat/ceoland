@@ -23,11 +23,18 @@
     return key;
   }
   const screen = params.get('screen') || 'objects';
+  // Keep old shared links working; content that lives on the landing has one home.
+  const sections = {objects:'objects',join:'selection',faq:'faq',nfc:'nfc','next-item':'next-item',loading:'top'};
+  if(sections[screen]) {location.replace('index.html#'+sections[screen]);return;}
+  if(screen==='wallet-white') {
+    params.set('screen','wallet');params.set('colour','white');
+    location.replace('app.html?'+params);return;
+  }
   const root = document.querySelector('#site-root');
   const PRICE = 2990;
   const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const money = n => new Intl.NumberFormat('ru-RU').format(n) + ' ₽';
-  const route = (name, extra = {}) => 'app.html?' + new URLSearchParams({screen:name,...(demo?{demo:'1'}:{}),...extra});
+  const route = (name, extra = {}) => sections[name] ? 'index.html#'+sections[name] : 'app.html?' + new URLSearchParams({screen:name==='wallet-white'?'wallet':name,...(demo?{demo:'1'}:{}),...(name==='wallet-white'?{colour:'white'}:{}),...extra});
   const home = 'index.html';
   const read = (key, fallback) => {try {return JSON.parse(sessionStorage.getItem(key)) ?? fallback;} catch {return fallback;}};
   const write = (key,value) => {try {sessionStorage.setItem(key,JSON.stringify(value));return true;} catch {return false;}};
@@ -35,7 +42,7 @@
   let cart = read(cartKey, []);
   if (!Array.isArray(cart)) cart=[];
   cart=window.CEO_STORE.cart(cart);
-  const selected = params.get('colour') === 'black' || screen === 'wallet' ? 'black' : 'white';
+  const selected = params.get('colour') === 'black' || (screen === 'wallet' && params.get('colour') !== 'white') ? 'black' : 'white';
   const sampleCart = [{colour:selected,quantity:1}];
   if(demo && screen==='cart' && read(cartKey,null)===null) {cart=sampleCart;write(cartKey,cart);}
   let activeCart = cart.length ? cart : (demo ? sampleCart : []);
@@ -53,44 +60,35 @@
   const rule = '<hr class="rule">';
   const slashes = '<img class="site-slashes" src="assets/imgAccentHorizontalSlashRhythm.svg" width="320" height="40" alt="">';
   const alert = '<p class="form-alert" role="alert" data-form-alert></p>';
-  const field = (name,label,placeholder='',type='text',required=true,value='') => `<label class="field" for="${name}">${label}<input id="${name}" name="${name}" type="${type}" maxlength="${name==='code'?64:name==='email'?254:name==='comment'?2000:300}" placeholder="${placeholder}" ${required?'required':''} ${type==='email'?'autocomplete="email"':type==='tel'?'autocomplete="tel"':name==='name'?'autocomplete="name"':''} value="${escape(value)}" aria-describedby="${name}-error" ${name==='code'?'autocapitalize="characters" spellcheck="false"':''}><span class="field-error" id="${name}-error"></span></label>`;
+  const field = (name,label,placeholder='',type='text',required=true,value='') => `<label class="field" for="${name}">${label}<input id="${name}" name="${name}" type="${type}" maxlength="${name==='code'?64:name==='email'?254:name==='comment'?2000:300}" placeholder="${placeholder}" ${required?'required':''} ${type==='email'?'autocomplete="email"':type==='tel'?'autocomplete="tel"':name==='name'?'autocomplete="name"':''} value="${escape(value)}" aria-describedby="${name}-error" ${name==='code'?'autocapitalize="characters" spellcheck="false"':name==='telegram'?'autocapitalize="none" spellcheck="false"':''}><span class="field-error" id="${name}-error"></span></label>`;
   const textarea = (name,label,placeholder) => `<label class="field" for="${name}">${label}<textarea maxlength="5000" id="${name}" name="${name}" placeholder="${placeholder}" required aria-describedby="${name}-error"></textarea><span class="field-error" id="${name}-error"></span></label>`;
   const consent = (name='privacy') => {
     const labels={privacy:'политикой конфиденциальности',agreement:'пользовательским соглашением','purchase-terms':'условиями покупки'};
     return `<label class="consent"><input type="checkbox" id="consent-${name}" name="${name}" required aria-describedby="consent-${name}-error"><span>Согласен с <a href="${route(name)}" target="_blank" rel="noopener">${labels[name]}</a>.<span class="field-error" id="consent-${name}-error"></span></span></label>`;
   };
   const intro = (title,caption='',cls='') => `<header class="page-intro ${cls}"><h1>${title}</h1>${caption?`<p>${caption}</p>`:''}</header>`;
-  const signature = '<div class="signature" aria-hidden="true">CEOMENTALITY<span>CEOMENTALITY</span></div>';
-  const footer = () => `<footer class="site-footer"><p>CEOMENTALITY　 /　 MORE THAN A CLUB.</p>${signature}</footer>`;
-  const navigation = [['КЛУБ',home+'#community'],['ОБЪЕКТЫ',route('objects')],['FAQ',route('faq')],['КОРЗИНА',route('cart')]];
-  const header = () => `<header class="site-header"><a class="site-logo" href="${home}" aria-label="CEOMENTALITY — главная"><img src="assets/wordmark.svg" alt="CEOMENTALITY" width="181" height="14"></a><nav class="site-nav" aria-label="Основная навигация">${navigation.map(([label,url])=>`<a href="${url}">${label}</a>`).join('')}</nav><a class="mobile-menu" href="${route('menu')}">МЕНЮ /</a></header>`;
-  const docLinks = [['Конфиденциальность','privacy'],['Соглашение','agreement'],['Условия покупки','purchase-terms'],['Реквизиты','company']];
-  const fullFooter = () => `<footer class="full-footer"><div class="full-footer-grid"><div><h2>СВОЙ<br>КРУГ.</h2><p>Закрытый клуб молодых предпринимателей.<br>Ручной отбор. Общение. Общие цели.</p></div><nav aria-label="Разделы сайта"><div><h3>КЛУБ</h3><a href="${home}#community">О сообществе</a><a href="${route('join')}">КАК ВСТУПИТЬ</a><a href="${route('faq')}">Вопросы и ответы</a></div><div><h3>ОБЪЕКТЫ</h3><a href="${route('objects')}">Вся линейка</a><a href="${route('wallet-white')}">CEOWALLET</a><a href="${route('nfc')}">NFC CARD</a></div><div><h3>ИНФОРМАЦИЯ</h3><a href="${route('contact')}">Контакты</a>${docLinks.map(([t,r])=>`<a href="${route(r)}">${t}</a>`).join('')}</div></nav></div><div class="full-footer-word">CEOMENTALITY</div><div class="full-footer-bottom"><span>© CEOMENTALITY / 2026</span><span>MORE THAN A CLUB.</span></div></footer>`;
+  const docLinks = window.CEO_SHELL.documents;
+  const header = () => `<header class="site-header"><a class="site-logo" href="${home}" aria-label="CEOMENTALITY — главная"><img src="assets/wordmark.svg" alt="CEOMENTALITY" width="181" height="14"></a>${screen==='menu'?`<a class="menu-close" data-menu-close href="${escape(window.CEO_SHELL.menuReturn())}">ЗАКРЫТЬ <span aria-hidden="true">×</span></a>`:`<nav class="site-nav" aria-label="Основная навигация"><a href="${route('cart')}" ${screen==='cart'?'aria-current="page"':''}>КОРЗИНА${count(cart)?` / ${count(cart)}`:''}</a><a href="${route('menu')}">МЕНЮ /</a></nav>`}</header>`;
+  const footer = () => window.CEO_SHELL.footer(route,home);
+  const menuLabel = (text,route) => ({
+    wallet:'<span class="menu-chip menu-chip-white">CEO</span><span class="menu-outline">WALLET</span>',
+    access:'КУПИТЬ <span class="menu-second menu-outline">ПО КОДУ</span>',
+    'purchase-application':'ЗАПРОСИТЬ <span class="menu-second menu-chip menu-chip-blue">КОД</span>',
+    contact:'<span class="menu-contact">КОНТАКТЫ</span>',
+    cart:`<span class="menu-outline">КОРЗИНА</span><span class="menu-count" aria-label="Объектов в корзине: ${count(cart)}">${String(count(cart)).padStart(2,'0')}</span>`
+  }[route] || text);
+  const menuDocumentLabel = (text,route) => `<span class="${({privacy:'menu-outline',agreement:'menu-chip menu-chip-white','purchase-terms':'menu-contact',company:'menu-chip menu-chip-blue'})[route]}">${route==='privacy'?'КОНФИДЕН<wbr>ЦИАЛЬНОСТЬ':route==='purchase-terms'?'УСЛОВИЯ<br>ПОКУПКИ':text.toUpperCase()}</span>`;
+  const menu = () => `<header class="page-intro menu-intro"><h1>МЕНЮ</h1><span aria-hidden="true">CEOMENTALITY / 09</span></header><div class="menu-columns"><nav class="menu-links" aria-label="Страницы сайта">${window.CEO_SHELL.pages.map(([t,r],i)=>`<a href="${route(r)}" aria-label="${t}${r==='cart'&&count(cart)?', объектов: '+count(cart):''}" style="--menu-i:${i}"><small aria-hidden="true">0${i+1}</small><span class="menu-label">${menuLabel(t,r)}</span></a>`).join('')}</nav><nav class="menu-documents" aria-label="Документы">${docLinks.map(([t,r],i)=>`<a href="${route(r)}" aria-label="${t}" style="--menu-i:${i+5}"><small aria-hidden="true">0${i+6}</small><span class="menu-label">${menuDocumentLabel(t,r)}</span></a>`).join('')}</nav></div>`;
   const colours = c => `<nav class="colour-options" aria-label="Цвет картхолдера">${['black','white'].map((x,i)=>`<a class="colour-option" href="${route(x==='white'?'wallet-white':'wallet')}" aria-current="${x===c}"><img src="assets/imgColourSwatch${i?'1':''}.svg" width="15" height="15" alt="">${colourName(x)}</a>`).join('')}</nav>`;
   const review = (items=activeCart) => {
     const list=items.length?items:sampleCart;
     return `<div class="stack summary"><h3>ТВОЙ ОБЪЕКТ</h3><div class="summary-photo wallet-visual"><img src="${photo(list[0].colour)}" alt="CEOWALLET — ${colourName(list[0].colour)}" width="624" height="510"></div>${list.map(x=>row(`CEOWALLET × ${x.quantity}`,money(x.quantity*unitPrice(x.colour)))+row('Цвет',colourName(x.colour))).join('')}${row('Доставка','По адресу')}${rule}<p class="total">${money(total(list))}</p><p class="small muted">Стоимость объекта без доставки</p></div>`;
   };
   function product() {
-    const white=screen==='wallet-white';
+    const white=selected==='white';
     const c=white?'white':'black';
     const images=white?[photo(c),'assets/wallet-white-angle.png','assets/wallet-white-back.png','assets/wallet-white-side.png']:[photo(c),'assets/wallet-black-back.png'];
     return intro('CEOWALLET.','OBJECT 01 / LIMITED EDITION')+`<div class="product-detail"><p class="detail-price">${money(unitPrice(c))}</p><div class="product-gallery"><div class="gallery-main wallet-visual"><img id="gallery-main" src="${images[0]}" alt="CEOWALLET — ${colourName(c)}, вид спереди" width="624" height="510"></div><div class="gallery-thumbs" aria-label="Ракурсы">${images.map((src,i)=>`<button type="button" data-gallery="${src}" aria-label="Ракурс ${i+1}" aria-pressed="${i===0}"><span class="wallet-visual"><img src="${src}" alt="" width="138" height="130"></span></button>`).join('')}</div><p class="gallery-caption">CEOMENTALITY / CEOWALLET　 •　 РАКУРСЫ</p></div><div class="stack product-information"><p>Натуральная кожа. Два цвета. Предмет из линейки CEOMENTALITY.</p><p>Покупка CEOWALLET не гарантирует вступление в клуб. Заявка на членство рассматривается отдельно.</p>${colours(c)}${row('КОЛЛЕКЦИЯ','Access')}${rule}<p class="small">Для покупки нужен действующий код доступа.</p><div class="action-stack">${live&&(!variant(c)?.available||!variant(c)?.maxQuantity)?'<p role="status">ЭТОТ ЦВЕТ ПОКА НЕДОСТУПЕН</p>':link('КУПИТЬ ПО КОДУ','access',false,{colour:c})}${link('НЕТ КОДА? ЗАПРОСИТЬ','purchase-application',true,{colour:c})}</div><p class="small muted">Условия доставки и оплаты — при оформлении заказа.</p></div></div>`;
-  }
-  function catalog() {
-    return intro('OBJECTS.','ЛИНЕЙКА ОБЪЕКТОВ CEOMENTALITY.<br>ПРОДУКЦИЯ ≠ ЧЛЕНСТВО.')+`<div class="catalog-list">${[
-      ['wallet-white','CEOWALLET','НАТУРАЛЬНАЯ КОЖА',photo('white')],
-      ['nfc','NFC CARD','МЕТАЛЛИЧЕСКАЯ NFC-ВИЗИТКА','assets/imgOriginalNfcTeaserSuppliedPhotograph.png'],
-      ['next-item','NEXT ITEM','СЛЕДУЮЩИЙ ОБЪЕКТ CEOMENTALITY','assets/imgOriginalNfcTeaserSuppliedPhotograph.png']
-    ].map(([r,name,material,src],i)=>{
-      const details=i?'<p class="accent" style="margin-top:32px">В РАЗРАБОТКЕ</p>':`<p class="detail-price">${money(unitPrice('white'))}</p>${colours('white')}`;
-      const action=i?`<button class="catalog-action is-locked" type="button" disabled aria-label="${name} пока в разработке"><img src="assets/lock.svg" alt="" width="20" height="20"></button>`:`<a class="catalog-action" href="${route('access',{colour:'white'})}">КУПИТЬ <span aria-hidden="true">↗</span></a>`;
-      return `<article class="catalog-item"><div class="catalog-copy"><p class="eyeline accent">OBJ / 0${i+1}${i?' — СКОРО':''}</p><h2><a href="${route(r)}">${name}</a></h2><p class="small muted">${material}</p>${details}<div class="catalog-arrows type-object" data-type="arrows" aria-hidden="true"></div>${action}</div><a class="catalog-photo ${i===0?'wallet-visual':''}" href="${route(r)}" aria-label="Открыть ${name}"><img src="${src}" alt="${i?'Будущий объект под белой тканью':name}" width="664" height="543"></a></article>`;
-    }).join('')}</div>`;
-  }
-  function teaser() {
-    const next=screen==='next-item';
-    return intro(next?'NEXT ITEM.':'NFC CARD.',`OBJECT ${next?'03':'02'} / В РАЗРАБОТКЕ`)+`<div class="site-grid"><div class="stack"><img class="gallery-main" src="assets/imgOriginalNfcTeaserSuppliedPhotograph.png" width="646" height="426" alt="Будущий объект под белой тканью"><p class="eyeline muted">${next?'NEXT ITEM':'NFC CARD'} / ТИЗЕР — НЕ ФИНАЛЬНЫЙ ДИЗАЙН</p></div><div class="stack"><h2>В РАЗРАБОТКЕ</h2><p>${next?'Следующий объект CEOMENTALITY. Подробности появятся после анонса.':'Металлическая NFC-визитка CEOMENTALITY. Продукт в разработке; финальный дизайн ещё не представлен.'}</p><p>Покупка продукции не гарантирует членство. Вступление проходит через отдельный ручной отбор.</p>${row('ФОРМАТ',next?'Скоро':'NFC-визитка')}${row('РЕЛИЗ','Готовится')}${rule}<p>Подробности — после анонса дропа.</p>${link('К ОБЪЕКТАМ','objects')}<p class="small muted">Изображение — тизер будущего продукта.</p></div></div>`;
   }
   function access() {
     const error=screen==='code-error';
@@ -109,7 +107,7 @@
     const purchase=kind==='purchase-application', membership=kind==='application';
     const title=purchase?'ЗАПРОС КОДА.':membership?'by invitation.':'НА СВЯЗИ.';
     const caption=purchase?'Нет кода для покупки? Оставь контакты.':membership?'QR-приглашение / заявка на вступление':'По заказам, продукции и сотрудничеству';
-    const form=`<form class="stack form-fields" data-form="${kind}" novalidate>${field('name','ИМЯ','Как к вам обращаться')}${purchase?field('phone','ТЕЛЕФОН','+7 ___ ___-__-__','tel'):''}${field('email','EMAIL','you@example.com','email')}${membership?field('phone','ТЕЛЕФОН','+7 ___ ___-__-__','tel')+field('telegram','TELEGRAM','@username')+textarea('project','ПРОЕКТ И ЦЕЛИ','Чем занимаешься и почему хочешь к нам')+field('invitation','КОД ПРИГЛАШЕНИЯ · НЕОБЯЗАТЕЛЬНО','Если тебя пригласил участник','text',false):purchase?field('comment','КОММЕНТАРИЙ · НЕОБЯЗАТЕЛЬНО','Вопрос или детали покупки','text',false):textarea('message','СООБЩЕНИЕ','Твой вопрос или предложение')}${consent()}${alert}${submit(purchase?'ЗАПРОСИТЬ КОД':membership?'ОТПРАВИТЬ ЗАЯВКУ':'ОТПРАВИТЬ СООБЩЕНИЕ')}</form>`;
+    const form=`<form class="stack form-fields" data-form="${kind}" novalidate>${field('name','ИМЯ','Как к вам обращаться')}${purchase?field('phone','ТЕЛЕФОН','+7 ___ ___-__-__','tel')+field('telegram','TELEGRAM','@username'):''}${field('email','EMAIL','you@example.com','email')}${membership?field('phone','ТЕЛЕФОН','+7 ___ ___-__-__','tel')+field('telegram','TELEGRAM','@username')+textarea('project','ПРОЕКТ И ЦЕЛИ','Чем занимаешься и почему хочешь к нам')+field('invitation','КОД ПРИГЛАШЕНИЯ · НЕОБЯЗАТЕЛЬНО','Если тебя пригласил участник','text',false):purchase?field('comment','КОММЕНТАРИЙ · НЕОБЯЗАТЕЛЬНО','Вопрос или детали покупки','text',false):textarea('message','СООБЩЕНИЕ','Твой вопрос или предложение')}${consent()}${alert}${submit(purchase?'ЗАПРОСИТЬ КОД':membership?'ОТПРАВИТЬ ЗАЯВКУ':'ОТПРАВИТЬ СООБЩЕНИЕ')}</form>`;
     const side=membership?`<div class="stack"><h2>РАССКАЖИ<br>О СЕБЕ.</h2><p>Мы внимательно изучаем каждую заявку. Оставь контакты, свой проект и цели — команда вернётся с ответом.</p>${slashes}</div>`:purchase?`<aside class="stack"><h3>ТВОЙ ОБЪЕКТ</h3><div class="summary-photo wallet-visual"><img src="${photo(selected)}" width="624" height="510" alt="CEOWALLET"></div><h3>CEOWALLET</h3><p>Это запрос кода для покупки CEOWALLET.</p><p class="muted">Анкета в клуб откроется отдельно — по QR внутри полученного картхолдера.</p></aside>`:`<aside class="stack"><h2>ПО ДЕЛУ.<br>НАПРЯМУЮ.</h2><p>Если вопрос связан с покупкой, укажи номер заказа. Для вступления в клуб есть отдельная заявка.</p>${link('КАК ВСТУПИТЬ','join',true)}</aside>`;
     return intro(title,caption)+`<div class="site-grid ${membership?'':'wide-left'}">${membership?side+form:form+side}</div>`;
   }
@@ -126,29 +124,19 @@
     }
   }
   function payment() {
-    return intro('ОПЛАТА.','01 / ДАННЫЕ ✓　 →　02 / КОД ✓　 →　03 / ОПЛАТА')+`<div class="site-grid wide-left"><div class="stack"><div class="payment-placeholder"><h3>● БАНКОВСКАЯ КАРТА</h3><label class="field">НОМЕР КАРТЫ<input placeholder="0000 0000 0000 0000" disabled aria-label="Номер карты — платёжный сервис не подключён"></label><div class="payment-pair"><label class="field">СРОК ДЕЙСТВИЯ<input placeholder="ММ / ГГ" disabled></label><label class="field">CVC / CVV<input placeholder="•••" disabled></label></div><p class="small muted">Платёжные данные обрабатывает платёжный сервис.</p></div>${alert}${action('ОПЛАТИТЬ '+money(total(activeCart)||PRICE),'pay')}${link('ВЕРНУТЬСЯ К ЗАКАЗУ','checkout',true)}${demo?`<div class="preview-controls">Состояния оплаты: <a href="${route('processing')}">Ожидание</a><a href="${route('thank-you')}">Успешно</a><a href="${route('payment-failed')}">Ошибка</a></div>`:''}</div><aside class="stack"><h3>К ОПЛАТЕ</h3><p class="total">${money(total(activeCart)||PRICE)}</p>${row('Объект','CEOWALLET')}${row('Цвет',colourName(activeCart[0]?.colour||selected))}${row('Количество',String(count(activeCart)||1))}${rule}<p class="muted">Проверь сумму перед оплатой.<br>После подтверждения откроется статус заказа.</p></aside></div>`;
+    return intro('ОПЛАТА.','01 / КОД ✓　 →　02 / ДАННЫЕ ✓　 →　03 / ОПЛАТА')+`<div class="site-grid wide-left"><div class="stack"><div class="payment-placeholder"><h3>● БАНКОВСКАЯ КАРТА</h3><label class="field">НОМЕР КАРТЫ<input placeholder="0000 0000 0000 0000" disabled aria-label="Номер карты — платёжный сервис не подключён"></label><div class="payment-pair"><label class="field">СРОК ДЕЙСТВИЯ<input placeholder="ММ / ГГ" disabled></label><label class="field">CVC / CVV<input placeholder="•••" disabled></label></div><p class="small muted">Платёжные данные обрабатывает платёжный сервис.</p></div>${alert}${action('ОПЛАТИТЬ '+money(total(activeCart)||PRICE),'pay')}${link('ВЕРНУТЬСЯ К ЗАКАЗУ','checkout',true)}${demo?`<div class="preview-controls">Состояния оплаты: <a href="${route('processing')}">Ожидание</a><a href="${route('thank-you')}">Успешно</a><a href="${route('payment-failed')}">Ошибка</a></div>`:''}</div><aside class="stack"><h3>К ОПЛАТЕ</h3><p class="total">${money(total(activeCart)||PRICE)}</p>${row('Объект','CEOWALLET')}${row('Цвет',colourName(activeCart[0]?.colour||selected))}${row('Количество',String(count(activeCart)||1))}${rule}<p class="muted">Проверь сумму перед оплатой.<br>После подтверждения откроется статус заказа.</p></aside></div>`;
   }
   function order() {
     return intro('ТВОЙ ЗАКАЗ.','ЗАКАЗ № 0001 / статус и состав')+`<div class="site-grid wide-left"><div class="stack"><h2>В ОБРАБОТКЕ</h2><p>Оплата подтверждена. Готовим заказ к передаче. Когда появятся данные отправления, они будут здесь.</p><ol class="timeline">${[['СОЗДАН','Состав заказа и контакты сохранены'],['ОПЛАЧЕН ✓','Оплата подтверждена · код использован'],['В ОБРАБОТКЕ ●','Подготавливаем к отправке'],['ВЫПОЛНЕН','Информация о получении появится после отправки']].map(([t,p],i)=>`<li><strong class="${i===2?'accent':''}">0${i+1} / ${t}</strong><p>${p}</p></li>`).join('')}</ol></div><aside class="stack">${review()}${row('Код','Использован')}<p class="small muted">Анкета в клуб — по QR на карточке внутри полученного картхолдера. Покупка не гарантирует членство.</p>${alert}${action('ОБНОВИТЬ СТАТУС','refresh-order')}${link('КАК ВСТУПИТЬ В КЛУБ','join',true)}</aside></div>`;
   }
   function membershipConfirmed() {return intro('ТЫ ВНУТРИ.','Приглашение в клуб / вступление одобрено')+`<div class="site-grid wide-left"><div class="stack"><img class="gallery-main" src="assets/imgInvitationSuppliedOriginal.png" width="592" height="345" alt="Membership confirmed. Welcome to the club."><p class="eyeline muted">THIS CARD CONNECTS YOU TO PEOPLE LIKE YOU.</p></div><div class="stack"><h2>WELCOME<br>TO THE CLUB.</h2><p>Твоя заявка одобрена командой.<br>Добро пожаловать в CEOMENTALITY.</p><p>Информация о вступлении и доступе к сообществу — в приглашении.</p>${link('К ОБЪЕКТАМ','objects')}${link('ВВЕСТИ КОД ДОСТУПА','access',true)}</div></div>`;}
-  function join() {return intro('КАК<br>ВСТУПИТЬ.','Покупка не открывает анкету автоматически. Она доступна по QR внутри полученного картхолдера.')+`<ol class="join-steps">${[['ЗАЯВКА НА ПОКУПКУ', 'Оставь контакты, чтобы получить код доступа к покупке.'], ['ПОКУПКА', 'Введи код, выбери картхолдер и дождись доставки.'], ['ЗАЯВКА В КЛУБ', 'Открой анкету по QR внутри картхолдера и расскажи о себе.'], ['ОТБОР', 'Команда вручную рассматривает каждую заявку.'], ['РЕШЕНИЕ', 'Сообщим результат отбора. При одобрении — пригласим в клуб.']].map(([t,p],i)=>`<li><span class="join-number">0${i+1}</span><div><h3>${t}</h3><p>${p}</p></div></li>`).join('')}</ol>${slashes}`;}
-  const faqItems=[
-    ['Покупка даёт членство?','НЕТ.','Нет. Продукция — физические объекты CEOMENTALITY. Членство проходит через отдельный ручной отбор. Покупка не гарантирует вступление.'],
-    ['Как вступить в CEOMENTALITY?','ЧЕРЕЗ ОТБОР.','После получения картхолдера заполните анкету по QR внутри. Команда изучает каждую заявку вручную. После одобрения вы получите приглашение в клуб.'],
-    ['Для чего нужен код доступа?','ДОСТУП.','Продукция CEOMENTALITY доступна по коду. Код открывает доступ к покупке объектов. Решение о членстве в клубе принимается отдельно.'],
-    ['Можно использовать код повторно?','ОДИН ЗАКАЗ.','После подтверждённой оплаты код считается использованным. Для следующего заказа нужен действующий код доступа.'],
-    ['Оплата пока не подтверждена. Что делать?','ПРОВЕРЬТЕ.','Проверьте статус заказа. Не оплачивайте повторно, пока результат платежа неизвестен. Если вопрос не решён, напишите команде и укажите номер заказа.'],
-    ['Что будет с линейкой и привилегиями?','ПРОДОЛЖЕНИЕ.','NFC CARD — металлическая NFC-визитка — в разработке. В клубе предусмотрены общение, закрытые встречи и привилегии в местах партнёров.']
-  ];
-  function faq() {return intro('<span>ВОПРОСЫ.</span><span>ПО ДЕЛУ.</span>','О клубе, объектах<br>и том, как всё устроено.','faq-page-title')+`<div class="site-faq"><div class="faq-index" role="tablist" aria-label="Вопросы" aria-orientation="vertical">${faqItems.map((x,i)=>`<button id="faq-${i}" role="tab" aria-controls="faq-reader" aria-selected="${i===0}" tabindex="${i===0?0:-1}" data-faq="${i}"><small>0${i+1}</small><span>${x[0]}</span><span aria-hidden="true">↗</span></button>`).join('')}</div><section class="faq-reader" id="faq-reader" role="tabpanel" tabindex="0" aria-labelledby="faq-0"><p class="eyeline accent" id="faq-number">ОТВЕТ / 01</p><h2 id="faq-title">НЕТ.</h2><p id="faq-body">${faqItems[0][2]}</p><div class="faq-decoration type-object" data-type="question" aria-hidden="true"></div></section></div>`;}
   function documents() {
     const doc=window.CEO_DOCUMENTS[screen];
     const labels={privacy:['Политика конфиденциальности','Как устроена работа с данными на сайте CEOMENTALITY.'],agreement:['Пользовательское соглашение','Использование сайта, продукция и заявки на членство.'],'purchase-terms':['Условия покупки','От выбора объекта до оплаты и получения заказа.'],company:['Реквизиты и контакты','Информация о продавце и каналы связи.']};
     const sections=doc.sections.filter(x=>!/^\d\d \/ [A-Z]+$/.test(x.title));
     return `<header class="page-intro document-title"><p class="breadcrumb"><a href="${home}">ГЛАВНАЯ</a>　/　ДОКУМЕНТЫ</p><h1>${doc.title}</h1><p><strong>${labels[screen][0]}</strong></p><p class="muted">${labels[screen][1]}</p></header><nav class="doc-tabs" aria-label="Документы">${docLinks.map(([t,r])=>`<a href="${route(r)}" ${r===screen?'aria-current="page"':''}>${t}</a>`).join('')}</nav><div class="document-layout"><nav class="document-index" aria-label="Содержание"><p class="eyeline">В ЭТОМ ДОКУМЕНТЕ</p>${sections.map((s,i)=>`<a href="#document-${i}">${escape(s.title.replace(' / ','　'))}</a>`).join('')}${link('СВЯЗАТЬСЯ С КОМАНДОЙ','contact',true)}</nav><article class="document-body">${sections.map((s,i)=>`<section id="document-${i}"><h2>${escape(s.title)}</h2>${s.paragraphs.map(p=>`<p>${escape(p)}</p>`).join('')}</section>`).join('')}<div class="doc-contact"><h2>ВОПРОС ПО ДОКУМЕНТУ?</h2><p>Напиши команде через форму связи. Для вопроса о покупке укажи номер заказа.</p>${link('НАПИСАТЬ КОМАНДЕ','contact')}</div></article></div>`;
   }
-  const screens=[['objects','01','Линейка объектов'],['wallet','02','CEOWALLET — чёрный'],['wallet-white','16','CEOWALLET — белый'],['nfc','03','NFC CARD'],['next-item','—','Следующий объект'],['access','08','Код доступа'],['code-error','09','Ошибка кода'],['cart','04','Корзина'],['cart-empty','05','Пустая корзина'],['checkout','10','Оформление'],['checkout-validation','20','Ошибки в форме'],['payment','11','Оплата'],['processing','12','Ожидание оплаты'],['payment-failed','13','Ошибка оплаты'],['thank-you','14','Покупка подтверждена'],['order','19','Статус заказа'],['join','41','Как вступить'],['application','06','Анкета по QR'],['application-received','07','Анкета принята'],['membership-confirmed','15','Вступление одобрено'],['purchase-application','17','Запрос кода'],['purchase-received','18','Запрос принят'],['faq','21','Вопросы и ответы'],['loading','22','Загрузка'],['contact','34','Контакты'],['menu','35','Навигация'],['contact-received','36','Сообщение отправлено'],['privacy','37','Конфиденциальность'],['agreement','38','Соглашение'],['purchase-terms','39','Условия покупки'],['company','40','Реквизиты']];
+  const screens=[['wallet','02','CEOWALLET'],['access','08','Код доступа'],['code-error','09','Ошибка кода'],['cart','04','Корзина'],['cart-empty','05','Пустая корзина'],['checkout','10','Оформление'],['checkout-validation','20','Ошибки в форме'],['payment','11','Оплата'],['processing','12','Ожидание оплаты'],['payment-failed','13','Ошибка оплаты'],['thank-you','14','Покупка подтверждена'],['order','19','Статус заказа'],['application','06','Анкета по QR'],['application-received','07','Анкета принята'],['membership-confirmed','15','Вступление одобрено'],['purchase-application','17','Запрос кода'],['purchase-received','18','Запрос принят'],['contact','34','Контакты'],['menu','35','Навигация'],['contact-received','36','Сообщение отправлено'],['privacy','37','Конфиденциальность'],['agreement','38','Соглашение'],['purchase-terms','39','Условия покупки'],['company','40','Реквизиты']];
   function gallery() {return intro('ВСЕ ЭКРАНЫ.','CEOMENTALITY / сайт / desktop + mobile')+`<p class="muted" style="margin-bottom:40px">Предпросмотр интерфейса. Формы, коды и оплата работают в демонстрационном режиме: сообщения не отправляются, деньги не списываются.</p><div class="screen-list">${screens.map(([r,n,t])=>`<a class="screen-card" href="${route(r,{demo:'1'})}"><small>ЭКРАН / ${n}</small><strong>${t}</strong><span aria-hidden="true">↗</span></a>`).join('')}</div>`;}
   const confirmedScreens=['purchase-received','application-received','contact-received','thank-you','order','membership-confirmed'];
   function unavailableStatus() {return intro('СТАТУС.','Информация по твоему обращению')+`<div class="stack" style="max-width:680px"><p>Для просмотра статуса нужна действующая ссылка из подтверждения заказа или приглашения.</p>${link('СВЯЗАТЬСЯ С КОМАНДОЙ','contact')}${homeButton('НА ГЛАВНУЮ',true)}</div>`;}
@@ -165,9 +153,7 @@
     else if(confirmedScreens.includes(screen)&&!demo && !(live&&read('ceo-receipt-'+screen,null))) content=unavailableStatus();
     else if(window.CEO_DOCUMENTS[screen]) content=documents();
     else switch(screen){
-      case 'wallet':case 'wallet-white':content=product();break;
-      case 'objects':content=catalog();break;
-      case 'nfc':case 'next-item':content=teaser();break;
+      case 'wallet':content=product();break;
       case 'access':case 'code-error':content=access();break;
       case 'cart':case 'cart-empty':content=cartPage();break;
       case 'checkout':case 'checkout-validation':content=checkout();break;
@@ -175,15 +161,13 @@
       case 'payment':content=payment();break;
       case 'order':content=order();break;
       case 'membership-confirmed':content=membershipConfirmed();break;
-      case 'join':content=join();break;
-      case 'faq':content=faq();break;
       case 'screens':content=config.previewEnabled?gallery():intro('НЕ НАЙДЕНО.','Такого экрана нет.')+homeButton();break;
-      case 'menu':content=intro('НАВИГАЦИЯ.','CEOMENTALITY / свой круг')+`<nav class="menu-links" aria-label="Все разделы">${[['КЛУБ',home+'#community'],['ОБЪЕКТЫ',route('objects')],['ВОПРОСЫ',route('faq')],['КОНТАКТЫ',route('contact')],['КОРЗИНА',route('cart')]].map(([t,r])=>`<a href="${r}">${t}</a>`).join('')}</nav>`;break;
-      case 'loading':content=`<div class="loading-preview"><img src="assets/wordmark.svg" alt="CEOMENTALITY" width="900" height="64"><div class="loading-track" aria-hidden="true"></div><p class="eyeline muted">ЗАГРУЗКА / 060</p><a href="${home}" class="text-link">НА ГЛАВНУЮ →</a></div>`;break;
+      case 'menu':content=menu();break;
       default:content=status()||intro('НЕ НАЙДЕНО.','Такого экрана нет.')+homeButton();
     }
     document.title=(screens.find(x=>x[0]===screen)?.[2]||'Все экраны')+' — CEOMENTALITY';
-    root.innerHTML=(demo?`<div class="preview-banner"><span>Предпросмотр · данные не отправляются, оплата тестовая</span><a href="${route('screens')}">Все экраны ↗</a></div>`:'')+header()+`<main class="site-main" id="site-main" tabindex="-1">${content}</main>`+(window.CEO_DOCUMENTS[screen]?fullFooter():footer());
+    document.body.classList.toggle('menu-page',screen==='menu');
+    root.innerHTML=(demo?`<div class="preview-banner"><span>Предпросмотр · данные не отправляются, оплата тестовая</span><a href="${route('screens')}">Все экраны ↗</a></div>`:'')+header()+`<main class="site-main" id="site-main" tabindex="-1">${content}</main>`+(screen==='menu'?'':footer());
     if(demo&&screen==='checkout-validation') validate(document.querySelector('form'),false);
     if(loadError) showAlert(window.CEO_API.message(loadError));
     document.dispatchEvent(new Event('ceo:render'));
@@ -304,7 +288,7 @@
       const common={name:data.name,email:data.email,consents:{privacy:data.privacy==='on'}};
       let body,operation;
       if(kind==='contact'){body={...common,message:data.message};operation=api.contact;}
-      else if(kind==='purchase-application'){body={...common,phone:window.CEO_STORE.phone(data.phone),comment:data.comment||'',variantId:'ceowallet-'+selected};operation=api.purchase;}
+      else if(kind==='purchase-application'){body={...common,phone:window.CEO_STORE.phone(data.phone),telegram:data.telegram,comment:data.comment||'',variantId:'ceowallet-'+selected};operation=api.purchase;}
       else if(kind==='application'){body={...common,phone:window.CEO_STORE.phone(data.phone),telegram:data.telegram,project:data.project,invitation:data.invitation||''};operation=api.membership;}
       if(!operation)return;
       const receipt=await operation(body,requestKey(kind,body),lifetime.signal);
@@ -335,7 +319,6 @@
       if(!write(cartKey,updated)){showAlert('Не удалось сохранить корзину. Разреши хранение данных в браузере.');return;}
       cart=updated;render();
     }
-    const faqButton=event.target.closest('[data-faq]');if(faqButton)selectFaq(Number(faqButton.dataset.faq));
     const a=event.target.closest('[data-action]');if(!a)return;
     if(live){handleLiveAction(a);return;}
     switch(a.dataset.action){
@@ -344,18 +327,6 @@
       case 'refresh-payment':if(demo)location.href=route('thank-you');else showAlert('Подтверждение оплаты пока недоступно. Не оплачивай повторно.');break;
       case 'refresh-order':showAlert(demo?'Демонстрационный статус обновлён: в обработке.':'Не удалось получить статус заказа. Попробуй позже.');break;
     }
-  });
-  function selectFaq(index) {
-    document.querySelectorAll('[data-faq]').forEach((button,i)=>{button.setAttribute('aria-selected',String(i===index));button.tabIndex=i===index?0:-1;});
-    document.querySelector('#faq-reader').setAttribute('aria-labelledby',`faq-${index}`);
-    document.querySelector('#faq-number').textContent=`ОТВЕТ / 0${index+1}`;
-    document.querySelector('#faq-title').textContent=faqItems[index][1];
-    document.querySelector('#faq-body').textContent=faqItems[index][2];
-  }
-  document.addEventListener('keydown',event=>{
-    const tab=event.target.closest('[data-faq]');if(!tab)return;
-    const index=Number(tab.dataset.faq),next=event.key==='ArrowDown'?(index+1)%6:event.key==='ArrowUp'?(index+5)%6:event.key==='Home'?0:event.key==='End'?5:null;
-    if(next!==null){event.preventDefault();selectFaq(next);document.querySelector(`[data-faq="${next}"]`).focus();}
   });
   document.addEventListener('submit',async event=>{
     const form=event.target.closest('[data-form]');if(!form)return;event.preventDefault();

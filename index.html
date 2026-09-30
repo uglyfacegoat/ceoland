@@ -35,6 +35,7 @@
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="typography.css">
   <link rel="stylesheet" href="wallet-media.css">
+  <link rel="stylesheet" href="footer.css">
 </head>
 <body>
   <div class="loading-screen" role="status" aria-label="Загрузка CEOMENTALITY" aria-live="off">
@@ -53,7 +54,7 @@
       <p class="description">Продукция доступна по коду.<br>Вступление в клуб — после ручного отбора.</p>
       <div class="actions">
         <a class="primary" href="#objects">СМОТРЕТЬ ОБЪЕКТЫ <span aria-hidden="true">↓</span></a>
-        <a class="secondary" href="app.html?screen=join">КАК ВСТУПИТЬ</a>
+        <a class="secondary" href="#selection">КАК ВСТУПИТЬ</a>
       </div>
     </section>
     <div class="signal" aria-hidden="true">
@@ -73,22 +74,22 @@
   <section class="objects section" id="objects" aria-labelledby="objects-title">
     <header class="section-heading"><h2 class="display" id="objects-title">OBJECTS.</h2><p class="eyebrow">ЛИНЕЙКА ОБЪЕКТОВ<br>CEOMENTALITY.<br>ПРОДУКЦИЯ ≠ ЧЛЕНСТВО.</p></header>
     <article class="product wallet" id="ceowallet">
-      <div class="product-copy"><p class="product-number">OBJ / 01</p><h3><a href="app.html?screen=wallet-white" data-wallet-link>CEOWALLET</a></h3><p class="material">НАТУРАЛЬНАЯ КОЖА</p><p class="price">2 990 ₽</p></div>
-      <a class="product-image wallet-visual" href="app.html?screen=wallet-white" data-wallet-link aria-label="Открыть CEOWALLET"><img id="wallet-image" src="assets/wallet-white-front.png" alt="Белый кожаный картхолдер CEOWALLET с надписью I’m CEO, Bitch" width="664" height="543" loading="lazy"></a>
+      <div class="product-copy"><p class="product-number">OBJ / 01</p><h3><a href="app.html?screen=wallet&amp;colour=white" data-wallet-link>CEOWALLET</a></h3><p class="material">НАТУРАЛЬНАЯ КОЖА</p><p class="price">2 990 ₽</p></div>
+      <a class="product-image wallet-visual" href="app.html?screen=wallet&amp;colour=white" data-wallet-link aria-label="Открыть CEOWALLET"><img id="wallet-image" src="assets/wallet-white-front.png" alt="Белый кожаный картхолдер CEOWALLET с надписью I’m CEO, Bitch" width="664" height="543" loading="lazy"></a>
       <fieldset class="colours"><legend>ЦВЕТ</legend><label><input type="radio" name="colour" value="black"><span><img src="assets/imgColourSwatch.svg" alt="" width="15" height="15">Чёрный</span></label><label><input type="radio" name="colour" value="white" checked><span><img src="assets/imgColourSwatch1.svg" alt="" width="15" height="15">Белый</span></label></fieldset>
       <div class="object-arrows decoration type-object" data-type="arrows" aria-hidden="true"></div>
       <a class="buy-action" href="app.html?screen=access&amp;colour=white" data-buy-link aria-label="Купить CEOWALLET по коду доступа">КУПИТЬ <span aria-hidden="true">↗</span></a>
     </article>
     <article class="product nfc" id="nfc">
-      <div class="product-copy"><p class="product-number">OBJ / 02 — СКОРО</p><h3><a href="app.html?screen=nfc">NFC CARD</a></h3><p class="material">МЕТАЛЛИЧЕСКАЯ NFC-ВИЗИТКА</p></div>
-      <a class="nfc-image" href="app.html?screen=nfc"><img  src="assets/imgOriginalNfcTeaserSuppliedPhotograph.png" alt="Будущий объект под белой тканью с надписью SOON" width="646" height="426" loading="lazy"></a>
+      <div class="product-copy"><p class="product-number">OBJ / 02 — СКОРО</p><h3>NFC CARD</h3><p class="material">МЕТАЛЛИЧЕСКАЯ NFC-ВИЗИТКА</p></div>
+      <div class="nfc-image"><img  src="assets/imgOriginalNfcTeaserSuppliedPhotograph.png" alt="Будущий объект под белой тканью с надписью SOON" width="646" height="426" loading="lazy"></div>
       <p class="development">В РАЗРАБОТКЕ</p>
       <div class="teaser-arrows decoration type-object" data-type="arrows" aria-hidden="true"></div>
       <button class="teaser-action" type="button" disabled aria-label="NFC CARD пока в разработке"><img src="assets/lock.svg" alt="" width="20" height="20"></button>
     </article>
     <article class="product next-item" id="next-item">
-      <div class="product-copy"><p class="product-number">OBJ / 03 — СКОРО</p><h3><a href="app.html?screen=next-item">NEXT ITEM</a></h3><p class="material">СЛЕДУЮЩИЙ ОБЪЕКТ CEOMENTALITY</p></div>
-      <a class="next-item-image" href="app.html?screen=next-item"><img  src="assets/imgOriginalNfcTeaserSuppliedPhotograph.png" alt="Будущий объект под белой тканью с надписью SOON" width="646" height="426" loading="lazy"></a>
+      <div class="product-copy"><p class="product-number">OBJ / 03 — СКОРО</p><h3>NEXT ITEM</h3><p class="material">СЛЕДУЮЩИЙ ОБЪЕКТ CEOMENTALITY</p></div>
+      <div class="next-item-image"><img  src="assets/imgOriginalNfcTeaserSuppliedPhotograph.png" alt="Будущий объект под белой тканью с надписью SOON" width="646" height="426" loading="lazy"></div>
       <p class="development">В РАЗРАБОТКЕ</p>
       <div class="teaser-arrows decoration type-object" data-type="arrows" aria-hidden="true"></div>
       <button class="teaser-action" type="button" disabled aria-label="NEXT ITEM пока в разработке"><img src="assets/lock.svg" alt="" width="20" height="20"></button>
@@ -147,16 +148,8 @@
   </section>
   </main>
 
-  <footer class="footer section dark" id="footer">
-    <h2>СВОЙ<br>КРУГ.</h2><p class="footer-description">Закрытый клуб молодых предпринимателей.<br>Ручной отбор. Общение. Общие цели.</p>
-    <nav class="footer-nav" aria-label="Навигация по сайту">
-      <div><h3>КЛУБ</h3><a href="#community">О сообществе</a><a href="app.html?screen=join">КАК ВСТУПИТЬ</a><a href="#faq">Вопросы и ответы</a></div>
-      <div><h3>ОБЪЕКТЫ</h3><a href="#objects">Вся линейка</a><a href="app.html?screen=wallet-white">CEOWALLET</a><a href="app.html?screen=nfc">NFC CARD</a></div>
-      <div><h3>ИНФОРМАЦИЯ</h3><a href="app.html?screen=contact">Контакты</a><a href="app.html?screen=privacy">Конфиденциальность</a><a href="app.html?screen=agreement">Соглашение</a><a href="app.html?screen=purchase-terms">Условия покупки</a><a href="app.html?screen=company">Реквизиты</a></div>
-    </nav>
-    <div class="footer-serial"><img src="assets/serial.svg" width="185" height="64" alt=""><p>EST. 2024<br>001 / ∞</p></div><div class="triangle decoration type-object" data-type="triangle" aria-hidden="true"></div>
-    <a class="footer-wordmark" href="#top" aria-label="CEOMENTALITY — наверх">CEOMENTALITY</a><div class="footer-bottom"><span>© CEOMENTALITY / 2026</span><span>MORE THAN A CLUB.</span></div>
-  </footer>
+  <div data-site-footer></div>
+  <script src="site-shell.js" defer></script>
   <script src="assets/type-objects.js" defer></script>
   <script src="typography.js" defer></script>
   <script src="hero-variants-extra-a.js" defer></script>

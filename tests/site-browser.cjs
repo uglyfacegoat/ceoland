@@ -11,7 +11,7 @@ const base=process.env.SITE_URL||'http://127.0.0.1:4173';
   page.on('pageerror',e=>errors.push(e.message));
   await page.goto(base+'/app.html?screen=screens');
   const routes=await page.locator('.screen-card').evaluateAll(els=>els.map(el=>el.href));
-  assert.equal(routes.length,31);
+  assert.equal(routes.length,24);
   for(const width of [320,375,390,430,700,768,1440]){
    await page.setViewportSize({width,height:900});
    for(const url of routes){
@@ -65,6 +65,80 @@ const base=process.env.SITE_URL||'http://127.0.0.1:4173';
    assert.equal(await page.locator('#email-error').evaluate(el=>getComputedStyle(el).outlineStyle),'none','keyboard focus outlines an error panel');
    console.log(`${width}px: ${routes.length} public screens and landing steps checked`);
   }
+  // Documents use the same type scale, beside destinations on desktop and below on mobile.
+  for(const [width,height] of [[320,568],[390,844],[768,600],[1440,900]]){
+   await page.setViewportSize({width,height});
+   await page.goto(base+'/app.html?screen=menu');await page.evaluate(()=>document.fonts.ready);
+   assert.equal(await page.locator('.site-header nav').count(),0,'menu duplicates the header navigation');
+   assert.equal(await page.locator('footer').count(),0,'menu must not repeat the footer');
+   const menuLayout=await page.evaluate(()=>{
+    const main=document.querySelector('.menu-links').getBoundingClientRect();
+    const docs=[...document.querySelectorAll('.menu-documents a')].map(e=>e.getBoundingClientRect().toJSON());
+    return {main:main.toJSON(),docs};
+   });
+   if(width<=700){
+    assert(menuLayout.docs[0].top>=menuLayout.main.bottom,'documents must follow the primary links on mobile');
+    menuLayout.docs.slice(1).forEach((r,i)=>assert(r.top>=menuLayout.docs[i].bottom,'mobile documents must form one vertical list'));
+   }else assert(menuLayout.docs[0].left>=menuLayout.main.right,'documents must sit to the right on desktop');
+   const menuLinks=await page.locator('.menu-links a,.menu-documents a').evaluateAll(els=>els.map(el=>({url:el.href,bottom:el.getBoundingClientRect().bottom,right:el.getBoundingClientRect().right,font:getComputedStyle(el).fontSize})));
+   assert.equal(menuLinks.length,9);
+   for(const item of menuLinks){
+    assert(!new URL(item.url).hash,'menu must link to a page, not a landing section');
+    assert(item.right<=width,'menu must fit the viewport width');
+    assert.equal(item.font,menuLinks[0].font,'documents must match the main menu type size');
+    if(width>700)assert(item.bottom<=height,'desktop menu must fit the viewport height');
+   }
+   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth),width,'menu has horizontal overflow');
+   await page.locator('.menu-documents a').last().scrollIntoViewIfNeeded();
+   assert(await page.locator('.menu-documents a').last().isVisible(),'last document must be reachable');
+   const footerBounds=async()=>page.locator('footer').evaluate(el=>{
+    const r=el.getBoundingClientRect();
+    return [r.width,r.height,...[...el.querySelectorAll('h2,.footer-description,.footer-nav,.footer-serial,.triangle,.footer-wordmark,.footer-bottom')].flatMap(e=>{const b=e.getBoundingClientRect();return [b.left-r.left,b.top-r.top,b.width,b.height];})];
+   });
+   await page.goto(base+'/#top');await page.evaluate(()=>document.fonts.ready);
+   const homeFooter=await footerBounds();
+   await page.goto(base+'/app.html?screen=contact');await page.evaluate(()=>document.fonts.ready);
+   const contactFooter=await footerBounds();
+   assert.equal(homeFooter.length,contactFooter.length);
+   homeFooter.forEach((value,i)=>assert(Math.abs(value-contactFooter[i])<.1,'footer differs from the landing composition'));
+  }
+  // Every FAQ state must fit its column, including long titles after a resize.
+  for(const width of [320,390,700,768,1440,1920]){
+   await page.setViewportSize({width,height:900});
+   await page.goto(base+'/#faq');await page.evaluate(()=>document.fonts.ready);
+   for(let i=0;i<6;i++){
+    await page.locator(`[data-question="${i}"]`).click();
+    const faq=await page.locator('.answer').evaluate(el=>{
+     const title=el.querySelector('h3'),body=el.querySelector('.answer-body');
+     const range=document.createRange();range.selectNodeContents(title);
+     const glyph=range.getBoundingClientRect(),heading=title.getBoundingClientRect(),text=body.getBoundingClientRect();
+     return {glyph:glyph.toJSON(),heading:heading.toJSON(),body:text.toJSON(),width:innerWidth};
+    });
+    assert(faq.glyph.right<=faq.heading.right+1,`FAQ title ${i} exceeds its column at ${width}`);
+    assert(faq.glyph.right<=width,`FAQ title ${i} clips at the screen edge at ${width}`);
+    assert(faq.body.right<=width,`FAQ body ${i} clips at the screen edge at ${width}`);
+    assert(faq.glyph.bottom<faq.body.top,`FAQ heading overlaps its answer at ${width}`);
+   }
+  }
+  for(const [old,section] of Object.entries({objects:'objects',join:'selection',faq:'faq',nfc:'nfc','next-item':'next-item',loading:'top'})){
+   await page.goto(base+'/app.html?screen='+old);await page.waitForURL('**/index.html#'+section);
+   assert.equal(await page.locator('#'+section).count(),1);
+  }
+  await page.goto(base+'/app.html?screen=contact');
+  await page.locator('.site-header a').filter({hasText:'МЕНЮ /'}).click();await page.waitForURL('**screen=menu');
+  await page.keyboard.press('Escape');await page.waitForURL('**screen=contact');
+  for(const [width,height] of [[1366,768],[1440,900],[1920,700],[2560,600]]){
+   await page.setViewportSize({width,height});await page.goto(base+'/#top');await page.evaluate(()=>document.fonts.ready);
+   const hero=await page.evaluate(()=>{
+    const r=document.querySelector('.hero').getBoundingClientRect();
+    const actions=document.querySelector('.actions').getBoundingClientRect();
+    const title=document.querySelector('.intro h1').getBoundingClientRect();
+    const logo=document.querySelector('.wordmark').getBoundingClientRect();
+    return {height:r.height,actionsBottom:actions.bottom-r.top,titleTop:title.top-r.top,logoBottom:logo.bottom-r.top};
+   });
+   assert(Math.abs(hero.height-height)<1,`hero must fill the first viewport at ${width}x${height}`);
+   assert(hero.actionsBottom<=height&&hero.titleTop>hero.logoBottom,`hero content clipped at ${width}x${height}`);
+  }
   await page.setViewportSize({width:390,height:844});
   // The source files have different padding. Compare their visible product bounds.
   for(const width of [390,1440]){
@@ -92,7 +166,8 @@ const base=process.env.SITE_URL||'http://127.0.0.1:4173';
   assert.equal(new URL(await page.locator('.buy-action').getAttribute('href'),base).searchParams.get('colour'),'black');
   await page.locator('input[value=white]').check();
   await page.locator('.wallet h3 a').click();
-  assert(new URL(page.url()).searchParams.get('screen')==='wallet-white');
+  assert.equal(new URL(page.url()).searchParams.get('screen'),'wallet');
+  assert.equal(new URL(page.url()).searchParams.get('colour'),'white');
   await page.goto(base+'/app.html?screen=wallet&demo=1');
   await page.getByRole('button',{name:'Ракурс 2'}).click();
   assert((await page.locator('#gallery-main').getAttribute('src')).includes('back'));
@@ -120,7 +195,7 @@ const base=process.env.SITE_URL||'http://127.0.0.1:4173';
   await page.locator('button[type=submit]').click();await page.waitForURL('**screen=contact-received**');
   await page.goto(base+'/app.html?screen=access');await page.locator('[name=code]').fill('CEO-DEMO-2026');await page.locator('button[type=submit]').click();assert.match(await page.locator('[data-form-alert]').innerText(),/не отправлены/);
   await page.goto(base+'/app.html?screen=thank-you');assert(!/Покупка подтверждена/.test(await page.locator('main').innerText()));
-  await page.goto(base+'/app.html?screen=faq');await page.locator('[data-faq="0"]').focus();await page.keyboard.press('ArrowDown');assert.equal(await page.locator('[data-faq="1"]').getAttribute('aria-selected'),'true');
+  await page.goto(base+'/#faq');await page.locator('[data-question="0"]').focus();await page.keyboard.press('ArrowDown');assert.equal(await page.locator('[data-question="1"]').getAttribute('aria-selected'),'true');
   console.log('PASS: gallery, product links, invalid/valid code, cart persistence, quantity/removal, checkout validation, payment states, contact form, FAQ keyboard navigation, non-demo guards');
   fs.writeFileSync(artifact('ceoland-site-validation.json'),JSON.stringify({screens:routes.length,widths:7,failures,errors},null,2));
   console.log(JSON.stringify({failures,errors},null,2));

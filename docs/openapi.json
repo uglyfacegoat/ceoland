@@ -2325,6 +2325,12 @@
             "type": "string",
             "pattern": "^\\+[0-9]{8,15}$"
           },
+          "telegram": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300,
+            "description": "Telegram username supplied by the applicant."
+          },
           "variantId": {
             "type": "string",
             "enum": [
@@ -2342,6 +2348,7 @@
           "email",
           "consents",
           "phone",
+          "telegram",
           "variantId",
           "comment"
         ]
