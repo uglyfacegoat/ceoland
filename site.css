@@ -91,6 +91,9 @@
 .menu-links a:hover .menu-chip-white,.menu-links a:focus-visible .menu-chip-white,.menu-documents a:hover .menu-chip-white,.menu-documents a:focus-visible .menu-chip-white{background:var(--blue);color:#fff}
 .menu-links a:hover .menu-outline,.menu-links a:focus-visible .menu-outline,.menu-documents a:hover .menu-outline,.menu-documents a:focus-visible .menu-outline{color:#fff}
 .menu-links a:hover .menu-contact,.menu-links a:focus-visible .menu-contact,.menu-documents a:hover .menu-contact,.menu-documents a:focus-visible .menu-contact{transform:skewX(0deg)}
+/* Blue labels and the contact word also respond to pointer, keyboard and touch. */
+.menu-links a:is(:hover,:focus-visible,:active) .menu-chip-blue,.menu-documents a:is(:hover,:focus-visible,:active) .menu-chip-blue{background:#fff;color:var(--blue);transform:translateY(-3px) rotate(2deg)}
+.menu-links a:is(:hover,:focus-visible,:active) .menu-contact,.menu-documents a:is(:hover,:focus-visible,:active) .menu-contact{color:var(--blue);transform:translateX(6px) skewX(0deg)}
 .menu-chip,.menu-contact,.menu-outline{transition:transform .2s ease,color .2s ease,background-color .2s ease}
 @keyframes menu-arrive{from{opacity:0;transform:translateY(24px) rotate(1deg)}to{opacity:1;transform:translateY(0) rotate(0)}}
 @media(min-width:701px) and (max-width:1000px){.menu-page{--menu-size:min(4.6vw,6svh)}.menu-columns{gap:28px}.menu-links a,.menu-documents a{gap:12px}}
