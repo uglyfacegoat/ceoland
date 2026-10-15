@@ -11,7 +11,7 @@ const base=process.env.SITE_URL||'http://127.0.0.1:4173';
   page.on('pageerror',e=>errors.push(e.message));
   await page.goto(base+'/app.html?screen=screens');
   const routes=await page.locator('.screen-card').evaluateAll(els=>els.map(el=>el.href));
-  assert.equal(routes.length,24);
+  assert.equal(routes.length,26);
   for(const width of [320,375,390,430,700,768,1440]){
    await page.setViewportSize({width,height:900});
    for(const url of routes){
@@ -64,6 +64,31 @@ const base=process.env.SITE_URL||'http://127.0.0.1:4173';
    await page.keyboard.press('Tab');
    assert.equal(await page.locator('#email-error').evaluate(el=>getComputedStyle(el).outlineStyle),'none','keyboard focus outlines an error panel');
    console.log(`${width}px: ${routes.length} public screens and landing steps checked`);
+  }
+  // Every form links to its own separate consent, while checkout acknowledges the policy.
+  for(const kind of ['contact','purchase-application','application']){
+   await page.goto(base+'/app.html?screen='+kind);
+   const consent=page.locator('.consent a').first();
+   const url=new URL(await consent.getAttribute('href'),base);
+   assert.equal(url.searchParams.get('screen'),'data-consent');
+   assert.equal(url.searchParams.get('purpose'),kind);
+   assert.equal(await page.locator('[name=privacy]').isChecked(),false);
+   await page.goto(new URL(url.pathname+url.search,base).href);
+   assert.equal(await page.locator('.document-body').count(),1);
+   assert(!/\{\{|\[ИНН/.test(await page.locator('.document-body').innerText()));
+   assert.equal(await page.locator('.legal-notice').count(),1,'working legal revision must be visible');
+  }
+  // Icons are actual decodable assets on both HTML entry points.
+  for(const path of ['/','/app.html?screen=privacy']){
+   await page.goto(base+path);
+   const icons=await page.locator('link[rel=icon],link[rel=apple-touch-icon]').evaluateAll(async els=>Promise.all(els.map(async el=>{
+    const image=new Image();image.src=el.href;await image.decode();return {w:image.naturalWidth,h:image.naturalHeight};
+   })));
+   assert.equal(icons.length,7);assert(icons.every(icon=>icon.w>0&&icon.w===icon.h));
+   const response=await page.request.get(new URL(await page.locator('link[rel=manifest]').getAttribute('href'),base).href);
+   assert.match(response.headers()['content-type'],/application\/manifest\+json/);
+   const manifest=await response.json();
+   for(const icon of manifest.icons){const result=await page.request.get(new URL(icon.src,base).href);assert.equal(result.status(),200);}
   }
   // Documents use the same type scale, beside destinations on desktop and below on mobile.
   for(const [width,height] of [[320,568],[390,844],[768,600],[1440,900]]){

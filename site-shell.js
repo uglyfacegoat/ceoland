@@ -19,7 +19,8 @@
     } catch {}
     return 'index.html';
   }
-  window.CEO_SHELL = {footer, documents, pages, menuReturn};
+  const legalDocuments = [...documents, ['Обработка данных','data-consent'], ['Cookies','cookies']];
+  window.CEO_SHELL = {footer, documents, legalDocuments, pages, menuReturn};
   const placeholder = document.querySelector('[data-site-footer]');
   if(placeholder) placeholder.outerHTML = footer((name,extra={}) => 'app.html?'+new URLSearchParams({screen:name,...extra}));
   document.addEventListener('click', event => {

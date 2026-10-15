@@ -98,6 +98,13 @@ const base=process.env.SITE_URL||'http://127.0.0.1:4173';
   memberStatus='approved';await go('membership-confirmed');assert.match(await page.locator('h1').innerText(),/ТЫ ВНУТРИ/);
   await go('order','#order=opaque-order-token');assert(page.url().includes('orderId=order_1'));assert(!page.url().includes('opaque-order-token'));
   for(const width of [320,768,1440]){await page.setViewportSize({width,height:900});await go('order','&orderId=order_1');assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));}
+  serverFail=true;
+  const beforeLegal=requests.length;
+  for(const screen of ['privacy','agreement','purchase-terms','company','data-consent','cookies']){
+   await go(screen);assert.equal(await page.locator('.document-body').count(),1,'legal text must remain available without the API');
+   assert(!/НЕТ СОЕДИНЕНИЯ/.test(await page.locator('h1').innerText()));
+  }
+  assert.equal(requests.length,beforeLegal,'reading legal documents must not require a session or catalog');
   serverFail=true;await go('wallet');assert.match(await page.locator('h1').innerText(),/НЕТ СОЕДИНЕНИЯ/);assert(!/SQL PASSWORD/.test(await page.locator('body').innerText()));
   serverFail=false;await page.getByRole('button',{name:'ПОВТОРИТЬ'}).click();await page.getByRole('heading',{name:'CEOWALLET.'}).waitFor();
   malformed=true;await go('access');assert.match(await page.locator('[data-form-alert]').innerText(),/прочитать ответ/);malformed=false;
