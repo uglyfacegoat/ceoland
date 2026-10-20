@@ -2,6 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+import legalTools from '../integration/legal.js';
 const root=new URL('../',import.meta.url);
 test('legal documents keep source seller details, distinct purposes and explicit draft limits',async()=>{
  const context={window:{}};vm.runInNewContext(await readFile(new URL('documents.js',root),'utf8'),context);
@@ -26,6 +28,22 @@ test('legal documents keep source seller details, distinct purposes and explicit
  assert(contexts['purchase-application'].data.includes('Telegram'));
  assert(contexts.application.data.includes('проекте'));
  assert.equal(new Set(Object.values(contexts).map(c=>c.purpose)).size,3);
+});
+test('published text archives match the current documents and reject inherited consent purposes',async()=>{
+ const context={window:{}};vm.runInNewContext(await readFile(new URL('documents.js',root),'utf8'),context);
+ const {CEO_LEGAL:legal,CEO_DOCUMENTS:docs}=context.window;
+ const manifest=JSON.parse(await readFile(new URL(`legal/${legal.revision}/manifest.json`,root),'utf8'));
+ assert.equal(manifest.files.length,9);
+ for(const item of manifest.files){
+  const text=await readFile(new URL(`legal/${legal.revision}/${item.text}`,root),'utf8');
+  assert.equal(text,legalTools.snapshot(legal,item.document,docs[item.document],item.purpose).text);
+  assert.equal(createHash('sha256').update(text).digest('hex'),item.sha256);
+  assert(!text.includes('{{purpose}}'));assert(!text.includes('{{data}}'));
+ }
+ const invalid=legalTools.sections(docs['data-consent'],'__proto__');
+ assert.equal(invalid[0].title,'01 / Выберите форму');
+ assert.equal(legalTools.snapshot(legal,'data-consent',docs['data-consent'],'constructor').name,'data-consent');
+ assert.equal(JSON.parse(await readFile(new URL('legal/2026-10-15/manifest.json',root),'utf8')).revision,'2026-10-15');
 });
 test('manifest assets are square, correctly sized and backed by a multi-size ICO',async()=>{
  const manifest=JSON.parse(await readFile(new URL('site.webmanifest',root),'utf8'));

@@ -9,7 +9,7 @@ try{
     await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(0,'127.0.0.1',resolve);});
     url=`http://127.0.0.1:${server.address().port}`;
   }
-  for(const file of ['site-browser.cjs','api-browser.cjs']){
+  for(const file of ['site-browser.cjs','api-browser.cjs','legal-browser.cjs']){
     const code=await new Promise((resolve,reject)=>{
       const child=spawn(process.execPath,[fileURLToPath(new URL(file,import.meta.url))],{stdio:'inherit',env:{...process.env,SITE_URL:url}});
       child.once('error',reject);child.once('exit',resolve);

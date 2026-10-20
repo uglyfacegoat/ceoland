@@ -1,0 +1,71 @@
+{
+  "revision": "2026-10-15",
+  "draft": true,
+  "encoding": "UTF-8",
+  "hashAlgorithm": "SHA-256",
+  "files": [
+    {
+      "document": "privacy",
+      "purpose": null,
+      "text": "privacy.txt",
+      "html": "privacy.html",
+      "sha256": "fd8324ffde7437371ecbf6f9865eba20c5ea529daabd506eaf8ca2ca91d01ebe"
+    },
+    {
+      "document": "agreement",
+      "purpose": null,
+      "text": "agreement.txt",
+      "html": "agreement.html",
+      "sha256": "490c69fd28a89f3fec247d4d9b8bbf6f09854298e6a659673a7b6b05be08655e"
+    },
+    {
+      "document": "purchase-terms",
+      "purpose": null,
+      "text": "purchase-terms.txt",
+      "html": "purchase-terms.html",
+      "sha256": "790316f078e27f676451fd2bb7a4db04b9723f78231bbd45858ac07793c64666"
+    },
+    {
+      "document": "company",
+      "purpose": null,
+      "text": "company.txt",
+      "html": "company.html",
+      "sha256": "a44a92a52f3c23990ff0d032d45ea08c3a2318695d404c1179ff4d7b3c1210ac"
+    },
+    {
+      "document": "data-consent",
+      "purpose": null,
+      "text": "data-consent.txt",
+      "html": "data-consent.html",
+      "sha256": "cc5bd1c3385ec143625be298377905e7dc62aed1ff847ff06badea592587e591"
+    },
+    {
+      "document": "data-consent",
+      "purpose": "contact",
+      "text": "data-consent-contact.txt",
+      "html": "data-consent-contact.html",
+      "sha256": "075c3786a44f21d5cd941e2887f8f09156f0bdf0073d622ab572ee96bd99a7ca"
+    },
+    {
+      "document": "data-consent",
+      "purpose": "purchase-application",
+      "text": "data-consent-purchase-application.txt",
+      "html": "data-consent-purchase-application.html",
+      "sha256": "26bd90d2f73a5f249b3acbd9b0bc9f97b6e70fb7de7e51f016edface1867d39a"
+    },
+    {
+      "document": "data-consent",
+      "purpose": "application",
+      "text": "data-consent-application.txt",
+      "html": "data-consent-application.html",
+      "sha256": "94519ad2de5008346e8a5f6bd3b813373d77ba5cb3352413e238ac1548f5fa7c"
+    },
+    {
+      "document": "cookies",
+      "purpose": null,
+      "text": "cookies.txt",
+      "html": "cookies.html",
+      "sha256": "8c793f323c5da6084368fa59b4ebfe313fa194f1c44292074f57e72b375e2ddc"
+    }
+  ]
+}

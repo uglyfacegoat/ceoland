@@ -23,6 +23,7 @@
     NOT_FOUND: 'Данные не найдены. Проверь ссылку из письма.',
     PAYMENT_UNAVAILABLE: 'Оплата пока недоступна. Попробуй позже.',
     INVALID_RESPONSE: 'Не удалось прочитать ответ сервера. Попробуй позже.',
+    LEGAL_REVISION_CHANGED: 'Документы обновились. Перезагрузи страницу, прочитай новую редакцию и подтверди её перед отправкой.',
     SERVER_ERROR: 'Сервис временно недоступен. Попробуй позже.',
     ABORTED: 'Операция прервана.',
     INVALID_PAYMENT_URL: 'Не удалось открыть безопасную страницу оплаты. Свяжись с командой.'
@@ -51,7 +52,7 @@
     const base = config.apiBase || '/api/v1';
     if (!/^\/(?!\/)[a-zA-Z0-9/_-]+$/.test(base)) throw new Error('apiBase must be a same-origin path');
     let csrfToken;
-    async function request(path, {method = 'GET', body, key, signal, schema} = {}) {
+    async function request(path, {method = 'GET', body, key, signal, schema, legalPurpose} = {}) {
       if (config.mode !== 'api') throw new ApiError('OFFLINE');
       const controller = new AbortController();
       let timedOut = false;
@@ -67,6 +68,10 @@
           headers['X-CSRF-Token'] = csrfToken;
         }
         if (key) headers['Idempotency-Key'] = key;
+        if (legalPurpose && /^\d{4}-\d{2}-\d{2}$/.test(config.legalRevision || '')) {
+          headers['X-Legal-Revision'] = config.legalRevision;
+          headers['X-Legal-Purpose'] = legalPurpose;
+        }
         const response = await fetcher(base.replace(/\/$/,'') + path, {method,headers,body:body===undefined?undefined:JSON.stringify(body),credentials:'same-origin',cache:'no-store',redirect:'error',signal:controller.signal});
         let data;
         try {data = await response.json();} catch {throw new ApiError(response.ok?'INVALID_RESPONSE':'SERVER_ERROR');}
@@ -85,20 +90,20 @@
       } finally {clearTimeout(timeout);signal?.removeEventListener('abort',abort);}
     }
     const get = (path,schema,signal) => request(path,{schema,signal});
-    const post = (path,schema,body,key,signal) => request(path,{method:'POST',schema,body,key,signal});
+    const post = (path,schema,body,key,signal,legalPurpose) => request(path,{method:'POST',schema,body,key,signal,legalPurpose});
     const orderPath = orderId => {if(!id(orderId))throw new ApiError('NOT_FOUND');return '/orders/'+encodeURIComponent(orderId);};
     return {
       async session(signal) {const data=await get('/session','session',signal);csrfToken=data.csrfToken;return data;},
       catalog: signal => get('/catalog','catalog',signal),
       checkAccess: (body,key,signal) => post('/access/check','access',body,key,signal),
-      purchase: (body,key,signal) => post('/purchase-applications','receipt',body,key,signal),
-      contact: (body,key,signal) => post('/contact-messages','receipt',body,key,signal),
-      membership: (body,key,signal) => post('/membership-applications','receipt',body,key,signal),
+      purchase: (body,key,signal) => post('/purchase-applications','receipt',body,key,signal,'purchase-application'),
+      contact: (body,key,signal) => post('/contact-messages','receipt',body,key,signal,'contact'),
+      membership: (body,key,signal) => post('/membership-applications','receipt',body,key,signal,'application'),
       claimInvitation: (token,key,signal) => post('/membership/invitations/claim','claim',{token},key,signal),
       membershipStatus: signal => get('/membership/status','membership',signal),
       claimOrder: (token,key,signal) => post('/orders/claim','orderClaim',{token},key,signal),
-      quote: (body,key,signal) => post('/checkout/quotes','quote',body,key,signal),
-      createOrder: (body,key,signal) => post('/orders','order',body,key,signal),
+      quote: (body,key,signal) => post('/checkout/quotes','quote',body,key,signal,'checkout'),
+      createOrder: (body,key,signal) => post('/orders','order',body,key,signal,'checkout'),
       order: (orderId,signal) => get(orderPath(orderId),'order',signal),
       payment: (orderId,key,signal) => post(orderPath(orderId)+'/payment','payment',{},key,signal),
       paymentURL(value) {

@@ -18,6 +18,8 @@ const base=process.env.SITE_URL||'http://127.0.0.1:4173';
    if(malformed)return send({nonsense:true});
    if(req.method()==='POST'){
     assert.equal(req.headers()['x-csrf-token'],'csrf-test');assert(req.headers()['idempotency-key']);
+    const purpose={'/contact-messages':'contact','/purchase-applications':'purchase-application','/membership-applications':'application','/checkout/quotes':'checkout','/orders':'checkout'}[path];
+    if(purpose){assert.equal(req.headers()['x-legal-purpose'],purpose);assert.equal(req.headers()['x-legal-revision'],'2026-10-20');}
    }
    if(path==='/session')return send({csrfToken:'csrf-test',accessGranted:access,membershipAllowed});
    if(path==='/catalog')return send({currency:'RUB',variants:['white','black'].map(c=>({variantId:'ceowallet-'+c,unitPrice:299000,available:true,maxQuantity:10}))});
@@ -75,6 +77,10 @@ const base=process.env.SITE_URL||'http://127.0.0.1:4173';
   await page.screenshot({path:artifact('api-order-paid.png'),fullPage:true});
   await go('contact');
   for(const [name,value] of Object.entries({name:'Тест',email:'invalid@example.com',message:'Тест API'}))await page.locator(`[name=${name}]`).fill(value);
+  const beforeConsent=requests.filter(r=>r.path==='/contact-messages').length;
+  await page.locator('button[type=submit]').click();
+  assert.equal(await page.locator('[name=privacy]').getAttribute('aria-invalid'),'true');
+  assert.equal(requests.filter(r=>r.path==='/contact-messages').length,beforeConsent,'unchecked consent must prevent submission');
   await page.locator('[name=privacy]').check();await page.locator('button[type=submit]').click();
   await page.getByText('Нет связи с сервером. Проверь подключение и попробуй ещё раз.').waitFor();
   assert.equal(await page.locator('[name=name]').inputValue(),'Тест');

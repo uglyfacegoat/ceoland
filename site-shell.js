@@ -7,7 +7,7 @@
     <nav class="footer-nav" aria-label="Навигация по сайту">
       <div><h3>КЛУБ</h3><a href="${home}#community">О сообществе</a><a href="${home}#selection">КАК ВСТУПИТЬ</a><a href="${home}#faq">Вопросы и ответы</a></div>
       <div><h3>ОБЪЕКТЫ</h3><a href="${home}#objects">Вся линейка</a><a href="${route('wallet',{colour:'white'})}">CEOWALLET</a><a href="${home}#nfc">NFC CARD</a></div>
-      <div><h3>ИНФОРМАЦИЯ</h3><a href="${route('contact')}">Контакты</a><a href="${route('privacy')}">Конфиденциальность</a><a href="${route('agreement')}">Соглашение</a><a href="${route('purchase-terms')}">Условия покупки</a><a href="${route('company')}">Реквизиты</a></div>
+      <div><h3>ИНФОРМАЦИЯ</h3><a href="${route('contact')}">Контакты</a><a href="${route('privacy')}">Конфиденциальность</a><a href="${route('agreement')}">Соглашение</a><a href="${route('purchase-terms')}">Условия покупки</a><a href="${route('company')}">Реквизиты</a><a href="${route('data-consent')}">Согласие на обработку</a><a href="${route('cookies')}">Cookies и хранение</a></div>
     </nav>
     <div class="footer-serial"><img src="assets/serial.svg" width="185" height="64" alt=""><p>EST. 2024<br>001 / ∞</p></div><div class="triangle decoration type-object" data-type="triangle" aria-hidden="true"></div>
     <a class="footer-wordmark" href="${home}#top" aria-label="CEOMENTALITY — наверх">CEOMENTALITY</a><div class="footer-bottom"><span>© CEOMENTALITY / 2026</span><span>MORE THAN A CLUB.</span></div>
@@ -19,7 +19,7 @@
     } catch {}
     return 'index.html';
   }
-  const legalDocuments = [...documents, ['Обработка данных','data-consent'], ['Cookies','cookies']];
+  const legalDocuments = [...documents, ['Обработка данных','data-consent'], ['Cookies и хранение','cookies']];
   window.CEO_SHELL = {footer, documents, legalDocuments, pages, menuReturn};
   const placeholder = document.querySelector('[data-site-footer]');
   if(placeholder) placeholder.outerHTML = footer((name,extra={}) => 'app.html?'+new URLSearchParams({screen:name,...extra}));

@@ -3,7 +3,7 @@ import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { resolve, extname, sep } from 'node:path';
-const types={'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'text/javascript; charset=utf-8','.svg':'image/svg+xml','.png':'image/png','.ttf':'font/ttf','.ico':'image/vnd.microsoft.icon','.webmanifest':'application/manifest+json','.xml':'application/xml; charset=utf-8'};
+const types={'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'text/javascript; charset=utf-8','.svg':'image/svg+xml','.png':'image/png','.ttf':'font/ttf','.ico':'image/vnd.microsoft.icon','.webmanifest':'application/manifest+json','.xml':'application/xml; charset=utf-8','.txt':'text/plain; charset=utf-8','.json':'application/json; charset=utf-8'};
 export function createStaticServer(directory=new URL('.',import.meta.url)){
   const root=resolve(fileURLToPath(directory));
   return createServer(async(req,res)=>{

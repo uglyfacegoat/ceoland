@@ -7,7 +7,7 @@ test('build clears stale files and includes the API adapter, but no source archi
  const dist=new URL('dist/',root);await mkdir(dist,{recursive:true});await writeFile(new URL('old-unused.js',dist),'stale');
  execFileSync(process.execPath,['build.mjs'],{cwd:root});
  const files=await readdir(dist);assert(!files.includes('old-unused.js'));assert(!files.includes('docs'));assert(!files.includes('website'));assert(!files.includes('blender'));
- for(const file of ['runtime-config.js','integration/api.js','integration/store.js','favicon.ico','apple-touch-icon.png','favicon.svg','safari-pinned-tab.svg','site.webmanifest','browserconfig.xml','assets/icons/icon-180.png','assets/icons/maskable-512.png'])assert((await stat(new URL(file,dist))).isFile());
+ for(const file of ['runtime-config.js','integration/api.js','integration/store.js','integration/legal.js','legal/index.html','legal/2026-10-20/privacy.html','legal/2026-10-20/data-consent-contact.txt','legal/2026-10-15/privacy.html','favicon.ico','apple-touch-icon.png','favicon.svg','safari-pinned-tab.svg','site.webmanifest','browserconfig.xml','assets/icons/icon-180.png','assets/icons/maskable-512.png'])assert((await stat(new URL(file,dist))).isFile());
  const html=await readFile(new URL('app.html',dist),'utf8');
  for(const match of html.matchAll(/(?:src|href)="([^"#?]+)"/g)){
   if(/^(data:|https?:)/.test(match[1]))continue;

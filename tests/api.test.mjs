@@ -44,3 +44,17 @@ test('field errors expose only named validation codes and amounts use kopecks',a
   const order={id:'order_1',status:'paid',items:[{variantId:'ceowallet-white',quantity:2,unitPrice:299000}],currency:'RUB',subtotal:598000,delivery:50000,total:648000};
   assert(API.schemas.order(order));assert(!API.schemas.order({...order,items:[...order.items,...order.items]}));assert(!API.schemas.order({...order,total:NaN}));assert(!API.schemas.order({...order,tracking:{carrier:'ok',number:123}}));
 });
+test('legal purpose and revision reach the server without changing request bodies',async()=>{
+  const calls=[];
+  const client=API.createClient({...config,legalRevision:'2026-10-20'},async(url,options)=>{
+    calls.push({url,...options});return json(url.endsWith('/session')?session:{id:'receipt_1',status:'received'});
+  });
+  await client.session();
+  const body={name:'Тест',email:'test@example.com',message:'Вопрос',consents:{privacy:true}};
+  await client.contact(body,'stable-key');
+  assert.equal(calls[1].headers['X-Legal-Revision'],'2026-10-20');
+  assert.equal(calls[1].headers['X-Legal-Purpose'],'contact');
+  assert.deepEqual(JSON.parse(calls[1].body),body);
+  assert.equal(calls[0].headers['X-Legal-Revision'],undefined);
+  assert.match(API.message(new API.ApiError('LEGAL_REVISION_CHANGED')),/Перезагрузи страницу/);
+});

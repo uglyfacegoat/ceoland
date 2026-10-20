@@ -135,4 +135,5 @@
 .legal-pending{border:1px solid #dfdfdf;padding:24px;margin-bottom:36px;scroll-margin-top:24px}
 .legal-pending ul{padding-left:20px;margin:18px 0 0}.legal-pending li{margin-top:10px;font-size:16px;line-height:1.6}
 .document-body p,.legal-notice,.document-index a{overflow-wrap:anywhere}
+.legal-tools{display:flex;flex-wrap:wrap;gap:12px 24px;margin-top:20px;font-size:14px;line-height:1.6}.legal-tools a{text-decoration:underline;text-underline-offset:3px}
 @media(max-width:700px){.legal-notice{padding:16px}.legal-pending{padding:20px}.legal-pending h2{font-size:20px}.legal-links{font-size:15px}}
