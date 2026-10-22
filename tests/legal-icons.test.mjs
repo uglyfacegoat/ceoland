@@ -5,7 +5,7 @@ import {readFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import legalTools from '../integration/legal.js';
 const root=new URL('../',import.meta.url);
-test('legal documents keep source seller details, distinct purposes and explicit draft limits',async()=>{
+test('draft legal documents keep confirmed seller details and purpose scopes without internal audit notes',async()=>{
  const context={window:{}};vm.runInNewContext(await readFile(new URL('documents.js',root),'utf8'),context);
  const {CEO_LEGAL:legal,CEO_DOCUMENTS:docs}=context.window;
  assert.equal(Object.keys(docs).length,6);assert.equal(legal.draft,true);
@@ -14,11 +14,15 @@ test('legal documents keep source seller details, distinct purposes and explicit
  assert.equal(legal.seller.bank,'Т-Банк');
  const purchase=JSON.stringify(docs['purchase-terms']);
  for(const term of ['СБП','Т-Банк','СДЭК','CloudKassir','Платформа ОФД','Участие в клубе бесплатное'])assert(purchase.includes(term),term);
- assert(purchase.includes('предварительно'));
- assert(JSON.stringify(docs.privacy).includes('Соответствие инфраструктуры требованиям локализации пока не подтверждено'));
+ assert(purchase.includes('Оператор фискальных данных — «Платформа ОФД»'));
+ assert(purchase.includes('примерно 10 минут'));
+ assert(purchase.includes('Продавцом в кассе указан ИП Махамаджанов'));
+ assert(JSON.stringify(docs.privacy).includes('SmartApe'));
+ assert(!/по сведениям разработчика|по словам разработчика|по сообщению команды|подтверждены разработчиком/i.test(JSON.stringify(docs)));
  assert(JSON.stringify(docs.agreement).includes('уведомление о принятии направляется через Telegram-бота'));
  for(const doc of Object.values(docs)){
-  assert(doc.label&&doc.sections.length&&doc.pending.length);
+  assert(doc.label&&doc.sections.length);
+  assert(!Object.hasOwn(doc,'pending'));
   assert(!JSON.stringify(doc).includes('[ИНН продавца]'));
   for(const section of doc.sections)for(const link of section.links||[])assert(link.screen?docs[link.screen]:/^(mailto:|https:\/\/t\.me\/)/.test(link.href));
  }

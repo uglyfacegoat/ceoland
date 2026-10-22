@@ -68,7 +68,7 @@
           headers['X-CSRF-Token'] = csrfToken;
         }
         if (key) headers['Idempotency-Key'] = key;
-        if (legalPurpose && /^\d{4}-\d{2}-\d{2}$/.test(config.legalRevision || '')) {
+        if (legalPurpose && /^\d{4}-\d{2}-\d{2}(?:\.[1-9]\d*)?$/.test(config.legalRevision || '')) {
           headers['X-Legal-Revision'] = config.legalRevision;
           headers['X-Legal-Purpose'] = legalPurpose;
         }

@@ -13,6 +13,8 @@ const base=process.env.SITE_URL||'http://127.0.0.1:4173';
     await page.goto(base+'/app.html?screen='+screen);await page.evaluate(()=>document.fonts.ready);
     assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),screen+' overflows at '+width);
     assert.equal(await page.locator('.footer a[href*="screen=data-consent"]').count(),1);
+    assert.equal(await page.locator('#legal-pending,[href="#legal-pending"]').count(),0);
+    assert(!/по сведениям разработчика|по словам разработчика|по сообщению команды|подтверждены разработчиком/i.test(await page.locator('.site-main').innerText()));
     assert.equal(await page.locator('.footer a[href*="screen=cookies"]').count(),1);
     const archive=await page.locator('.legal-tools a').first().getAttribute('href');
     const response=await page.request.get(base+'/'+archive);assert.equal(response.status(),200);

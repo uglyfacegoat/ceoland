@@ -9,7 +9,7 @@
   function snapshot(legal,screen,doc,purpose){
     const context=doc.contexts&&Object.hasOwn(doc.contexts,purpose||'')?doc.contexts[purpose]:null;
     const name=screen+(context?'-'+purpose:'');
-    const text=[doc.label,'CEOMENTALITY','Редакция: '+legal.revision,legal.draft?'РАБОЧАЯ РЕДАКЦИЯ — требует утверждения оператором':'',context?.label||'',doc.description,...sections(doc,purpose).flatMap(section=>[section.title,...section.paragraphs,...(section.links||[]).map(link=>link.label)]),...(doc.pending.length?['ТРЕБУЕТ ПОДТВЕРЖДЕНИЯ',...doc.pending]:[])].filter(Boolean).join('\n\n')+'\n';
+    const text=[doc.label,'CEOMENTALITY','Редакция: '+legal.revision,legal.draft?'ПРОЕКТ ДОКУМЕНТА':'',context?.label||'',doc.description,...sections(doc,purpose).flatMap(section=>[section.title,...section.paragraphs,...(section.links||[]).map(link=>link.label)])].filter(Boolean).join('\n\n')+'\n';
     return {name,text,path:'legal/'+legal.revision+'/'+name};
   }
   return {sections,snapshot};
