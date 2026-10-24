@@ -8,7 +8,7 @@ const root=new URL('../',import.meta.url);
 test('draft legal documents keep confirmed seller details and purpose scopes without internal audit notes',async()=>{
  const context={window:{}};vm.runInNewContext(await readFile(new URL('documents.js',root),'utf8'),context);
  const {CEO_LEGAL:legal,CEO_DOCUMENTS:docs}=context.window;
- assert.equal(Object.keys(docs).length,6);assert.equal(legal.draft,true);
+ assert.equal(Object.keys(docs).length,6);assert.equal(legal.draft,false);
  assert.equal(legal.seller.inn,'772463930459');assert.equal(legal.seller.ogrnip,'325774600559950');
  assert.equal(legal.seller.email,'timiz.work@mail.ru');
  assert.equal(legal.seller.bank,'Т-Банк');

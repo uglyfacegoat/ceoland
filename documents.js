@@ -1,8 +1,8 @@
 /* Draft public legal documents. Implementation notes: docs/legal-readiness.md. */
 window.CEO_LEGAL = {
-  "revision": "2026-10-20.1",
+  "revision": "2026-10-20.2",
   "displayDate": "20 октября 2026 года",
-  "draft": true,
+  "draft": false,
   "seller": {
     "name": "ИП Махамаджанов Бегижон Шерзодович",
     "fullName": "Индивидуальный предприниматель Махамаджанов Бегижон Шерзодович",
@@ -12,7 +12,7 @@ window.CEO_LEGAL = {
     "account": "40802810600008634509",
     "email": "timiz.work@mail.ru",
     "telegram": "@ceowalletsmanager",
-    "sourceDomain": "ceoment.ru",
+    "sourceDomain": "ceomentality.ru",
     "bank": "Т-Банк"
   }
 };
@@ -294,7 +294,7 @@ window.CEO_DOCUMENTS = {
         "paragraphs": [
           "Электронная почта: timiz.work@mail.ru",
           "Telegram: @ceowalletsmanager",
-          "Адрес сайта: ceoment.ru.",
+          "Адрес сайта: ceomentality.ru.",
           "Адрес приёма возвратов совпадает с адресом ИП: 115612, Россия, г. Москва, ул. Братеевская, д. 21, кв. 8. По вопросам заказа укажите его номер и суть обращения."
         ],
         "links": [
