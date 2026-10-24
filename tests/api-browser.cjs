@@ -19,7 +19,7 @@ const base=process.env.SITE_URL||'http://127.0.0.1:4173';
    if(req.method()==='POST'){
     assert.equal(req.headers()['x-csrf-token'],'csrf-test');assert(req.headers()['idempotency-key']);
     const purpose={'/contact-messages':'contact','/purchase-applications':'purchase-application','/membership-applications':'application','/checkout/quotes':'checkout','/orders':'checkout'}[path];
-    if(purpose){assert.equal(req.headers()['x-legal-purpose'],purpose);assert.equal(req.headers()['x-legal-revision'],'2026-10-20.2');}
+    if(purpose){assert.equal(req.headers()['x-legal-purpose'],purpose);assert.equal(req.headers()['x-legal-revision'],'2026-10-20.3');}
    }
    if(path==='/session')return send({csrfToken:'csrf-test',accessGranted:access,membershipAllowed});
    if(path==='/catalog')return send({currency:'RUB',variants:['white','black'].map(c=>({variantId:'ceowallet-'+c,unitPrice:299000,available:true,maxQuantity:10}))});
