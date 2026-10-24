@@ -2347,6 +2347,7 @@
                 "enum": [
                   "UNAUTHORIZED",
                   "FORBIDDEN",
+                  "BLACKLISTED",
                   "INVALID_CODE",
                   "INVALID_INVITATION",
                   "VALIDATION_ERROR",
@@ -2368,6 +2369,11 @@
                     "INVALID"
                   ]
                 }
+              },
+              "reason": {
+                "type": "string",
+                "maxLength": 1000,
+                "description": "Human-readable blacklist reason; present only for BLACKLISTED."
               }
             },
             "required": [

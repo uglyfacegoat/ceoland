@@ -21,6 +21,8 @@ test('HTTP contract: session cookie, CSRF, idempotency and no implicit redirects
 test('rejects malformed success, arbitrary errors, wrong totals and unsafe payment origins',async()=>{
   await assert.rejects(API.createClient(config,async()=>json({csrfToken:'x'})).session(),{code:'INVALID_RESPONSE'});
   await assert.rejects(API.createClient(config,async()=>json({error:{code:'raw-secret-error',message:'stack and SQL'}},500)).session(),e=>API.message(e)==='Сервис временно недоступен. Попробуй позже.');
+  const blocked=API.createClient(config,async url=>url.endsWith('/session')?json(session):json({error:{code:'BLACKLISTED',reason:'Нарушение правил'}},403));
+  await blocked.session();await assert.rejects(blocked.purchase({},'key'),e=>API.message(e)==='Вы находитесь в чёрном списке. Причина: Нарушение правил');
   assert.equal(API.schemas.order({id:'id',status:'paid',items:[{variantId:'ceowallet-white',quantity:1,unitPrice:299000}],currency:'RUB',subtotal:299000,delivery:100,total:1}),false);
   const client=API.createClient(config);
   for(const url of ['javascript:alert(1)','https://evil.example','https://pay.example.com.evil.test/','http://pay.example.com','https://user:pass@pay.example.com/'])assert.throws(()=>client.paymentURL(url),{code:'INVALID_PAYMENT_URL'});
@@ -44,6 +46,19 @@ test('field errors expose only named validation codes and amounts use kopecks',a
   const order={id:'order_1',status:'paid',items:[{variantId:'ceowallet-white',quantity:2,unitPrice:299000}],currency:'RUB',subtotal:598000,delivery:50000,total:648000};
   assert(API.schemas.order(order));assert(!API.schemas.order({...order,items:[...order.items,...order.items]}));assert(!API.schemas.order({...order,total:NaN}));assert(!API.schemas.order({...order,tracking:{carrier:'ok',number:123}}));
 });
+test('pickup points use an encoded city and a strict response schema',async()=>{
+  const calls=[];
+  const client=API.createClient(config,async url=>{
+    calls.push(url);
+    return url.endsWith('/session')?json(session):json({items:[{code:'MSK1',name:'PVZ',address:'Address 1',city:'Moscow',workTime:'10-20'}]});
+  });
+  await client.session();
+  const result=await client.pickupPoints('Nizhny Novgorod');
+  assert.equal(result.items[0].code,'MSK1');
+  assert.match(calls[1],/city=Nizhny%20Novgorod/);
+});
+
+
 test('legal purpose and revision reach the server without changing request bodies',async()=>{
   const calls=[];
   const client=API.createClient({...config,legalRevision:'2026-10-20.3'},async(url,options)=>{

@@ -2,7 +2,7 @@
 (() => {
   const documents = [['Конфиденциальность','privacy'],['Соглашение','agreement'],['Условия покупки','purchase-terms'],['Реквизиты','company']];
   const pages = [['CEOWALLET','wallet'],['КУПИТЬ ПО КОДУ','access'],['ЗАПРОСИТЬ КОД','purchase-application'],['КОНТАКТЫ','contact'],['КОРЗИНА','cart']];
-  const footer = (route, home='index.html') => `<footer class="footer section dark" id="footer">
+  const footer = (route, home='/') => `<footer class="footer section dark" id="footer">
     <h2>СВОЙ<br>КРУГ.</h2><p class="footer-description">Закрытый клуб молодых предпринимателей.<br>Ручной отбор. Общение. Общие цели.</p>
     <nav class="footer-nav" aria-label="Навигация по сайту">
       <div><h3>КЛУБ</h3><a href="${home}#community">О сообществе</a><a href="${home}#selection">КАК ВСТУПИТЬ</a><a href="${home}#faq">Вопросы и ответы</a></div>
@@ -14,20 +14,20 @@
   </footer>`;
   function menuReturn() {
     try {
-      const url = new URL(sessionStorage.getItem('ceo-menu-return') || 'index.html', location.href);
-      if(url.origin === location.origin && url.searchParams.get('screen') !== 'menu') return url.pathname+url.search+url.hash;
+      const url = new URL(sessionStorage.getItem('ceo-menu-return') || '/', location.href);
+      if(url.origin === location.origin && url.searchParams.get('screen') !== 'menu' && url.pathname !== '/menu') return url.pathname+url.search+url.hash;
     } catch {}
-    return 'index.html';
+    return '/';
   }
   const legalDocuments = [...documents, ['Обработка данных','data-consent'], ['Cookies и хранение','cookies']];
   window.CEO_SHELL = {footer, documents, legalDocuments, pages, menuReturn};
   const placeholder = document.querySelector('[data-site-footer]');
-  if(placeholder) placeholder.outerHTML = footer((name,extra={}) => 'app.html?'+new URLSearchParams({screen:name,...extra}));
+  if(placeholder) placeholder.outerHTML = footer((name,extra={}) => window.CEO_ROUTES.route(name==='wallet-white'?'wallet':name,name==='wallet-white'?{colour:'white',...extra}:extra));
   document.addEventListener('click', event => {
     const link = event.target.closest('a[href]');
     if(!link) return;
     const url = new URL(link.href);
-    if(url.origin === location.origin && url.searchParams.get('screen') === 'menu') {
+    if(url.origin === location.origin && (url.searchParams.get('screen') === 'menu' || url.pathname === '/menu')) {
       try { sessionStorage.setItem('ceo-menu-return',location.pathname+location.search+location.hash); } catch {}
     }
   });

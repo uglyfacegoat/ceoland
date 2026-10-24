@@ -3,13 +3,18 @@ import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { resolve, extname, sep } from 'node:path';
+import routing from './routing.js';
 const types={'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'text/javascript; charset=utf-8','.svg':'image/svg+xml','.png':'image/png','.ttf':'font/ttf','.ico':'image/vnd.microsoft.icon','.webmanifest':'application/manifest+json','.xml':'application/xml; charset=utf-8','.txt':'text/plain; charset=utf-8','.json':'application/json; charset=utf-8'};
 export function createStaticServer(directory=new URL('.',import.meta.url)){
   const root=resolve(fileURLToPath(directory));
   return createServer(async(req,res)=>{
     if(!['GET','HEAD'].includes(req.method)){res.writeHead(405,{'Allow':'GET, HEAD'});res.end();return;}
     try{
-      const path=decodeURIComponent(new URL(req.url,'http://localhost').pathname);
+      const url=new URL(req.url,'http://localhost');
+      const redirect=routing.redirect(url);
+      if(redirect){res.writeHead(301,{Location:redirect});res.end();return;}
+      let path=decodeURIComponent(url.pathname);
+      if(routing.valid(path.slice(1)))path='/app.html';
       const file=resolve(root,'.'+(path==='/'?'/index.html':path));
       if(!file.startsWith(root+sep)||!types[extname(file)]){res.writeHead(404);res.end('Not found');return;}
       const body=await readFile(file);

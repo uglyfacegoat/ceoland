@@ -12,7 +12,8 @@
   let invitationToken = fragment.get('invitation'), orderToken = fragment.get('order');
   if(invitationToken||orderToken)history.replaceState(null,'',location.pathname+location.search);
   window.addEventListener('pagehide', () => lifetime.abort(), {once:true});
-  let ready = !live, loadError = null, session = null, catalogData = null, quote = null, orderData = null, membershipData = null;
+  let ready = !live, loadError = null, session = null, catalogData = null, quote = null, orderData = null, membershipData = null, paymentUrl = null, sbpQr = null;
+  const fixedDelivery = config.deliveryProvider === 'fixed';
   const requestKeys = new Map();
   function requestKey(kind, payload) {
     const fingerprint = JSON.stringify(payload);
@@ -22,21 +23,21 @@
     requestKeys.set(kind, {fingerprint,key});
     return key;
   }
-  const screen = params.get('screen') || 'objects';
+  const screen = window.CEO_ROUTES.screen(new URL(location.href));
   const isLegal = Object.prototype.hasOwnProperty.call(window.CEO_DOCUMENTS,screen);
   // Keep old shared links working; content that lives on the landing has one home.
   const sections = {objects:'objects',join:'selection',faq:'faq',nfc:'nfc','next-item':'next-item',loading:'top'};
-  if(sections[screen]) {location.replace('index.html#'+sections[screen]);return;}
+  if(sections[screen]) {location.replace('/#'+sections[screen]);return;}
   if(screen==='wallet-white') {
-    params.set('screen','wallet');params.set('colour','white');
-    location.replace('app.html?'+params);return;
+    params.delete('screen');params.set('colour','white');
+    location.replace(window.CEO_ROUTES.route('wallet',Object.fromEntries(params)));return;
   }
   const root = document.querySelector('#site-root');
   const PRICE = 2990;
   const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const money = n => new Intl.NumberFormat('ru-RU').format(n) + ' ₽';
-  const route = (name, extra = {}) => sections[name] ? 'index.html#'+sections[name] : 'app.html?' + new URLSearchParams({screen:name==='wallet-white'?'wallet':name,...(demo?{demo:'1'}:{}),...(name==='wallet-white'?{colour:'white'}:{}),...extra});
-  const home = 'index.html';
+  const home = '/';
+  const route = (name, extra = {}) => sections[name] ? home+'#'+sections[name] : window.CEO_ROUTES.route(name==='wallet-white'?'wallet':name,{...(demo?{demo:'1'}:{}),...(name==='wallet-white'?{colour:'white'}:{}),...extra});
   const read = (key, fallback) => {try {return JSON.parse(sessionStorage.getItem(key)) ?? fallback;} catch {return fallback;}};
   const write = (key,value) => {try {sessionStorage.setItem(key,JSON.stringify(value));return true;} catch {return false;}};
   const cartKey = demo ? 'ceo-preview-cart-v1' : 'ceo-cart-v1';
@@ -62,6 +63,7 @@
   const slashes = '<img class="site-slashes" src="assets/imgAccentHorizontalSlashRhythm.svg" width="320" height="40" alt="">';
   const alert = '<p class="form-alert" role="alert" data-form-alert></p>';
   const field = (name,label,placeholder='',type='text',required=true,value='') => `<label class="field" for="${name}">${label}<input id="${name}" name="${name}" type="${type}" maxlength="${name==='code'?64:name==='email'?254:name==='comment'?2000:300}" placeholder="${placeholder}" ${required?'required':''} ${type==='email'?'autocomplete="email"':type==='tel'?'autocomplete="tel"':name==='name'?'autocomplete="name"':''} value="${escape(value)}" aria-describedby="${name}-error" ${name==='code'?'autocapitalize="characters" spellcheck="false"':name==='telegram'?'autocapitalize="none" spellcheck="false"':''}><span class="field-error" id="${name}-error"></span></label>`;
+  const pickupField = () => fixedDelivery ? '' : `<label class="field" for="pickupPointCode">ПУНКТ ВЫДАЧИ CDEK<select id="pickupPointCode" name="pickupPointCode" required aria-describedby="pickupPointCode-error"><option value="">Сначала укажи город и нажми «Найти ПВЗ»</option></select><span class="field-error" id="pickupPointCode-error"></span></label><input type="hidden" name="address"><input type="hidden" name="pickupPointName">`;
   const textarea = (name,label,placeholder) => `<label class="field" for="${name}">${label}<textarea maxlength="5000" id="${name}" name="${name}" placeholder="${placeholder}" required aria-describedby="${name}-error"></textarea><span class="field-error" id="${name}-error"></span></label>`;
   const consent = (name='privacy',purpose='order') => {
     const labels={agreement:`Принимаю <a href="${route('agreement')}" target="_blank" rel="noopener">пользовательское соглашение</a>.`,'purchase-terms':`Принимаю <a href="${route('purchase-terms')}" target="_blank" rel="noopener">публичную оферту</a>.`};
@@ -104,7 +106,9 @@
   }
   function checkout() {
     const invalid=demo&&screen==='checkout-validation';
-    return intro('ОФОРМЛЕНИЕ.','КОД ✓　/　КОРЗИНА ✓　/　ДАННЫЕ　/　ОПЛАТА')+`<form data-form="checkout" novalidate>${invalid?'<p class="form-alert" style="margin-bottom:28px">Проверь email, телефон и обязательные согласия. Остальные данные сохранены.</p>':''}<div class="site-grid wide-left"><div class="stack form-fields"><h3>01 / КОНТАКТЫ</h3>${field('name','ИМЯ И ФАМИЛИЯ','Как к вам обращаться')}${field('email','EMAIL','you@example.com','email',true,invalid?'you@':'')}${field('phone','ТЕЛЕФОН','+7 ___ ___-__-__','tel',true,invalid?'+7 900':'')}<h3>02 / ДОСТАВКА</h3>${field('city','ГОРОД','Укажи город')}${field('address','АДРЕС','Улица, дом, квартира')}${field('comment','КОММЕНТАРИЙ · НЕОБЯЗАТЕЛЬНО','Что нужно знать о доставке','text',false)}<p class="small muted">Стоимость доставки рассчитывается по адресу.</p></div><aside class="stack">${review()}${consent()}${consent('agreement')}${consent('purchase-terms')}${alert}<div data-quote-summary></div>${submit(live?'РАССЧИТАТЬ ДОСТАВКУ':invalid?'ИСПРАВИТЬ ДАННЫЕ':'ПЕРЕЙТИ К ОПЛАТЕ')}<p class="eyeline">✓ Код подтверждён. Следующий шаг — оплата.</p></aside></div></form>`;
+    const deliveryFields=fixedDelivery?'':`<h3>02 / ДОСТАВКА В ПВЗ CDEK</h3>${field('city','ГОРОД','Укажи город')}${live?action('НАЙТИ ПВЗ','find-pvz',true):''}${pickupField()}<p class="small muted">Доставку оплачивает покупатель. Стоимость рассчитывается CDEK для выбранного ПВЗ.</p>`;
+    const fixedNotice=fixedDelivery?'<h3>02 / ДОСТАВКА</h3><p class="small muted">Бесплатная доставка. Адрес доставки будет уточнён после оплаты.</p>':'';
+    return intro('ОФОРМЛЕНИЕ.','КОД ✓　/　КОРЗИНА ✓　/　ДАННЫЕ　/　ОПЛАТА')+`<form data-form="checkout" novalidate>${invalid?'<p class="form-alert" style="margin-bottom:28px">Проверь email, телефон и обязательные согласия. Остальные данные сохранены.</p>':''}<div class="site-grid wide-left"><div class="stack form-fields"><h3>01 / КОНТАКТЫ</h3>${field('name','ИМЯ И ФАМИЛИЯ','Как к вам обращаться')}${field('email','EMAIL','you@example.com','email',true,invalid?'you@':'')}${field('phone','ТЕЛЕФОН','+7 ___ ___-__-__','tel',true,invalid?'+7 900':'')}${fixedNotice}${deliveryFields}${field('comment','КОММЕНТАРИЙ · НЕОБЯЗАТЕЛЬНО','Что нужно знать о доставке','text',false)}</div><aside class="stack">${review()}${consent()}${consent('agreement')}${consent('purchase-terms')}${alert}<div data-quote-summary></div>${submit(live?(fixedDelivery?'ПЕРЕЙТИ К ОПЛАТЕ':'РАССЧИТАТЬ ДОСТАВКУ'):invalid?'ИСПРАВИТЬ ДАННЫЕ':'ПЕРЕЙТИ К ОПЛАТЕ')}<p class="eyeline">✓ Код подтверждён. Следующий шаг — оплата.</p></aside></div></form>`;
   }
   function formPage(kind) {
     const purchase=kind==='purchase-application', membership=kind==='application';
@@ -127,7 +131,8 @@
     }
   }
   function payment() {
-    return intro('ОПЛАТА.','01 / КОД ✓　 →　02 / ДАННЫЕ ✓　 →　03 / ОПЛАТА')+`<div class="site-grid wide-left"><div class="stack"><div class="payment-placeholder"><h3>● БАНКОВСКАЯ КАРТА</h3><label class="field">НОМЕР КАРТЫ<input placeholder="0000 0000 0000 0000" disabled aria-label="Номер карты — платёжный сервис не подключён"></label><div class="payment-pair"><label class="field">СРОК ДЕЙСТВИЯ<input placeholder="ММ / ГГ" disabled></label><label class="field">CVC / CVV<input placeholder="•••" disabled></label></div><p class="small muted">Платёжные данные обрабатывает платёжный сервис.</p></div>${alert}${action('ОПЛАТИТЬ '+money(total(activeCart)||PRICE),'pay')}${link('ВЕРНУТЬСЯ К ЗАКАЗУ','checkout',true)}${demo?`<div class="preview-controls">Состояния оплаты: <a href="${route('processing')}">Ожидание</a><a href="${route('thank-you')}">Успешно</a><a href="${route('payment-failed')}">Ошибка</a></div>`:''}</div><aside class="stack"><h3>К ОПЛАТЕ</h3><p class="total">${money(total(activeCart)||PRICE)}</p>${row('Объект','CEOWALLET')}${row('Цвет',colourName(activeCart[0]?.colour||selected))}${row('Количество',String(count(activeCart)||1))}${rule}<p class="muted">Проверь сумму перед оплатой.<br>После подтверждения откроется статус заказа.</p></aside></div>`;
+    const qr = sbpQr ? `<div class="payment-placeholder"><h3>● ОПЛАТА ПО СБП</h3><p class="small muted">Отсканируй QR-код в приложении своего банка.</p><img src="${escape(sbpQr)}" alt="QR-код для оплаты через СБП" style="display:block;width:min(280px,100%);height:auto;margin:20px auto;background:#fff;padding:12px;border-radius:8px">${paymentUrl?action('ОТКРЫТЬ ФОРМУ ОПЛАТЫ','open-payment',true):''}</div>` : '';
+    return intro('ОПЛАТА.','01 / КОД ✓　 →　02 / ДАННЫЕ ✓　 →　03 / ОПЛАТА')+`<div class="site-grid wide-left"><div class="stack">${qr}<div class="payment-placeholder"><h3>● БАНКОВСКАЯ КАРТА / СБП</h3><p class="small muted">Платёжные данные обрабатывает защищённая форма Т‑Банка.</p></div>${alert}${!paymentUrl?action('ОПЛАТИТЬ '+money(total(activeCart)||PRICE),'pay'):''}${link('ВЕРНУТЬСЯ К ЗАКАЗУ','checkout',true)}${demo?`<div class="preview-controls">Состояния оплаты: <a href="${route('processing')}">Ожидание</a><a href="${route('thank-you')}">Успешно</a><a href="${route('payment-failed')}">Ошибка</a></div>`:''}</div><aside class="stack"><h3>К ОПЛАТЕ</h3><p class="total">${money(total(activeCart)||PRICE)}</p>${row('Объект','CEOWALLET')}${row('Цвет',colourName(activeCart[0]?.colour||selected))}${row('Количество',String(count(activeCart)||1))}${rule}<p class="muted">Проверь сумму перед оплатой.<br>После подтверждения откроется статус заказа.</p></aside></div>`;
   }
   function order() {
     return intro('ТВОЙ ЗАКАЗ.','ЗАКАЗ № 0001 / статус и состав')+`<div class="site-grid wide-left"><div class="stack"><h2>В ОБРАБОТКЕ</h2><p>Оплата подтверждена. Готовим заказ к передаче. Когда появятся данные отправления, они будут здесь.</p><ol class="timeline">${[['СОЗДАН','Состав заказа и контакты сохранены'],['ОПЛАЧЕН ✓','Оплата подтверждена · код использован'],['В ОБРАБОТКЕ ●','Подготавливаем к отправке'],['ВЫПОЛНЕН','Информация о получении появится после отправки']].map(([t,p],i)=>`<li><strong class="${i===2?'accent':''}">0${i+1} / ${t}</strong><p>${p}</p></li>`).join('')}</ol></div><aside class="stack">${review()}${row('Код','Использован')}<p class="small muted">Анкета в клуб — по QR на карточке внутри полученного картхолдера. Покупка не гарантирует членство.</p>${alert}${action('ОБНОВИТЬ СТАТУС','refresh-order')}${link('КАК ВСТУПИТЬ В КЛУБ','join',true)}</aside></div>`;
@@ -208,7 +213,7 @@
     }
     showAlert(window.CEO_API.message(error),scope);
   }
-  const customer = data => ({name:data.name,email:data.email,phone:window.CEO_STORE.phone(data.phone),city:data.city,address:data.address,comment:data.comment||''});
+  const customer = data => ({name:data.name,email:data.email,phone:window.CEO_STORE.phone(data.phone),city:data.city,address:data.address,pickupPointCode:data.pickupPointCode,pickupPointName:data.pickupPointName,comment:data.comment||''});
   const consents = data => ({privacy:data.privacy==='on',agreement:data.agreement==='on',purchaseTerms:data['purchase-terms']==='on'});
   function serverSummary(data){
     return `<div class="stack">${data.items.map(x=>row(`CEOWALLET / ${colourName(x.variantId.endsWith('white')?'white':'black')} × ${x.quantity}`,money(x.unitPrice*x.quantity/100))).join('')}${row('Объекты',money(data.subtotal/100))}${row('Доставка',money(data.delivery/100))}${rule}${row('Итого',money(data.total/100))}</div>`;
@@ -217,8 +222,9 @@
     if(!orderData)return unavailableStatus();
     const paid=['paid','shipped','delivered'].includes(orderData.status);
     const labels={awaiting_payment:'ОЖИДАЕТ ОПЛАТЫ.',processing:'ПРОВЕРЯЕМ ОПЛАТУ.',paid:'ОПЛАЧЕН.',shipped:'ОТПРАВЛЕН.',delivered:'ДОСТАВЛЕН.',payment_failed:'ПЛАТЁЖ НЕ ПРОШЁЛ.',cancelled:'ЗАКАЗ ОТМЕНЁН.'};
-    const canPay=['awaiting_payment','payment_failed'].includes(orderData.status);
-    return intro(labels[orderData.status],`ЗАКАЗ / ${escape(orderData.id)}`)+`<div class="site-grid"><div class="stack"><p>${paid?'Оплата подтверждена. Покупка не гарантирует вступление в клуб.':canPay?'Оплата откроется на защищённой странице платёжного сервиса.':'Статус получен от сервера. Не оплачивай заказ повторно, пока платёж проверяется.'}</p>${alert}${canPay?action('ПЕРЕЙТИ К ОПЛАТЕ','pay'):''}${action('ОБНОВИТЬ СТАТУС','refresh-order',true)}${link('СВЯЗАТЬСЯ С КОМАНДОЙ','contact',true)}</div><aside>${serverSummary(orderData)}${orderData.tracking?row('Служба доставки',escape(orderData.tracking.carrier))+row('Трек-номер',escape(orderData.tracking.number)):''}</aside></div>`;
+    const canPay=['awaiting_payment','payment_failed','processing'].includes(orderData.status);
+    const paymentPanel=canPay&&paymentUrl ? `<section class="stack" aria-label="Оплата заказа">${sbpQr?`<h3>ОПЛАТА ПО СБП</h3><img src="${escape(sbpQr)}" alt="QR-код оплаты заказа" width="280" height="280" style="max-width:100%;height:auto;background:white;padding:12px"><p>Отсканируй QR в приложении банка, затем обнови статус заказа.</p>`:'<p role="status">QR СБП сейчас недоступен. Можно оплатить через форму банка.</p>'}${action('ОТКРЫТЬ ФОРМУ БАНКА','open-payment',true)}</section>`:'';
+    return intro(labels[orderData.status],`ЗАКАЗ / ${escape(orderData.id)}`)+`<div class="site-grid"><div class="stack"><p>${paid?'Оплата подтверждена. Покупка не гарантирует вступление в клуб.':'Если уже оплатил, дождись подтверждения банка и обнови статус.'}</p>${alert}${paymentPanel}${canPay&&!paymentUrl?action('ОТКРЫТЬ ОПЛАТУ И QR','pay'):''}${action('ОБНОВИТЬ СТАТУС','refresh-order',true)}${link('СВЯЗАТЬСЯ С КОМАНДОЙ','contact',true)}</div><aside>${serverSummary(orderData)}${orderData.tracking?row('Служба доставки',escape(orderData.tracking.carrier))+row('Трек-номер',escape(orderData.tracking.number)):''}</aside></div>`;
   }
   async function initialize(){
     ready=false;loadError=null;render();
@@ -239,10 +245,25 @@
     button.disabled=true;
     try{
       if(button.dataset.action==='retry-load'){await initialize();return;}
+      if(button.dataset.action==='find-pvz'){
+        const form=button.closest('form');
+        const city=form?.elements.city?.value?.trim();
+        const select=form?.elements.pickupPointCode;
+        if(!form||!select||!city)throw new window.CEO_API.ApiError('VALIDATION_ERROR',{city:'INVALID'});
+        const data=await api.pickupPoints(city,lifetime.signal);
+        select.innerHTML=data.items.length
+          ? '<option value="">Выбери пункт выдачи</option>'+data.items.map(point=>`<option value="${escape(point.code)}" data-address="${escape(point.address)}" data-name="${escape(point.name)}">${escape(point.address)}${point.workTime?' · '+escape(point.workTime):''}</option>`).join('')
+          : '<option value="">В этом городе подходящие ПВЗ не найдены</option>';
+        select.focus();return;
+      }
       if(!orderData)return;
       if(button.dataset.action==='pay'){
         const data=await api.payment(orderData.id,requestKey('payment',orderData.id),lifetime.signal);
-        location.assign(api.paymentURL(data.paymentUrl));
+        paymentUrl=api.paymentURL(data.paymentUrl);
+        sbpQr=data.sbpQr||null;
+        render();
+      }else if(button.dataset.action==='open-payment'){
+        if(paymentUrl) location.assign(paymentUrl);
       }else if(['refresh-order','refresh-payment'].includes(button.dataset.action)){
         orderData=await api.order(orderData.id,lifetime.signal);render();
       }
@@ -251,7 +272,7 @@
   function resetQuote(form){
     quote=null;requestKeys.delete('quote');requestKeys.delete('order');
     const output=form.querySelector('[data-quote-summary]');if(output)output.replaceChildren();
-    const label=form.querySelector('button[type="submit"] span');if(label)label.textContent='РАССЧИТАТЬ ДОСТАВКУ';
+    const label=form.querySelector('button[type="submit"] span');if(label)label.textContent=fixedDelivery?'ПЕРЕЙТИ К ОПЛАТЕ':'РАССЧИТАТЬ ДОСТАВКУ';
   }
   document.addEventListener('input',event=>{
     const form=event.target.closest('[data-form]');if(!form)return;
@@ -260,6 +281,13 @@
       event.target.removeAttribute('aria-invalid');
       const error=document.getElementById(event.target.id+'-error');if(error)error.textContent='';
     }
+  });
+  document.addEventListener('change',event=>{
+    if(event.target.id!=='pickupPointCode')return;
+    const form=event.target.form, option=event.target.selectedOptions[0];
+    form.elements.address.value=option?.dataset.address||'';
+    form.elements.pickupPointName.value=option?.dataset.name||'';
+    resetQuote(form);
   });
   async function submitLive(form){
     const data=Object.fromEntries([...new FormData(form)].map(([key,value])=>[key,typeof value==='string'?value.trim():value]));

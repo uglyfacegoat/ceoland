@@ -12,19 +12,20 @@ const base=process.env.SITE_URL||'http://127.0.0.1:4173';
    for(const screen of ['privacy','agreement','purchase-terms','company','data-consent','cookies']){
     await page.goto(base+'/app.html?screen='+screen);await page.evaluate(()=>document.fonts.ready);
     assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),screen+' overflows at '+width);
-    assert.equal(await page.locator('.footer a[href*="screen=data-consent"]').count(),1);
+    assert.equal(await page.locator('.footer a[href*="/data-consent"]').count(),1);
     assert.equal(await page.locator('#legal-pending,[href="#legal-pending"]').count(),0);
     assert(!/по сведениям разработчика|по словам разработчика|по сообщению команды|подтверждены разработчиком/i.test(await page.locator('.site-main').innerText()));
-    assert.equal(await page.locator('.footer a[href*="screen=cookies"]').count(),1);
+    assert.equal(await page.locator('.footer a[href*="/cookies"]').count(),1);
     const archive=await page.locator('.legal-tools a').first().getAttribute('href');
     const response=await page.request.get(base+'/'+archive);assert.equal(response.status(),200);
     if(screen==='privacy'&&[320,1440].includes(width))await page.screenshot({path:artifact(`legal-privacy-top-${width}.png`)});
    }
    await page.goto(base+'/app.html?screen=contact');
    assert.equal(await page.locator('.consent .consent-policy').count(),0);
-   assert.equal(await page.locator('.consent-policy a[href*="screen=privacy"]').count(),1);
+   assert.equal(await page.locator('.consent-policy a[href*="/privacy"]').count(),1);
    assert.equal(await page.locator('[name=privacy]').isChecked(),false);
    if([320,1440].includes(width))await page.screenshot({path:artifact(`legal-contact-${width}.png`)});
+   await page.goto(base+'/#footer');
    await page.locator('.footer').scrollIntoViewIfNeeded();
    const separated=await page.locator('.footer').evaluate(footer=>{
     const nav=footer.querySelector('.footer-nav').getBoundingClientRect();

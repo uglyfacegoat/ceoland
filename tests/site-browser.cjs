@@ -7,6 +7,10 @@ const base=process.env.SITE_URL||'http://127.0.0.1:4173';
  const failures=[],errors=[];
  try{
   const context=await browser.newContext({reducedMotion:'reduce'});
+  await context.route('**/runtime-config.js',route=>route.fulfill({
+   contentType:'text/javascript',
+   body:"window.CEO_CONFIG={mode:'offline',apiBase:'/api/v1',deliveryProvider:'fixed',previewEnabled:true,timeoutMs:15000,paymentOrigins:[]};"
+  }));
   const page=await context.newPage();
   page.on('pageerror',e=>errors.push(e.message));
   await page.goto(base+'/app.html?screen=screens');
@@ -22,9 +26,9 @@ const base=process.env.SITE_URL||'http://127.0.0.1:4173';
      heading:document.querySelector('h1')?.textContent,
      overflow:[...document.querySelectorAll('main h1,main h2,main h3,main p,main input,main button')].filter(e=>e.getBoundingClientRect().right>innerWidth+1).map(e=>e.textContent.slice(0,70))
     }));
-    if(state.scroll>width||state.broken.length||state.overflow.length)failures.push({width,screen:new URL(url).searchParams.get('screen'),...state});
-    if([390,1440].includes(width)&&['wallet','wallet-white','checkout','access','faq','join','privacy','objects'].includes(new URL(url).searchParams.get('screen'))){
-     await page.screenshot({path:artifact(`ceoland-${new URL(url).searchParams.get('screen')}-${width}.png`),fullPage:true});
+    if(state.scroll>width||state.broken.length||state.overflow.length)failures.push({width,screen:new URL(url).pathname.slice(1),...state});
+    if([390,1440].includes(width)&&['wallet','wallet-white','checkout','access','faq','join','privacy','objects'].includes(new URL(url).pathname.slice(1))){
+     await page.screenshot({path:artifact(`ceoland-${new URL(url).pathname.slice(1)}-${width}.png`),fullPage:true});
     }
    }
    await page.goto(base+'/#selection');await page.evaluate(()=>document.fonts.ready);
@@ -57,7 +61,7 @@ const base=process.env.SITE_URL||'http://127.0.0.1:4173';
    }
    await page.goto(base+'/#top');
    await page.locator('.landing-menu').click();
-   await page.waitForURL('**screen=menu');
+   await page.waitForURL('**/menu');
    await page.goto(base+'/app.html?screen=contact');
    await page.locator('[name=name]').click();
    assert.equal(await page.locator('#name-error').evaluate(el=>getComputedStyle(el).outlineStyle),'none','input focus outlines an error panel');
@@ -67,10 +71,10 @@ const base=process.env.SITE_URL||'http://127.0.0.1:4173';
   }
   // Every form links to its own separate consent, while checkout acknowledges the policy.
   for(const kind of ['contact','purchase-application','application']){
-   await page.goto(base+'/app.html?screen='+kind);
+   await page.goto(base+'/app.html?screen='+kind+'&demo=1');
    const consent=page.locator('.consent a').first();
    const url=new URL(await consent.getAttribute('href'),base);
-   assert.equal(url.searchParams.get('screen'),'data-consent');
+   assert.equal(url.pathname.slice(1),'data-consent');
    assert.equal(url.searchParams.get('purpose'),kind);
    assert.equal(await page.locator('[name=privacy]').isChecked(),false);
    await page.goto(new URL(url.pathname+url.search,base).href);
@@ -146,12 +150,12 @@ const base=process.env.SITE_URL||'http://127.0.0.1:4173';
    }
   }
   for(const [old,section] of Object.entries({objects:'objects',join:'selection',faq:'faq',nfc:'nfc','next-item':'next-item',loading:'top'})){
-   await page.goto(base+'/app.html?screen='+old);await page.waitForURL('**/index.html#'+section);
+   await page.goto(base+'/app.html?screen='+old);await page.waitForURL('**/#'+section);
    assert.equal(await page.locator('#'+section).count(),1);
   }
   await page.goto(base+'/app.html?screen=contact');
-  await page.locator('.site-header a').filter({hasText:'МЕНЮ /'}).click();await page.waitForURL('**screen=menu');
-  await page.keyboard.press('Escape');await page.waitForURL('**screen=contact');
+  await page.locator('.site-header a').filter({hasText:'МЕНЮ /'}).click();await page.waitForURL('**/menu');
+  await page.keyboard.press('Escape');await page.waitForURL('**/contact');
   for(const [width,height] of [[1366,768],[1440,900],[1920,700],[2560,600]]){
    await page.setViewportSize({width,height});await page.goto(base+'/#top');await page.evaluate(()=>document.fonts.ready);
    const hero=await page.evaluate(()=>{
@@ -191,8 +195,7 @@ const base=process.env.SITE_URL||'http://127.0.0.1:4173';
   assert.equal(new URL(await page.locator('.buy-action').getAttribute('href'),base).searchParams.get('colour'),'black');
   await page.locator('input[value=white]').check();
   await page.locator('.wallet h3 a').click();
-  assert.equal(new URL(page.url()).searchParams.get('screen'),'wallet');
-  assert.equal(new URL(page.url()).searchParams.get('colour'),'white');
+  assert(new URL(page.url()).pathname.slice(1)==='wallet-white');
   await page.goto(base+'/app.html?screen=wallet&demo=1');
   await page.getByRole('button',{name:'Ракурс 2'}).click();
   assert((await page.locator('#gallery-main').getAttribute('src')).includes('back'));
@@ -200,7 +203,7 @@ const base=process.env.SITE_URL||'http://127.0.0.1:4173';
   await page.locator('[name=code]').fill('INVALID');await page.locator('button[type=submit]').click();
   assert.match(await page.locator('[data-form-alert]').innerText(),/недействителен/);
   await page.locator('[name=code]').fill('CEO-DEMO-2026');await page.locator('button[type=submit]').click();
-  await page.waitForURL('**screen=cart**');
+  await page.waitForURL('**/cart**');
   await page.getByRole('button',{name:'Увеличить количество'}).click();
   assert.equal(await page.locator('.quantity output').innerText(),'2');
   assert.equal((await page.locator('.cart-summary .total').innerText()).replace(/\s/g,''),'5980₽');
@@ -208,16 +211,20 @@ const base=process.env.SITE_URL||'http://127.0.0.1:4173';
   await page.getByRole('link',{name:'ОФОРМИТЬ ЗАКАЗ'}).click();
   await page.locator('button[type=submit]').click();
   assert(await page.locator('[aria-invalid=true]').count()>0);
-  for(const [name,value] of Object.entries({name:'Тестовый пользователь',email:'test@example.com',phone:'+79001234567',city:'Москва',address:'Тестовая улица, 1'}))await page.locator(`[name="${name}"]`).fill(value);
+  for(const [name,value] of Object.entries({name:'Тестовый пользователь',email:'test@example.com',phone:'+79001234567',city:'Москва',address:'Тестовая улица, 1'})){
+   const input=page.locator(`[name="${name}"]`);
+   if(['city','address'].includes(name)&&!await input.count())continue;
+   await input.fill(value);
+  }
   for(const name of ['privacy','agreement','purchase-terms'])await page.locator(`[name="${name}"]`).check();
-  await page.locator('button[type=submit]').click();await page.waitForURL('**screen=payment**');
+  await page.locator('button[type=submit]').click();await page.waitForURL('**/payment**');
   assert.equal(await page.locator('.payment-placeholder input:not([disabled])').count(),0);
-  await page.getByRole('button',{name:/ОПЛАТИТЬ/}).click();await page.waitForURL('**screen=processing**');
-  await page.getByRole('button',{name:'ОБНОВИТЬ СТАТУС'}).click();await page.waitForURL('**screen=thank-you**');
+  await page.getByRole('button',{name:/ОПЛАТИТЬ/}).click();await page.waitForURL('**/processing**');
+  await page.getByRole('button',{name:'ОБНОВИТЬ СТАТУС'}).click();await page.waitForURL('**/thank-you**');
   await page.goto(base+'/app.html?screen=cart&demo=1');await page.getByRole('button',{name:'УДАЛИТЬ ×'}).click();assert.match(await page.locator('h1').innerText(),/ПОКА ПУСТО/);
   await page.goto(base+'/app.html?screen=contact&demo=1');
   await page.locator('[name=name]').fill('Тест');await page.locator('[name=email]').fill('test@example.com');await page.locator('[name=message]').fill('Проверка интерфейса');await page.locator('[name=privacy]').check();
-  await page.locator('button[type=submit]').click();await page.waitForURL('**screen=contact-received**');
+  await page.locator('button[type=submit]').click();await page.waitForURL('**/contact-received**');
   await page.goto(base+'/app.html?screen=access');await page.locator('[name=code]').fill('CEO-DEMO-2026');await page.locator('button[type=submit]').click();assert.match(await page.locator('[data-form-alert]').innerText(),/не отправлены/);
   await page.goto(base+'/app.html?screen=thank-you');assert(!/Покупка подтверждена/.test(await page.locator('main').innerText()));
   await page.goto(base+'/#faq');await page.locator('[data-question="0"]').focus();await page.keyboard.press('ArrowDown');assert.equal(await page.locator('[data-question="1"]').getAttribute('aria-selected'),'true');

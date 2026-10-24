@@ -45,8 +45,8 @@ document.querySelectorAll('input[name="colour"]').forEach(input=>input.addEventL
   const white=input.value==='white';
   wallet.src=white?'assets/wallet-white-front.png':'assets/imgOriginalCeowalletBlack.png';
   wallet.alt=`${white?'Белый':'Чёрный'} кожаный картхолдер CEOWALLET`;
-  document.querySelectorAll('[data-wallet-link]').forEach(link=>link.href=`app.html?screen=wallet&colour=${input.value}`);
-  document.querySelector('[data-buy-link]').href=`app.html?screen=access&colour=${input.value}`;
+  document.querySelectorAll('[data-wallet-link]').forEach(link=>link.href=`/${white?'wallet-white':'wallet'}`);
+  document.querySelector('[data-buy-link]').href=`/access?colour=${input.value}`;
 }));
 
 // Refresh presentation prices; only the server quote can authorize a final total.

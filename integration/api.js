@@ -6,7 +6,7 @@
 })(globalThis, () => {
   'use strict';
   class ApiError extends Error {
-    constructor(code, fields = {}) { super(code); this.name = 'ApiError'; this.code = code; this.fields = fields; }
+    constructor(code, fields = {}, reason = '') { super(code); this.name = 'ApiError'; this.code = code; this.fields = fields; this.reason = reason; }
   }
   const messages = {
     OFFLINE: 'Отправка пока недоступна. Сервис ещё не подключён; данные не отправлены.',
@@ -14,6 +14,7 @@
     TIMEOUT: 'Ответ задерживается. Повтори попытку: повторная отправка не создаст дубликат.',
     UNAUTHORIZED: 'Срок доступа истёк. Введи код или открой ссылку из письма снова.',
     FORBIDDEN: 'Для этого действия нужен действующий доступ.',
+    BLACKLISTED: 'Вы находитесь в чёрном списке.',
     INVALID_CODE: 'Код недействителен, истёк или уже использован.',
     INVALID_INVITATION: 'Приглашение недействительно или срок его действия истёк.',
     VALIDATION_ERROR: 'Проверь данные в отмеченных полях.',
@@ -22,13 +23,16 @@
     RATE_LIMITED: 'Слишком много попыток. Подожди немного и попробуй снова.',
     NOT_FOUND: 'Данные не найдены. Проверь ссылку из письма.',
     PAYMENT_UNAVAILABLE: 'Оплата пока недоступна. Попробуй позже.',
+    DELIVERY_UNAVAILABLE: 'Не удалось получить пункты или стоимость доставки CDEK. Попробуй позже.',
     INVALID_RESPONSE: 'Не удалось прочитать ответ сервера. Попробуй позже.',
     LEGAL_REVISION_CHANGED: 'Документы обновились. Перезагрузи страницу, прочитай новую редакцию и подтверди её перед отправкой.',
     SERVER_ERROR: 'Сервис временно недоступен. Попробуй позже.',
     ABORTED: 'Операция прервана.',
     INVALID_PAYMENT_URL: 'Не удалось открыть безопасную страницу оплаты. Свяжись с командой.'
   };
-  const message = error => messages[error?.code] || messages.SERVER_ERROR;
+  const message = error => error?.code === 'BLACKLISTED' && error.reason
+    ? `Вы находитесь в чёрном списке. Причина: ${error.reason}`
+    : messages[error?.code] || messages.SERVER_ERROR;
   const object = x => !!x && typeof x === 'object' && !Array.isArray(x);
   const id = x => typeof x === 'string' && /^[a-zA-Z0-9_-]{1,100}$/.test(x);
   const amount = x => Number.isSafeInteger(x) && x >= 0;
@@ -36,6 +40,7 @@
   const item = x => object(x) && variants.includes(x.variantId) && Number.isInteger(x.quantity) && x.quantity >= 1 && x.quantity <= 10 && amount(x.unitPrice);
   const totals = x => object(x) && x.currency === 'RUB' && ['subtotal','delivery','total'].every(k => amount(x[k])) && x.subtotal + x.delivery === x.total && Array.isArray(x.items) && x.items.length > 0 && x.items.length <= 2 && x.items.every(item) && new Set(x.items.map(i=>i.variantId)).size === x.items.length && x.items.reduce((sum,i)=>sum+i.quantity*i.unitPrice,0) === x.subtotal;
   const statuses = ['awaiting_payment','processing','paid','shipped','delivered','payment_failed','cancelled'];
+  const pickupPoint = x => object(x) && typeof x.code === 'string' && typeof x.name === 'string' && typeof x.address === 'string' && typeof x.city === 'string' && typeof x.workTime === 'string';
   const schemas = {
     session: x => object(x) && typeof x.csrfToken === 'string' && x.csrfToken.length > 0 && typeof x.accessGranted === 'boolean' && typeof x.membershipAllowed === 'boolean',
     catalog: x => object(x) && x.currency === 'RUB' && Array.isArray(x.variants) && x.variants.length === 2 && variants.every(v=>x.variants.some(i=>i.variantId===v)) && x.variants.every(i=>amount(i.unitPrice)&&typeof i.available==='boolean'&&Number.isInteger(i.maxQuantity)&&i.maxQuantity>=0&&i.maxQuantity<=10),
@@ -44,8 +49,9 @@
     claim: x => object(x) && x.accepted === true,
     orderClaim: x => object(x) && id(x.orderId),
     quote: x => totals(x) && id(x.id) && Number.isFinite(Date.parse(x.expiresAt)),
+    pickupPoints: x => object(x) && Array.isArray(x.items) && x.items.every(pickupPoint),
     order: x => totals(x) && id(x.id) && statuses.includes(x.status) && (x.tracking == null || (object(x.tracking) && typeof x.tracking.carrier === 'string' && typeof x.tracking.number === 'string' && x.tracking.carrier.length <= 200 && x.tracking.number.length <= 200)),
-    payment: x => object(x) && typeof x.paymentUrl === 'string',
+    payment: x => object(x) && typeof x.paymentUrl === 'string' && (x.sbpQr == null || typeof x.sbpQr === 'string'),
     membership: x => object(x) && ['not_submitted','pending','approved','rejected'].includes(x.status)
   };
   function createClient(config = {}, fetcher = globalThis.fetch?.bind(globalThis)) {
@@ -79,7 +85,8 @@
           const fallback = {401:'UNAUTHORIZED',403:'FORBIDDEN',404:'NOT_FOUND',409:'OUT_OF_STOCK',422:'VALIDATION_ERROR',429:'RATE_LIMITED'}[response.status] || 'SERVER_ERROR';
           const code = Object.hasOwn(messages,data?.error?.code) ? data.error.code : fallback;
           const fields = object(data?.error?.fields) ? data.error.fields : {};
-          throw new ApiError(code, fields);
+          const reason = typeof data?.error?.reason === 'string' ? data.error.reason.slice(0, 1000) : '';
+          throw new ApiError(code, fields, reason);
         }
         if (!schemas[schema]?.(data)) throw new ApiError('INVALID_RESPONSE');
         return data;
@@ -103,6 +110,10 @@
       membershipStatus: signal => get('/membership/status','membership',signal),
       claimOrder: (token,key,signal) => post('/orders/claim','orderClaim',{token},key,signal),
       quote: (body,key,signal) => post('/checkout/quotes','quote',body,key,signal,'checkout'),
+      pickupPoints: (city,signal) => {
+        if(typeof city!=='string'||city.trim().length<2)throw new ApiError('VALIDATION_ERROR',{city:'INVALID'});
+        return get('/delivery/pickup-points?city='+encodeURIComponent(city.trim()),'pickupPoints',signal);
+      },
       createOrder: (body,key,signal) => post('/orders','order',body,key,signal,'checkout'),
       order: (orderId,signal) => get(orderPath(orderId),'order',signal),
       payment: (orderId,key,signal) => post(orderPath(orderId)+'/payment','payment',{},key,signal),
