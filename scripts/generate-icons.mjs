@@ -5,15 +5,17 @@ import {fileURLToPath} from 'node:url';
 const root=new URL('../',import.meta.url);
 const logo=await readFile(new URL('assets/wordmark.svg',root),'utf8');
 const glyph=logo.match(/<path d="([^"]+)"/)[1];
-const svg=(scale,background=true)=>{
- const x=(64-9.982*scale)/2,y=(64-11.1654*scale)/2;
- return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">${background?'<rect width="64" height="64" fill="#2451b2"/>':''}<path d="${glyph}" transform="translate(${x} ${y}) scale(${scale})" fill="${background?'#fff':'#000'}"/></svg>\n`;
+// Icon = C glyph plus the brand period (headings end with "."), centred as one group.
+const svg=(scale,{background=true,mono=false}={})=>{
+ const w=9.982*scale,h=11.1654*scale,dot=h*.2,gap=h*.09,x=(64-(w+gap+dot))/2,y=(64-h)/2;
+ const ink=mono?'#000':'#fff',accent=mono?'#000':'#3566d9';
+ return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">${background?'<rect width="64" height="64" fill="#171717"/>':''}<path d="${glyph}" transform="translate(${x.toFixed(3)} ${y.toFixed(3)}) scale(${scale})" fill="${ink}"/><rect x="${(x+w+gap).toFixed(3)}" y="${(y+h-dot).toFixed(3)}" width="${dot.toFixed(3)}" height="${dot.toFixed(3)}" fill="${accent}"/></svg>`;
 };
 const run=args=>execFileSync('magick',[...args.slice(0,-1),'-strip','-depth','8',args.at(-1)],{cwd:fileURLToPath(root)});
 await mkdir(new URL('assets/icons/',root),{recursive:true});
-await writeFile(new URL('favicon.svg',root),svg(4.3));
-await writeFile(new URL('assets/icons/maskable.svg',root),svg(3.2));
-await writeFile(new URL('safari-pinned-tab.svg',root),svg(4.3,false));
+await writeFile(new URL('favicon.svg',root),svg(3.9));
+await writeFile(new URL('assets/icons/maskable.svg',root),svg(2.9));
+await writeFile(new URL('safari-pinned-tab.svg',root),svg(3.9,{background:false,mono:true}));
 run(['-background','none','-density','768','favicon.svg','-resize','512x512','assets/icons/icon-512.png']);
 for(const size of [16,32,48,96,120,144,150,152,167,180,192,256]){
  run(['assets/icons/icon-512.png','-resize',`${size}x${size}`,`assets/icons/icon-${size}.png`]);
