@@ -4,7 +4,7 @@ window.CEO_CONFIG = Object.freeze({
   deliveryProvider: 'fixed', // 'cdek' enables pickup-point delivery (needs the backend CDEK endpoints)
   previewEnabled: false, // true только для визуального ревью
   timeoutMs: 15000,
-  telegramBotUrl: 'https://t.me/ceowalletsmanager',
+  telegramBotUrl: 'https://t.me/ceopasswordbot',
   paymentOrigins: [
     'https://securepay.tinkoff.ru',
     'https://securepayments.tinkoff.ru',
