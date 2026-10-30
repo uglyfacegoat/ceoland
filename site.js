@@ -53,7 +53,7 @@
   const total = items => items.reduce((sum,x)=>sum+x.quantity*unitPrice(x.colour),0);
   const variant = colour => catalogData?.variants.find(v=>v.variantId==='ceowallet-'+colour);
   const colourName = c => c==='white'?'Белый':'Чёрный';
-  const photo = c => c==='white'?'assets/wallet-white-front.png':'assets/imgOriginalCeowalletBlack.png';
+  const photo = c => c==='white'?'assets/wallet-white-front.webp':'assets/imgOriginalCeowalletBlack.webp';
   const link = (text,name,outline=false,extra={}) => `<a class="site-button${outline?' outline':''}" href="${route(name,extra)}"><span>${text}</span><span aria-hidden="true">→</span></a>`;
   const homeButton = (text='НА ГЛАВНУЮ',outline=false) => `<a class="site-button${outline?' outline':''}" href="${home}"><span>${text}</span><span aria-hidden="true">→</span></a>`;
   const submit = text => `<button class="site-button" type="submit"><span>${text}</span><span aria-hidden="true">→</span></button>`;
@@ -95,7 +95,7 @@
   function product() {
     const white=selected==='white';
     const c=white?'white':'black';
-    const images=white?[photo(c),'assets/wallet-white-angle.png','assets/wallet-white-back.png','assets/wallet-white-side.png']:[photo(c),'assets/wallet-black-back.png'];
+    const images=white?[photo(c),'assets/wallet-white-angle.webp','assets/wallet-white-back.webp','assets/wallet-white-side.webp']:[photo(c),'assets/wallet-black-back.webp'];
     return intro('CEOWALLET.','OBJECT 01 / LIMITED EDITION')+`<div class="product-detail"><p class="detail-price">${money(unitPrice(c))}</p><div class="product-gallery"><div class="gallery-main wallet-visual"><img id="gallery-main" src="${images[0]}" alt="CEOWALLET — ${colourName(c)}, вид спереди" width="624" height="510"></div><div class="gallery-thumbs" aria-label="Ракурсы">${images.map((src,i)=>`<button type="button" data-gallery="${src}" aria-label="Ракурс ${i+1}" aria-pressed="${i===0}"><span class="wallet-visual"><img src="${src}" alt="" width="138" height="130"></span></button>`).join('')}</div><p class="gallery-caption">CEOMENTALITY / CEOWALLET　 •　 РАКУРСЫ</p></div><div class="stack product-information"><p>Натуральная кожа. Два цвета. Предмет из линейки CEOMENTALITY.</p><p>Покупка CEOWALLET не гарантирует вступление в клуб. Заявка на членство рассматривается отдельно.</p>${colours(c)}${row('КОЛЛЕКЦИЯ','Access')}${rule}<p class="small">Для покупки нужен действующий код доступа.</p><div class="action-stack">${live&&(!variant(c)?.available||!variant(c)?.maxQuantity)?'<p role="status">ЭТОТ ЦВЕТ ПОКА НЕДОСТУПЕН</p>':link('КУПИТЬ ПО КОДУ','access',false,{colour:c})}${link('НЕТ КОДА? ЗАПРОСИТЬ','purchase-application',true,{colour:c})}</div><p class="small muted">Условия доставки и оплаты — при оформлении заказа.</p></div></div>`;
   }
   function access() {
@@ -144,7 +144,7 @@
   function order() {
     return intro('ТВОЙ ЗАКАЗ.','ЗАКАЗ № 0001 / статус и состав')+`<div class="site-grid wide-left"><div class="stack"><h2>В ОБРАБОТКЕ</h2><p>Оплата подтверждена. Готовим заказ к передаче. Когда появятся данные отправления, они будут здесь.</p><ol class="timeline">${[['СОЗДАН','Состав заказа и контакты сохранены'],['ОПЛАЧЕН ✓','Оплата подтверждена · код использован'],['В ОБРАБОТКЕ ●','Подготавливаем к отправке'],['ВЫПОЛНЕН','Информация о получении появится после отправки']].map(([t,p],i)=>`<li><strong class="${i===2?'accent':''}">0${i+1} / ${t}</strong><p>${p}</p></li>`).join('')}</ol></div><aside class="stack">${review()}${row('Код','Использован')}<p class="small muted">Анкета в клуб — по QR на карточке внутри полученного картхолдера. Покупка не гарантирует членство.</p>${alert}${action('ОБНОВИТЬ СТАТУС','refresh-order')}${link('КАК ВСТУПИТЬ В КЛУБ','join',true)}</aside></div>`;
   }
-  function membershipConfirmed() {return intro('ТЫ ВНУТРИ.','Приглашение в клуб / вступление одобрено')+`<div class="site-grid wide-left"><div class="stack"><img class="gallery-main" src="assets/imgInvitationSuppliedOriginal.png" width="592" height="345" alt="Membership confirmed. Welcome to the club."><p class="eyeline muted">THIS CARD CONNECTS YOU TO PEOPLE LIKE YOU.</p></div><div class="stack"><h2>WELCOME<br>TO THE CLUB.</h2><p>Твоя заявка одобрена командой.<br>Добро пожаловать в CEOMENTALITY.</p><p>Информация о вступлении и доступе к сообществу — в приглашении.</p>${link('К ОБЪЕКТАМ','objects')}${link('ВВЕСТИ КОД ДОСТУПА','access',true)}</div></div>`;}
+  function membershipConfirmed() {return intro('ТЫ ВНУТРИ.','Приглашение в клуб / вступление одобрено')+`<div class="site-grid wide-left"><div class="stack"><img class="gallery-main" src="assets/imgInvitationSuppliedOriginal.webp" width="592" height="345" alt="Membership confirmed. Welcome to the club."><p class="eyeline muted">THIS CARD CONNECTS YOU TO PEOPLE LIKE YOU.</p></div><div class="stack"><h2>WELCOME<br>TO THE CLUB.</h2><p>Твоя заявка одобрена командой.<br>Добро пожаловать в CEOMENTALITY.</p><p>Информация о вступлении и доступе к сообществу — в приглашении.</p>${link('К ОБЪЕКТАМ','objects')}${link('ВВЕСТИ КОД ДОСТУПА','access',true)}</div></div>`;}
   function documents() {
     const doc=window.CEO_DOCUMENTS[screen];
     const purpose=params.get('purpose');

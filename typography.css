@@ -1,4 +1,4 @@
-@font-face{font-family:'Roboto Mono';src:url('assets/roboto-mono-bold.ttf') format('truetype');font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:'Roboto Mono';src:url('assets/roboto-mono-bold.woff2') format('woff2');font-weight:700;font-style:normal;font-display:swap}
 .type-object{pointer-events:none;user-select:none;overflow:visible}
 .type-stage{position:absolute;left:0;top:0;transform-origin:0 0;line-height:normal;white-space:nowrap}
 .type-position{position:absolute;display:block;font:inherit;line-height:normal}
