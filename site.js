@@ -126,9 +126,10 @@
   function status() {
     switch(screen) {
       case 'purchase-received':{
-        const copy='Запрос кода отправлен.<br><br><strong>Код придёт на почту и в Telegram-бота.</strong> Чтобы получать сообщения в Telegram, открой бота и нажми «Старт».<br><br>Этот запрос не является анкетой на членство.';
-        const botLink=`<a class="site-button" href="${telegramBotUrl}" target="_blank" rel="noopener"><span>ОТКРЫТЬ TELEGRAM-БОТА</span><span aria-hidden="true">→</span></a>`;
-        return statusPage('ЗАЯВКА ОТПРАВЛЕНА.','Покупка продукции / обращение принято',copy,botLink+link('ВВЕСТИ ПОЛУЧЕННЫЙ КОД','access')+homeButton('НА ГЛАВНУЮ',true),'SENT / 001');
+        const receipt=read('ceo-receipt-purchase-received',{}), byEmail=receipt.deliveryChannel==='email';
+        const copy=byEmail?'Запрос кода отправлен. После одобрения код придёт на указанный email.<br><br>Этот запрос не является анкетой на членство.':'Запрос кода отправлен. Чтобы код пришёл в Telegram, открой бота и нажми «Старт».<br><br>Этот запрос не является анкетой на членство.';
+        const channelAction=byEmail?'':`<a class="site-button" href="${telegramBotUrl}" target="_blank" rel="noopener"><span>ОТКРЫТЬ TELEGRAM-БОТА</span><span aria-hidden="true">→</span></a>`;
+        return statusPage('ЗАЯВКА ОТПРАВЛЕНА.','Покупка продукции / обращение принято',copy,channelAction+link('ВВЕСТИ ПОЛУЧЕННЫЙ КОД','access')+homeButton('НА ГЛАВНУЮ',true),'SENT / 001');
       }
       case 'application-received':return statusPage('ПРИНЯТО.<br>НА СВЯЗИ.','Заявка отправлена.','Твои контакты переданы команде.<br>Мы рассмотрим заявку и вернёмся с ответом.<br><br>Приглашение в клуб придёт отдельно после рассмотрения.',homeButton()+link('ПОСМОТРЕТЬ ОБЪЕКТЫ','objects',true));
       case 'contact-received':return statusPage('НА СВЯЗИ.','Сообщение отправлено','Команда получила твоё сообщение. Ответ придёт на указанный email.<br><br>Если вопрос связан с заказом, его статус можно проверить на отдельном экране.',homeButton()+link('ВОПРОСЫ И ОТВЕТЫ','faq',true),'SENT / 002');
