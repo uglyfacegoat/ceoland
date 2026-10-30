@@ -71,7 +71,7 @@
   const consent = (name='privacy',purpose='order') => {
     const labels={agreement:`Принимаю <a href="${route('agreement')}" target="_blank" rel="noopener">пользовательское соглашение</a>.`,'purchase-terms':`Принимаю <a href="${route('purchase-terms')}" target="_blank" rel="noopener">публичную оферту</a>.`};
     const purposeText={contact:'ответа на обращение','purchase-application':'рассмотрения запроса кода',application:'рассмотрения заявки в клуб'}[purpose];
-    const text=name==='privacy'?(purpose==='order'?`Ознакомлен с <a href="${route('privacy')}" target="_blank" rel="noopener">политикой обработки данных</a>.`:`Даю <a href="${route('data-consent',{purpose})}" target="_blank" rel="noopener">согласие на обработку персональных данных</a> для ${purposeText}.`):labels[name];
+    const text=name==='privacy'?(purpose==='order'?`Ознакомлен с <a href="${route('privacy')}" target="_blank" rel="noopener">политикой обработки данных</a>.`:`Даю <a href="${route('data-consent')}" target="_blank" rel="noopener">согласие на обработку персональных данных</a> для ${purposeText}.`):labels[name];
     return `<label class="consent"><input type="checkbox" id="consent-${name}" name="${name}" required data-legal-revision="${window.CEO_LEGAL.revision}" data-consent-purpose="${purpose}" aria-describedby="consent-${name}-error"><span>${text}<span class="field-error" id="consent-${name}-error"></span></span></label>${name==='privacy'&&purpose!=='order'?`<p class="small muted consent-policy"><a href="${route('privacy')}" target="_blank" rel="noopener">Политика обработки персональных данных</a>, без согласия на рекламу.</p>`:''}`;
   };
   const intro = (title,caption='',cls='') => `<header class="page-intro ${cls}"><h1>${title}</h1>${caption?`<p>${caption}</p>`:''}</header>`;
@@ -126,10 +126,9 @@
   function status() {
     switch(screen) {
       case 'purchase-received':{
-        const receipt=read('ceo-receipt-purchase-received',{}), byEmail=receipt.deliveryChannel==='email';
-        const copy=byEmail?'Запрос кода отправлен. После одобрения код придёт на указанный email.<br><br>Этот запрос не является анкетой на членство.':'Запрос кода отправлен. Чтобы код пришёл в Telegram, открой бота и нажми «Старт».<br><br>Этот запрос не является анкетой на членство.';
-        const channelAction=byEmail?'':`<a class="site-button" href="${telegramBotUrl}" target="_blank" rel="noopener"><span>ОТКРЫТЬ TELEGRAM-БОТА</span><span aria-hidden="true">→</span></a>`;
-        return statusPage('ЗАЯВКА ОТПРАВЛЕНА.','Покупка продукции / обращение принято',copy,channelAction+link('ВВЕСТИ ПОЛУЧЕННЫЙ КОД','access')+homeButton('НА ГЛАВНУЮ',true),'SENT / 001');
+        const copy='Запрос кода отправлен.<br><br><strong>Код придёт на почту и в Telegram-бота.</strong> Чтобы получать сообщения в Telegram, открой бота и нажми «Старт».<br><br>Этот запрос не является анкетой на членство.';
+        const botLink=`<a class="site-button" href="${telegramBotUrl}" target="_blank" rel="noopener"><span>ОТКРЫТЬ TELEGRAM-БОТА</span><span aria-hidden="true">→</span></a>`;
+        return statusPage('ЗАЯВКА ОТПРАВЛЕНА.','Покупка продукции / обращение принято',copy,botLink+link('ВВЕСТИ ПОЛУЧЕННЫЙ КОД','access')+homeButton('НА ГЛАВНУЮ',true),'SENT / 001');
       }
       case 'application-received':return statusPage('ПРИНЯТО.<br>НА СВЯЗИ.','Заявка отправлена.','Твои контакты переданы команде.<br>Мы рассмотрим заявку и вернёмся с ответом.<br><br>Приглашение в клуб придёт отдельно после рассмотрения.',homeButton()+link('ПОСМОТРЕТЬ ОБЪЕКТЫ','objects',true));
       case 'contact-received':return statusPage('НА СВЯЗИ.','Сообщение отправлено','Команда получила твоё сообщение. Ответ придёт на указанный email.<br><br>Если вопрос связан с заказом, его статус можно проверить на отдельном экране.',homeButton()+link('ВОПРОСЫ И ОТВЕТЫ','faq',true),'SENT / 002');

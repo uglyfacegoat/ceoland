@@ -61,13 +61,13 @@ test('pickup points use an encoded city and a strict response schema',async()=>{
 
 test('legal purpose and revision reach the server without changing request bodies',async()=>{
   const calls=[];
-  const client=API.createClient({...config,legalRevision:'2026-10-20.3'},async(url,options)=>{
+  const client=API.createClient({...config,legalRevision:'2026-10-29'},async(url,options)=>{
     calls.push({url,...options});return json(url.endsWith('/session')?session:{id:'receipt_1',status:'received'});
   });
   await client.session();
   const body={name:'Тест',email:'test@example.com',message:'Вопрос',consents:{privacy:true}};
   await client.contact(body,'stable-key');
-  assert.equal(calls[1].headers['X-Legal-Revision'],'2026-10-20.3');
+  assert.equal(calls[1].headers['X-Legal-Revision'],'2026-10-29');
   assert.equal(calls[1].headers['X-Legal-Purpose'],'contact');
   assert.deepEqual(JSON.parse(calls[1].body),body);
   assert.equal(calls[0].headers['X-Legal-Revision'],undefined);

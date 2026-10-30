@@ -69,13 +69,12 @@ const base=process.env.SITE_URL||'http://127.0.0.1:4173';
    assert.equal(await page.locator('#email-error').evaluate(el=>getComputedStyle(el).outlineStyle),'none','keyboard focus outlines an error panel');
    console.log(`${width}px: ${routes.length} public screens and landing steps checked`);
   }
-  // Every form links to its own separate consent, while checkout acknowledges the policy.
+  // Every form links to the combined consent, while checkout acknowledges the policy.
   for(const kind of ['contact','purchase-application','application']){
    await page.goto(base+'/app.html?screen='+kind+'&demo=1');
    const consent=page.locator('.consent a').first();
    const url=new URL(await consent.getAttribute('href'),base);
    assert.equal(url.pathname.slice(1),'data-consent');
-   assert.equal(url.searchParams.get('purpose'),kind);
    assert.equal(await page.locator('[name=privacy]').isChecked(),false);
    await page.goto(new URL(url.pathname+url.search,base).href);
    assert.equal(await page.locator('.document-body').count(),1);

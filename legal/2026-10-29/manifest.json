@@ -1,0 +1,50 @@
+{
+  "revision": "2026-10-29",
+  "draft": false,
+  "encoding": "UTF-8",
+  "hashAlgorithm": "SHA-256",
+  "files": [
+    {
+      "document": "privacy",
+      "purpose": null,
+      "text": "privacy.txt",
+      "html": "privacy.html",
+      "sha256": "1384c2fc97bedc2ac6b3f3bd7b8dc1969592b5712c47caf8ecf29e669f2364e0"
+    },
+    {
+      "document": "agreement",
+      "purpose": null,
+      "text": "agreement.txt",
+      "html": "agreement.html",
+      "sha256": "4df0dac053da53c1a7f6b21670d32f3d8d2f1f616cc0ed470f0566412763c35f"
+    },
+    {
+      "document": "purchase-terms",
+      "purpose": null,
+      "text": "purchase-terms.txt",
+      "html": "purchase-terms.html",
+      "sha256": "562bc213f07444e8c98f274941c0449ae769261355a280584c8357206c981612"
+    },
+    {
+      "document": "company",
+      "purpose": null,
+      "text": "company.txt",
+      "html": "company.html",
+      "sha256": "9b822a04c811980dd81c259bb5384578f77e12c902a3a09f13da216f01a4cc53"
+    },
+    {
+      "document": "data-consent",
+      "purpose": null,
+      "text": "data-consent.txt",
+      "html": "data-consent.html",
+      "sha256": "7ca365599bae63303d17849bb1740d010494a08f11f543f4270369f17fea0c10"
+    },
+    {
+      "document": "cookies",
+      "purpose": null,
+      "text": "cookies.txt",
+      "html": "cookies.html",
+      "sha256": "7fe716c71e89374e161abaeec3bda493ea6929caf7ac4eba71620c6e33b2dfb4"
+    }
+  ]
+}

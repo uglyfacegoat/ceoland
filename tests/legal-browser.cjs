@@ -40,13 +40,11 @@ const base=process.env.SITE_URL||'http://127.0.0.1:4173';
    }
    if([320,1440].includes(width))await page.locator('.footer').screenshot({path:artifact(`legal-footer-${width}.png`)});
   }
-  await page.goto(base+'/app.html?screen=data-consent&purpose=__proto__');
-  assert.match(await page.locator('.document-body').innerText(),/Выберите форму/);
-  assert(!/undefined|\{\{/.test(await page.locator('.document-body').innerText()));
-  for(const purpose of ['contact','purchase-application','application']){
-   await page.goto(base+'/app.html?screen=data-consent&purpose='+purpose);
-   const archive=await page.locator('.legal-tools a').first().getAttribute('href');assert(archive.endsWith('data-consent-'+purpose+'.html'));
-   assert(!/\{\{/.test(await page.locator('.document-body').innerText()));
+  for(const purpose of ['','__proto__','contact']){
+   await page.goto(base+'/app.html?screen=data-consent'+(purpose?'&purpose='+purpose:''));
+   const body=await page.locator('.document-body').innerText();
+   assert.match(body,/ДАЮ СВОЕ СОГЛАСИЕ/);assert(!/undefined|\{\{/.test(body));
+   assert((await page.locator('.legal-tools a').first().getAttribute('href')).endsWith('data-consent.html'));
   }
   assert.deepEqual(await context.cookies(),[],'static offline pages must not set cookies');
   assert.deepEqual(external,[],'current frontend must not load unlisted third-party resources');
@@ -56,14 +54,13 @@ const base=process.env.SITE_URL||'http://127.0.0.1:4173';
   await staticPage.goto(base+'/app.html?screen=privacy');
   await staticPage.getByRole('link',{name:'Юридические документы доступны без JavaScript'}).click();
   const current=staticPage.locator('section').first();
-  await current.getByRole('link',{name:'Согласие на обработку персональных данных',exact:true}).click();
-  await staticPage.getByRole('link',{name:'Обращение к команде',exact:true}).click();
-  assert.match(await staticPage.locator('main').innerText(),/имя, email, содержание сообщения/);
+  await current.getByRole('link',{name:'Согласие на обработку и передачу персональных данных',exact:true}).click();
+  assert.match(await staticPage.locator('main').innerText(),/ДАЮ СВОЕ СОГЛАСИЕ/);
   assert(!/\{\{/.test(await staticPage.locator('main').innerText()));
-  const response=await staticPage.request.get(new URL('data-consent-contact.txt',staticPage.url()).href);
-  assert.match(response.headers()['content-type'],/text\/plain/);assert.match(await response.text(),/Редакция: 2026-10-20/);
+  const response=await staticPage.request.get(new URL('data-consent.txt',staticPage.url()).href);
+  assert.match(response.headers()['content-type'],/text\/plain/);assert.match(await response.text(),/Редакция: 2026-10-29/);
   await staticPage.screenshot({path:artifact('legal-without-js-390.png')});
   await nojs.close();
-  console.log('PASS: legal links, footer separation, version exports, scoped consents, no-JS access, no external requests/cookies on offline pages');
+  console.log('PASS: legal links, footer separation, version exports, combined consent, no-JS access, no external requests/cookies on offline pages');
  }finally{await browser.close();}
 })().catch(error=>{console.error(error);process.exitCode=1;});
