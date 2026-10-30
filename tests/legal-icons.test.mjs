@@ -5,7 +5,7 @@ import {readFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import legalTools from '../integration/legal.js';
 const root=new URL('../',import.meta.url);
-test('draft legal documents keep confirmed seller details and purpose scopes without internal audit notes',async()=>{
+test('published legal documents keep confirmed seller details and purpose scopes without internal audit notes',async()=>{
  const context={window:{}};vm.runInNewContext(await readFile(new URL('documents.js',root),'utf8'),context);
  const {CEO_LEGAL:legal,CEO_DOCUMENTS:docs}=context.window;
  assert.equal(Object.keys(docs).length,6);assert.equal(legal.draft,false);

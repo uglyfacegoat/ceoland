@@ -57,12 +57,15 @@
   const link = (text,name,outline=false,extra={}) => `<a class="site-button${outline?' outline':''}" href="${route(name,extra)}"><span>${text}</span><span aria-hidden="true">→</span></a>`;
   const homeButton = (text='НА ГЛАВНУЮ',outline=false) => `<a class="site-button${outline?' outline':''}" href="${home}"><span>${text}</span><span aria-hidden="true">→</span></a>`;
   const submit = text => `<button class="site-button" type="submit"><span>${text}</span><span aria-hidden="true">→</span></button>`;
+  const telegramBotUrl = escape(config.telegramBotUrl || 'https://t.me/ceowalletsmanager');
+  const telegramCodeNotice = `<p class="telegram-code-notice" data-telegram-code-notice>Чтобы получить код в Telegram, после отправки заявки открой <a href="${telegramBotUrl}" target="_blank" rel="noopener">нашего бота</a> и нажми «Старт».</p>`;
+  const deliveryChannelChoice = `<fieldset class="delivery-channel"><legend>СПОСОБ ПОЛУЧЕНИЯ КОДА</legend><div><label><input type="radio" name="deliveryChannel" value="telegram" checked><span>TELEGRAM</span></label><label><input type="radio" name="deliveryChannel" value="email"><span>EMAIL</span></label></div></fieldset>`;
   const action = (text,id,outline=false) => `<button class="site-button${outline?' outline':''}" type="button" data-action="${id}"><span>${text}</span><span aria-hidden="true">→</span></button>`;
   const row = (name,value) => `<div class="key-value"><span>${name}</span><span>${value}</span></div>`;
   const rule = '<hr class="rule">';
   const slashes = '<img class="site-slashes" src="assets/imgAccentHorizontalSlashRhythm.svg" width="320" height="40" alt="">';
   const alert = '<p class="form-alert" role="alert" data-form-alert></p>';
-  const field = (name,label,placeholder='',type='text',required=true,value='') => `<label class="field" for="${name}">${label}<input id="${name}" name="${name}" type="${type}" maxlength="${name==='code'?64:name==='email'?254:name==='comment'?2000:300}" placeholder="${placeholder}" ${required?'required':''} ${type==='email'?'autocomplete="email"':type==='tel'?'autocomplete="tel"':name==='name'?'autocomplete="name"':''} value="${escape(value)}" aria-describedby="${name}-error" ${name==='code'?'autocapitalize="characters" spellcheck="false"':name==='telegram'?'autocapitalize="none" spellcheck="false"':''}><span class="field-error" id="${name}-error"></span></label>`;
+  const field = (name,label,placeholder='',type='text',required=true,value='') => `<label class="field" for="${name}"><span class="field-label" data-field-label="${name}">${label}</span><input id="${name}" name="${name}" type="${type}" maxlength="${name==='code'?64:name==='email'?254:name==='comment'?2000:300}" placeholder="${placeholder}" ${required?'required':''} ${type==='email'?'autocomplete="email"':type==='tel'?'autocomplete="tel"':name==='name'?'autocomplete="name"':''} value="${escape(value)}" aria-describedby="${name}-error" ${name==='code'?'autocapitalize="characters" spellcheck="false"':name==='telegram'?'autocapitalize="none" spellcheck="false"':''}><span class="field-error" id="${name}-error"></span></label>`;
   const pickupField = () => fixedDelivery ? '' : `<label class="field" for="pickupPointCode">ПУНКТ ВЫДАЧИ CDEK<select id="pickupPointCode" name="pickupPointCode" required aria-describedby="pickupPointCode-error"><option value="">Сначала укажи город и нажми «Найти ПВЗ»</option></select><span class="field-error" id="pickupPointCode-error"></span></label><input type="hidden" name="address"><input type="hidden" name="pickupPointName">`;
   const textarea = (name,label,placeholder) => `<label class="field" for="${name}">${label}<textarea maxlength="5000" id="${name}" name="${name}" placeholder="${placeholder}" required aria-describedby="${name}-error"></textarea><span class="field-error" id="${name}-error"></span></label>`;
   const consent = (name='privacy',purpose='order') => {
@@ -114,7 +117,7 @@
     const purchase=kind==='purchase-application', membership=kind==='application';
     const title=purchase?'ЗАПРОС КОДА.':membership?'by invitation.':'НА СВЯЗИ.';
     const caption=purchase?'Нет кода для покупки? Оставь контакты.':membership?'QR-приглашение / заявка на вступление':'По заказам, продукции и сотрудничеству';
-    const form=`<form class="stack form-fields" data-form="${kind}" novalidate>${field('name','ИМЯ','Как к вам обращаться')}${purchase?field('phone','ТЕЛЕФОН','+7 ___ ___-__-__','tel')+field('telegram','TELEGRAM','@username'):''}${field('email','EMAIL','you@example.com','email')}${membership?field('phone','ТЕЛЕФОН','+7 ___ ___-__-__','tel')+field('telegram','TELEGRAM','@username')+textarea('project','ПРОЕКТ И ЦЕЛИ','Чем занимаешься и почему хочешь к нам')+field('invitation','КОД ПРИГЛАШЕНИЯ · НЕОБЯЗАТЕЛЬНО','Если тебя пригласил участник','text',false):purchase?field('comment','КОММЕНТАРИЙ · НЕОБЯЗАТЕЛЬНО','Вопрос или детали покупки','text',false):textarea('message','СООБЩЕНИЕ','Твой вопрос или предложение')}${consent('privacy',kind)}${alert}${submit(purchase?'ЗАПРОСИТЬ КОД':membership?'ОТПРАВИТЬ ЗАЯВКУ':'ОТПРАВИТЬ СООБЩЕНИЕ')}</form>`;
+    const form=`<form class="stack form-fields" data-form="${kind}" novalidate>${field('name','ИМЯ','Как к вам обращаться')}${purchase?deliveryChannelChoice+field('phone','ТЕЛЕФОН','+7 ___ ___-__-__','tel')+field('telegram','TELEGRAM','@username'):''}${field('email',purchase?'EMAIL · НЕОБЯЗАТЕЛЬНО':'EMAIL','you@example.com','email',!purchase)}${membership?field('phone','ТЕЛЕФОН','+7 ___ ___-__-__','tel')+field('telegram','TELEGRAM','@username')+textarea('project','ПРОЕКТ И ЦЕЛИ','Чем занимаешься и почему хочешь к нам')+field('invitation','КОД ПРИГЛАШЕНИЯ · НЕОБЯЗАТЕЛЬНО','Если тебя пригласил участник','text',false):purchase?field('comment','КОММЕНТАРИЙ · НЕОБЯЗАТЕЛЬНО','Вопрос или детали покупки','text',false):textarea('message','СООБЩЕНИЕ','Твой вопрос или предложение')}${consent('privacy',kind)}${alert}${submit(purchase?'ЗАПРОСИТЬ КОД':membership?'ОТПРАВИТЬ ЗАЯВКУ':'ОТПРАВИТЬ СООБЩЕНИЕ')}${purchase?telegramCodeNotice:''}</form>`;
     const side=membership?`<div class="stack"><h2>РАССКАЖИ<br>О СЕБЕ.</h2><p>Мы внимательно изучаем каждую заявку. Оставь контакты, свой проект и цели — команда вернётся с ответом.</p>${slashes}</div>`:purchase?`<aside class="stack"><h3>ТВОЙ ОБЪЕКТ</h3><div class="summary-photo wallet-visual"><img src="${photo(selected)}" width="624" height="510" alt="CEOWALLET"></div><h3>CEOWALLET</h3><p>Это запрос кода для покупки CEOWALLET.</p><p class="muted">Анкета в клуб откроется отдельно — по QR внутри полученного картхолдера.</p></aside>`:`<aside class="stack"><h2>ПО ДЕЛУ.<br>НАПРЯМУЮ.</h2><p>Если вопрос связан с покупкой, укажи номер заказа. Для вступления в клуб есть отдельная заявка.</p><nav class="legal-links" aria-label="Прямые контакты"><a href="mailto:${window.CEO_LEGAL.seller.email}">${window.CEO_LEGAL.seller.email}</a><a href="https://t.me/ceowalletsmanager" target="_blank" rel="noopener">${window.CEO_LEGAL.seller.telegram}</a></nav>${link('КАК ВСТУПИТЬ','join',true)}</aside>`;
     return intro(title,caption)+`<div class="site-grid ${membership?'':'wide-left'}">${membership?side+form:form+side}</div>`;
   }
@@ -122,7 +125,12 @@
   function statusPage(title,caption,copy,buttons,mark='001 / ∞',extra='') {return intro(title,caption)+`<div class="status-layout"><div class="stack"><p class="status-copy">${copy}</p>${extra}<div class="action-stack">${buttons}</div></div>${signal(mark)}</div>`;}
   function status() {
     switch(screen) {
-      case 'purchase-received':return statusPage('ЗАЯВКА ОТПРАВЛЕНА.','Покупка продукции / обращение принято','Запрос кода отправлен. Команда свяжется с тобой по указанным контактам.<br><br>Когда получишь код, введи его перед покупкой. Этот запрос не является анкетой на членство.',link('ВВЕСТИ ПОЛУЧЕННЫЙ КОД','access')+homeButton('НА ГЛАВНУЮ',true),'SENT / 001');
+      case 'purchase-received':{
+        const receipt=read('ceo-receipt-purchase-received',{}), byEmail=receipt.deliveryChannel==='email';
+        const copy=byEmail?'Запрос кода отправлен. После одобрения код придёт на указанный email.<br><br>Этот запрос не является анкетой на членство.':'Запрос кода отправлен. Чтобы код пришёл в Telegram, открой бота и нажми «Старт».<br><br>Этот запрос не является анкетой на членство.';
+        const channelAction=byEmail?'':`<a class="site-button" href="${telegramBotUrl}" target="_blank" rel="noopener"><span>ОТКРЫТЬ TELEGRAM-БОТА</span><span aria-hidden="true">→</span></a>`;
+        return statusPage('ЗАЯВКА ОТПРАВЛЕНА.','Покупка продукции / обращение принято',copy,channelAction+link('ВВЕСТИ ПОЛУЧЕННЫЙ КОД','access')+homeButton('НА ГЛАВНУЮ',true),'SENT / 001');
+      }
       case 'application-received':return statusPage('ПРИНЯТО.<br>НА СВЯЗИ.','Заявка отправлена.','Твои контакты переданы команде.<br>Мы рассмотрим заявку и вернёмся с ответом.<br><br>Приглашение в клуб придёт отдельно после рассмотрения.',homeButton()+link('ПОСМОТРЕТЬ ОБЪЕКТЫ','objects',true));
       case 'contact-received':return statusPage('НА СВЯЗИ.','Сообщение отправлено','Команда получила твоё сообщение. Ответ придёт на указанный email.<br><br>Если вопрос связан с заказом, его статус можно проверить на отдельном экране.',homeButton()+link('ВОПРОСЫ И ОТВЕТЫ','faq',true),'SENT / 002');
       case 'processing':return statusPage('ОДИН МОМЕНТ.','Получаем подтверждение оплаты.','Это может занять немного времени.<br><br>Не оплачивай заказ повторно, пока статус не обновится.',action('ОБНОВИТЬ СТАТУС','refresh-payment')+link('К ЗАКАЗУ','order',true),'… / ∞','<p class="eyeline accent">● ОЖИДАЕМ ОТВЕТ ПЛАТЁЖНОГО СЕРВИСА</p>'+alert);
@@ -283,6 +291,31 @@
     }
   });
   document.addEventListener('change',event=>{
+    if(event.target.name==='deliveryChannel'){
+      const form=event.target.form, telegram=form?.elements.telegram;
+      if(telegram){
+        telegram.required=event.target.value==='telegram';
+        if(!telegram.required){
+          telegram.removeAttribute('aria-invalid');
+          const error=document.getElementById('telegram-error');if(error)error.textContent='';
+        }
+      }
+      const email=form?.elements.email;
+      if(email){
+        email.required=event.target.value==='email';
+        if(!email.required){
+          email.removeAttribute('aria-invalid');
+          const error=document.getElementById('email-error');if(error)error.textContent='';
+        }
+      }
+      const telegramLabel=form?.querySelector('[data-field-label="telegram"]');
+      const emailLabel=form?.querySelector('[data-field-label="email"]');
+      if(telegramLabel)telegramLabel.textContent=event.target.value==='telegram'?'TELEGRAM':'TELEGRAM · НЕОБЯЗАТЕЛЬНО';
+      if(emailLabel)emailLabel.textContent=event.target.value==='email'?'EMAIL':'EMAIL · НЕОБЯЗАТЕЛЬНО';
+      const notice=form?.querySelector('[data-telegram-code-notice]');
+      if(notice)notice.hidden=event.target.value!=='telegram';
+      return;
+    }
     if(event.target.id!=='pickupPointCode')return;
     const form=event.target.form, option=event.target.selectedOptions[0];
     form.elements.address.value=option?.dataset.address||'';
@@ -319,15 +352,15 @@
         write('ceo-order-id',created.id);
         location.href=route('payment',{orderId:created.id});return;
       }
-      const common={name:data.name,email:data.email,consents:{privacy:data.privacy==='on'}};
+      const common={name:data.name,email:data.email||null,consents:{privacy:data.privacy==='on'}};
       let body,operation;
       if(kind==='contact'){body={...common,message:data.message};operation=api.contact;}
-      else if(kind==='purchase-application'){body={...common,phone:window.CEO_STORE.phone(data.phone),telegram:data.telegram,comment:data.comment||'',variantId:'ceowallet-'+selected};operation=api.purchase;}
+      else if(kind==='purchase-application'){body={...common,phone:window.CEO_STORE.phone(data.phone),telegram:data.telegram||'',deliveryChannel:data.deliveryChannel,comment:data.comment||'',variantId:'ceowallet-'+selected};operation=api.purchase;}
       else if(kind==='application'){body={...common,phone:window.CEO_STORE.phone(data.phone),telegram:data.telegram,project:data.project,invitation:data.invitation||''};operation=api.membership;}
       if(!operation)return;
       const receipt=await operation(body,requestKey(kind,body),lifetime.signal);
       const next={contact:'contact-received','purchase-application':'purchase-received',application:'application-received'}[kind];
-      if(write('ceo-receipt-'+next,{id:receipt.id}))location.href=route(next);
+      if(write('ceo-receipt-'+next,{id:receipt.id,deliveryChannel:data.deliveryChannel||null}))location.href=route(next);
       else form.innerHTML='<h2>ПРИНЯТО.</h2><p>Данные получены. Команда вернётся с ответом.</p>';
     }catch(error){
       if(error.code==='QUOTE_EXPIRED'&&kind==='checkout')resetQuote(form);

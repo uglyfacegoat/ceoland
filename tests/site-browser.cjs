@@ -80,20 +80,25 @@ const base=process.env.SITE_URL||'http://127.0.0.1:4173';
    await page.goto(new URL(url.pathname+url.search,base).href);
    assert.equal(await page.locator('.document-body').count(),1);
    assert(!/\{\{|\[ИНН/.test(await page.locator('.document-body').innerText()));
-   assert.equal(await page.locator('.legal-notice').count(),1,'working legal revision must be visible');
+   assert.equal(await page.locator('.legal-notice').count(),0,'published legal revision must not show a draft notice');
   }
   // Icons are actual decodable assets on both HTML entry points.
+  const iconContext=await browser.newContext();
   for(const path of ['/','/app.html?screen=privacy']){
-   await page.goto(base+path);
-   const icons=await page.locator('link[rel=icon],link[rel=apple-touch-icon]').evaluateAll(async els=>Promise.all(els.map(async el=>{
-    const image=new Image();image.src=el.href;await image.decode();return {w:image.naturalWidth,h:image.naturalHeight};
+   const iconPage=await iconContext.newPage();
+   await iconPage.goto(base+path);
+   const icons=await iconPage.locator('link[rel=icon],link[rel=apple-touch-icon]').evaluateAll(async els=>Promise.all(els.map(async el=>{
+    const load=()=>new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>resolve({w:image.naturalWidth,h:image.naturalHeight});image.onerror=reject;image.src=el.href;});
+    try{return await load();}catch{return await load();}
    })));
    assert.equal(icons.length,7);assert(icons.every(icon=>icon.w>0&&icon.w===icon.h));
-   const response=await page.request.get(new URL(await page.locator('link[rel=manifest]').getAttribute('href'),base).href);
+   const response=await iconPage.request.get(new URL(await iconPage.locator('link[rel=manifest]').getAttribute('href'),base).href);
    assert.match(response.headers()['content-type'],/application\/manifest\+json/);
    const manifest=await response.json();
-   for(const icon of manifest.icons){const result=await page.request.get(new URL(icon.src,base).href);assert.equal(result.status(),200);}
+   for(const icon of manifest.icons){const result=await iconPage.request.get(new URL(icon.src,base).href);assert.equal(result.status(),200);}
+   await iconPage.close();
   }
+  await iconContext.close();
   // Documents use the same type scale, beside destinations on desktop and below on mobile.
   for(const [width,height] of [[320,568],[390,844],[768,600],[1440,900]]){
    await page.setViewportSize({width,height});
