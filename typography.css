@@ -7,8 +7,8 @@
 .mobile-signal{position:relative;background:var(--ink)}
 @media(max-width:700px){
  .signal{display:none!important}
- .hero{min-height:auto}
- .intro{padding-bottom:28px}
+ .hero{min-height:100vh;min-height:100svh;display:flex;flex-direction:column}
+ .intro{flex:1;display:flex;flex-direction:column;justify-content:center;padding-top:96px;padding-bottom:40px}
  .signal{width:calc(100% - 48px);margin:4px 24px 40px;min-height:0;background:#fff}
  .mobile-signal{height:148px;aspect-ratio:auto;min-height:0;background:#fff}
  .mobile-signal>img{position:absolute;top:0;height:100%;object-fit:fill}
@@ -16,8 +16,8 @@
  .mobile-inverse{display:none}
  .mobile-field{position:absolute;left:40px;right:0;top:0;bottom:0;overflow:hidden}
  .object-arrows.type-object{height:50px;margin-top:32px;margin-bottom:32px}
- .manifesto{height:557px}
- .diamond.type-object{left:auto;right:-42px;top:467px;transform:none;width:220px;height:164px;aspect-ratio:auto}
+ .manifesto{height:calc(var(--mw)*6.6 + 360px)}
+ .diamond.type-object{left:auto;right:-42px;top:calc(54px + var(--mw)*6.6 + 105px);transform:none;width:220px;height:164px;aspect-ratio:auto}
  .chevron.type-object{width:180px;height:84px}
  .loops.type-object{width:240px;height:92px}
  .seal.type-object{width:211.56px;height:49.02px}
@@ -33,3 +33,33 @@
 .flow-letter{display:inline-block;white-space:pre}
 
 @media(max-width:370px){.signal{width:calc(100% - 40px);margin-left:20px;margin-right:20px}}
+
+/* Mobile manifesto: four words at one size, evenly spaced, left edges aligned. */
+@media(max-width:700px){
+ .manifesto{--mw:calc((100vw - 48px)*.128)}
+ .manifesto .manifesto-title span:nth-child(n){left:24px;font-size:var(--mw);line-height:1.08;letter-spacing:-.04em}
+ .manifesto .manifesto-title span:nth-child(1){top:54px}
+ .manifesto .manifesto-title span:nth-child(2){top:calc(54px + var(--mw)*1.6)}
+ .manifesto .manifesto-title span:nth-child(3){top:calc(54px + var(--mw)*3.2)}
+ .manifesto .manifesto-title span:nth-child(4){top:calc(54px + var(--mw)*4.8)}
+ .manifesto .manifesto-copy{top:calc(54px + var(--mw)*6.6)}
+ .manifesto .slashes-one{top:calc(54px + var(--mw)*1.1)}
+ .manifesto .slashes-two{top:calc(54px + var(--mw)*3.9)}
+}
+
+/* "More than a club" stays; the benefits and the membership note open on request. */
+.club-more{display:none}
+.club-more-button{display:flex;align-items:center;justify-content:space-between;gap:24px;min-width:242px;height:52px;padding:0 24px;border:1px solid #fff;border-radius:6px;background:transparent;color:#fff;font-size:13px;font-weight:500;line-height:17px;letter-spacing:0;transition:background .15s,color .15s}
+.club-more-button span{font-size:24px;font-weight:400;line-height:1}
+.club-more-button:hover{background:#fff;color:var(--ink)}
+.club-more-button:focus-visible{outline:3px solid #fff;outline-offset:5px}
+.club[data-collapsed]{height:calc(46.5vw + 56px)}
+.club[data-collapsed] .benefits{display:none}
+.club[data-collapsed]~.membership{display:none}
+.club[data-collapsed] .club-more{display:block;position:absolute;left:4.4444vw;top:calc(32.5694vw + 6vw)}
+@media(max-width:700px){
+ .club[data-collapsed]{height:592px}
+ .club[data-collapsed] .club-more{left:24px;right:24px;top:476px}
+ .club-more-button{width:100%}
+}
+@media(prefers-reduced-motion:reduce){.club-more-button{transition:none}}

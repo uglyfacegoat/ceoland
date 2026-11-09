@@ -64,3 +64,22 @@ if(window.CEO_CONFIG?.mode==='api'){
     const price=document.querySelector('.wallet .price');if(price)price.textContent='Цена уточняется';
   });
 }
+
+// The benefits and the membership note stay folded until "ПОДРОБНЕЕ". Without JavaScript everything is shown.
+{
+  const club = document.querySelector('#club');
+  const more = club?.querySelector('.club-more-button');
+  const details = document.querySelector('#club-details');
+  const unfold = focus => {
+    if (!club.hasAttribute('data-collapsed')) return;
+    club.removeAttribute('data-collapsed');
+    more.setAttribute('aria-expanded', 'true');
+    if (focus) { details.tabIndex = -1; details.focus({preventScroll: true}); }
+  };
+  if (club && more && details) {
+    if (location.hash === '#membership' || location.hash === '#club-details') more.setAttribute('aria-expanded', 'true');
+    else club.setAttribute('data-collapsed', '');
+    more.addEventListener('click', () => unfold(true));
+    addEventListener('hashchange', () => { if (location.hash === '#membership' || location.hash === '#club-details') unfold(false); });
+  }
+}

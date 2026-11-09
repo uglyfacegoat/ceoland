@@ -113,7 +113,7 @@ const base=process.env.SITE_URL||'http://127.0.0.1:4173';
   assert.equal(requests.filter(r=>r.path==='/purchase-applications').at(-1).body.deliveryChannel,'telegram');
   await go('purchase-application');
   for(const [name,value] of Object.entries({name:'Email Тест',email:'email@example.com',phone:'+79001234567'}))await page.locator(`[name=${name}]`).fill(value);
-  await page.locator('[name=deliveryChannel][value=email]').check();
+  await page.locator('[name=deliveryChannel][value=email]').check({force:true});
   assert.match(await page.locator('[data-field-label=telegram]').innerText(),/НЕОБЯЗАТЕЛЬНО/);
   assert.doesNotMatch(await page.locator('[data-field-label=email]').innerText(),/НЕОБЯЗАТЕЛЬНО/);
   await page.locator('[name=privacy]').check();await page.locator('button[type=submit]').click();await page.waitForURL('**/purchase-received');

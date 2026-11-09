@@ -38,6 +38,12 @@ const base=process.env.SITE_URL||'http://127.0.0.1:4173';
    assert(steps[2].text.includes('ЗАЯВКА В КЛУБ'));
    assert(steps[4].text.includes('РЕШЕНИЕ'));
    for(let i=1;i<steps.length;i++)assert(steps[i].top>=steps[i-1].bottom,'steps overlap');
+   if(await page.locator('.club-more-button').isVisible()){
+    assert(!(await page.locator('.membership').isVisible()),'membership note is folded by default');
+    assert(!(await page.locator('#club-details article').first().isVisible()),'benefits are folded by default');
+    await page.locator('.club-more-button').click();
+    assert(await page.locator('.membership').isVisible()&&await page.locator('#club-details article').first().isVisible(),'ПОДРОБНЕЕ opens the benefits and the membership note');
+   }
    if([390,1440].includes(width)){await page.locator('.selection').screenshot({path:artifact(`ceoland-five-steps-${width}.png`)});await page.locator('.membership').screenshot({path:artifact(`ceoland-ticket-${width}.png`)});}
    for(const name of ['mark','code']){
     const sculpture=page.locator(`.selection-${name}`);
